@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useMemo, useEffect } from "react";
 import { LogEntry, PROJECTS, PROTOCOLS, SITES, ROLE_HIERARCHY, User, UserAssignment } from "@/lib/types";
+import { ActiveTimer } from "@/lib/store";
 import { format } from "date-fns";
 import { CheckCircle2, Clock, FileText, Users, Phone, Database, ShieldCheck, Stethoscope, ClipboardCheck, Activity, Sparkles } from "lucide-react";
 import { generateAIResponse } from "@/lib/actions";
@@ -23,9 +24,15 @@ interface LogFormViewProps {
   onSuccess: () => void;
   currentUser: User;
   assignments: UserAssignment[];
+  activeTimer?: ActiveTimer | null;
+  stopTimer?: () => number;
+  cancelTimer?: () => void;
+  repeatLogId?: string | null;
+  logs?: LogEntry[];
+  aiPreFillData?: any | null;
 }
 
-export function LogFormView({ onAddLog, onSuccess, currentUser, assignments }: LogFormViewProps) {
+export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, activeTimer, stopTimer, cancelTimer, repeatLogId, logs, aiPreFillData }: LogFormViewProps) {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [hours, setHours] = useState("1");
   const [minutes, setMinutes] = useState("0");
@@ -76,6 +83,36 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments }: L
 
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [elapsedTimerStr, setElapsedTimerStr] = useState("00:00:00");
+
+  useEffect(() => {
+    if (!activeTimer) return;
+
+    const interval = setInterval(() => {
+      const now = Date.now();
+      const diff = now - activeTimer.startTime;
+
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+
+      setElapsedTimerStr(
+        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+      );
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [activeTimer]);
+
+  const handleStopTimer = () => {
+    if (stopTimer) {
+      const durationMins = stopTimer();
+      const h = Math.floor(durationMins / 60);
+      const m = durationMins % 60;
+      setHours(h.toString());
+      setMinutes(m.toString());
+      toast.success(`Timer stopped. ${h}h ${m}m logged.`);
+    }
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
@@ -223,31 +260,50 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments }: L
           
           <div className="space-y-2">
             <label className="text-sm font-medium text-neutral-700">Duration</label>
-            <div className="flex items-center gap-3">
-              <div className="flex-1 relative">
-                <input 
-                  type="number" 
-                  min="0"
-                  required
-                  value={hours}
-                  onChange={e => setHours(e.target.value)}
-                  className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">h</span>
+            {activeTimer ? (
+              <div className="flex flex-col gap-2">
+                 <div className="w-full px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl flex justify-between items-center text-rose-700 shadow-sm">
+                    <div className="flex items-center gap-2 font-mono font-medium text-base">
+                      <Clock className="w-4 h-4 animate-pulse" />
+                      {elapsedTimerStr}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStopTimer}
+                      className="text-sm bg-rose-600 hover:bg-rose-700 text-white px-4 py-1.5 rounded-lg font-medium transition-colors shadow-sm"
+                    >
+                      Stop Timer
+                    </button>
+                 </div>
+                 <button type="button" onClick={cancelTimer} className="text-xs text-rose-500 hover:text-rose-700 self-end mr-1 font-medium transition-colors">Cancel Timer</button>
               </div>
-              <div className="flex-1 relative">
-                <input 
-                  type="number" 
-                  min="0"
-                  max="59"
-                  required
-                  value={minutes}
-                  onChange={e => setMinutes(e.target.value)}
-                  className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">m</span>
+            ) : (
+              <div className="flex items-center gap-3">
+                <div className="flex-1 relative">
+                  <input
+                    type="number"
+                    min="0"
+                    required
+                    value={hours}
+                    onChange={e => setHours(e.target.value)}
+                    className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">h</span>
+                </div>
+                <div className="flex-1 relative">
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    required
+                    value={minutes}
+                    onChange={e => setMinutes(e.target.value)}
+                    className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">m</span>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

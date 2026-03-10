@@ -5,6 +5,7 @@ import { Search, Filter, Trash2, Clock, CloudOff, MessageSquarePlus, MessageSqua
 import { toast } from "sonner";
 
 interface HistoryViewProps {
+  onRepeat?: (logId: string) => void;
   logs: LogEntry[];
   onDeleteLog: (id: string) => void;
   currentUser: User;
@@ -12,7 +13,7 @@ interface HistoryViewProps {
   onReplyToQuery: (logId: string, queryId: string, response: string) => void;
 }
 
-export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onReplyToQuery }: HistoryViewProps) {
+export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onReplyToQuery, onRepeat }: HistoryViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [projectFilter, setProjectFilter] = useState("ALL");
   const [activeQueryLogId, setActiveQueryLogId] = useState<string | null>(null);
