@@ -1,15 +1,27 @@
 import React, { useMemo } from "react";
 import { LogEntry, PROJECTS, PROTOCOLS, User, ROLE_PERMISSIONS } from "@/lib/types";
 import { format, subDays, isSameDay, parseISO } from "date-fns";
-import { Clock, Activity, CheckCircle2, MessageSquare } from "lucide-react";
+import { Clock, Activity, CheckCircle2, MessageSquare, Repeat, Sparkles, Send, AlertTriangle, TrendingUp, Search } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { parseNaturalLanguageLog } from "@/lib/actions";
+
+import { ActiveTimer } from "@/lib/store";
 
 interface DashboardViewProps {
   logs: LogEntry[];
   onNavigate: (view: "log" | "history") => void;
   currentUser: User;
+  activeTimer?: ActiveTimer | null;
+  startTimer?: () => void;
+  onRepeat?: (logId: string) => void;
+  onSmartLog?: (data: any) => void;
+  assignments?: any[];
 }
 
-export function DashboardView({ logs, onNavigate, currentUser }: DashboardViewProps) {
+export function DashboardView({ logs, onNavigate, currentUser, activeTimer, startTimer, onRepeat, onSmartLog, assignments = [] }: DashboardViewProps) {
+  const [nlInput, setNlInput] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const today = new Date();
   const permissions = ROLE_PERMISSIONS[currentUser.role];
 
@@ -31,6 +43,108 @@ export function DashboardView({ logs, onNavigate, currentUser }: DashboardViewPr
     0,
   );
 
+  const handleSmartSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nlInput.trim() || !onSmartLog) return;
+
+    setIsAnalyzing(true);
+    try {
+      // Find available projects for current user
+      const userAssignments = assignments.find(a => a.userId === currentUser.id);
+      const availableProjects = PROJECTS.filter(p => userAssignments?.projectIds.includes(p.id));
+      const availableProtocols = PROTOCOLS.filter(p => userAssignments?.protocolIds.includes(p.id));
+
+      const response = await parseNaturalLanguageLog(
+        nlInput,
+        currentUser.role,
+        availableProjects,
+        availableProtocols,
+        [] // Pass sites if available, empty for now to simplify
+      );
+
+      if (response.success) {
+        toast.success("AI extraction successful. Please review.");
+        onSmartLog(response.data);
+        setNlInput("");
+      } else {
+        toast.error(response.error || "Failed to parse natural language.");
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Smart Insights for Managers
+  const insights = useMemo(() => {
+    if (currentUser.role !== "Manager" && currentUser.role !== "Admin") return [];
+
+    const alerts = [];
+    const _today = new Date();
+
+    // 1. Burnout Risk: Team members with > 45 hours this week
+    const startOfThisWeek = subDays(_today, _today.getDay() || 7);
+
+    const teamLogsThisWeek = logs.filter(log => new Date(log.date) >= startOfThisWeek);
+    const userHours = teamLogsThisWeek.reduce((acc, log) => {
+      acc[log.userName] = (acc[log.userName] || 0) + log.durationMinutes;
+      return acc;
+    }, {} as Record<string, number>);
+
+    for (const [name, minutes] of Object.entries(userHours)) {
+      if (minutes > 45 * 60) {
+         alerts.push({
+           id: `burnout-${name}`,
+           type: "warning",
+           icon: <AlertTriangle className="w-5 h-5 text-amber-600" />,
+           title: "Burnout Risk Detected",
+           message: `${name} has logged ${Math.floor(minutes/60)} hours this week.`,
+           bg: "bg-amber-50",
+           border: "border-amber-200"
+         });
+      }
+    }
+
+    // 2. Query Escalations: Find old queries (e.g. > 3 days old)
+    const oldQueries = logs.flatMap(log =>
+       (log.queries || []).filter(q => {
+          if (q.status !== "OPEN") return false;
+          const qDate = new Date(q.questionDate);
+          const diffDays = (_today.getTime() - qDate.getTime()) / (1000 * 3600 * 24);
+          return diffDays > 3;
+       })
+    );
+
+    if (oldQueries.length > 0) {
+       alerts.push({
+           id: "old-queries",
+           type: "danger",
+           icon: <MessageSquare className="w-5 h-5 text-rose-600" />,
+           title: "Query Escalation Needed",
+           message: `There are ${oldQueries.length} open queries older than 3 days.`,
+           bg: "bg-rose-50",
+           border: "border-rose-200"
+       });
+    }
+
+    // 3. Performance positive: Site with most resolved queries
+    const resolvedQueries = logs.flatMap(log => (log.queries || []).filter(q => q.status === "RESOLVED"));
+    if (resolvedQueries.length > 10) {
+       alerts.push({
+           id: "high-resolution",
+           type: "success",
+           icon: <TrendingUp className="w-5 h-5 text-emerald-600" />,
+           title: "Great Resolution Rate",
+           message: "The team has successfully resolved a high volume of queries recently.",
+           bg: "bg-emerald-50",
+           border: "border-emerald-200"
+       });
+    }
+
+    return alerts;
+  }, [logs, currentUser.role]);
+
   const openQueriesCount = useMemo(() => {
     return visibleLogs.reduce((acc, log) => acc + (log.queries?.filter(q => q.status === "OPEN").length || 0), 0);
   }, [visibleLogs]);
@@ -49,6 +163,46 @@ export function DashboardView({ logs, onNavigate, currentUser }: DashboardViewPr
         </h2>
         <p className="text-neutral-500">Overview of your recent activities.</p>
       </header>
+
+            {/* Smart Logging */}
+      <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-5 rounded-2xl border border-indigo-100 shadow-sm relative overflow-hidden">
+        <div className="absolute right-0 top-0 -translate-y-1/2 translate-x-1/3 opacity-10 pointer-events-none">
+          <Sparkles className="w-64 h-64 text-indigo-600" />
+        </div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles className="w-5 h-5 text-indigo-600" />
+            <h3 className="text-sm font-semibold text-indigo-900">AI Smart Logging</h3>
+          </div>
+          <form onSubmit={handleSmartSubmit} className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="text"
+              value={nlInput}
+              onChange={(e) => setNlInput(e.target.value)}
+              placeholder="e.g. Spent 2 hours doing SDV for PRJ-JIT at General Hospital..."
+              className="flex-1 px-4 py-3 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none placeholder-indigo-300 text-sm shadow-sm transition-all"
+              disabled={isAnalyzing}
+            />
+            <button
+              type="submit"
+              disabled={isAnalyzing || !nlInput.trim()}
+              className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              {isAnalyzing ? (
+                <>
+                  <Activity className="w-4 h-4 animate-spin" />
+                  <span>Analyzing...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Generate</span>
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+      </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -94,12 +248,34 @@ export function DashboardView({ logs, onNavigate, currentUser }: DashboardViewPr
               <span className="bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">{openQueriesCount}</span>
             </div>
           )}
+
+          {activeTimer ? (
+            <button
+              onClick={() => onNavigate("log")}
+              className="w-full py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              <Clock className="w-5 h-5 animate-pulse" />
+              Timer is Running
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                startTimer?.();
+                onNavigate("log");
+              }}
+              className="w-full py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              <Clock className="w-5 h-5" />
+              Start Live Timer
+            </button>
+          )}
           <button
             onClick={() => onNavigate("log")}
-            className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-sm"
+            className="w-full py-3 mt-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-sm"
           >
             Log New Activity
           </button>
+
           <button
             onClick={() => onNavigate("history")}
             className="w-full py-3 mt-2 text-indigo-600 hover:bg-indigo-50 rounded-xl font-medium transition-colors"
@@ -108,6 +284,29 @@ export function DashboardView({ logs, onNavigate, currentUser }: DashboardViewPr
           </button>
         </div>
       </div>
+
+            {/* Smart Insights (Managers Only) */}
+      {insights.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <Search className="w-5 h-5 text-neutral-500" />
+            <h3 className="text-sm font-semibold text-neutral-900">Proactive Insights</h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {insights.map(alert => (
+              <div key={alert.id} className={`${alert.bg} ${alert.border} border p-4 rounded-xl flex items-start gap-3 shadow-sm`}>
+                 <div className="shrink-0 mt-0.5">
+                   {alert.icon}
+                 </div>
+                 <div>
+                   <h4 className="text-sm font-semibold text-neutral-900">{alert.title}</h4>
+                   <p className="text-xs text-neutral-600 mt-0.5">{alert.message}</p>
+                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent Activity */}
       <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
@@ -143,9 +342,20 @@ export function DashboardView({ logs, onNavigate, currentUser }: DashboardViewPr
                       <p className="text-sm font-medium text-neutral-900 truncate">
                         {activityName}
                       </p>
-                      <span className="text-xs font-medium text-neutral-500 whitespace-nowrap">
-                        {formatHours(log.durationMinutes)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        {onRepeat && (
+                          <button
+                            onClick={() => onRepeat(log.id)}
+                            className="p-1 text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-colors tooltip tooltip-left"
+                            title="Repeat this activity"
+                          >
+                            <Repeat className="w-4 h-4" />
+                          </button>
+                        )}
+                        <span className="text-xs font-medium text-neutral-500 whitespace-nowrap">
+                          {formatHours(log.durationMinutes)}
+                        </span>
+                      </div>
                     </div>
                     <p className="text-xs text-neutral-500 truncate mb-1">
                       {log.userName || log.role} • {project?.name || log.projectId || log.studyId} 

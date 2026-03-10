@@ -14,6 +14,8 @@ type View = "dashboard" | "log" | "history" | "reports" | "team";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>("dashboard");
+  const [repeatLogId, setRepeatLogId] = useState<string | null>(null);
+  const [aiPreFillData, setAiPreFillData] = useState<any | null>(null);
   const { 
     logs, 
     isLoaded, 
@@ -27,8 +29,22 @@ export default function App() {
     assignments,
     updateAssignments,
     addQuery,
-    replyToQuery
+    replyToQuery,
+    activeTimer,
+    startTimer,
+    stopTimer,
+    cancelTimer
   } = useAppStore();
+
+      const handleSmartLog = (data: any) => {
+    setAiPreFillData(data);
+    setCurrentView("log");
+  };
+
+  const handleRepeat = (logId: string) => {
+    setRepeatLogId(logId);
+    setCurrentView("log");
+  };
 
   if (!isLoaded) {
     return (
@@ -51,19 +67,26 @@ export default function App() {
         onChangeUser={changeUser}
       >
         {currentView === "dashboard" && (
-          <DashboardView logs={logs} onNavigate={setCurrentView} currentUser={currentUser} />
+          <DashboardView logs={logs} onNavigate={setCurrentView} currentUser={currentUser} activeTimer={activeTimer} startTimer={startTimer} onRepeat={handleRepeat} onSmartLog={handleSmartLog} assignments={assignments} />
         )}
         {currentView === "log" && (
           <LogFormView 
             onAddLog={addLog} 
-            onSuccess={() => setCurrentView("dashboard")} 
+            onSuccess={() => { setCurrentView("dashboard"); setRepeatLogId(null); setAiPreFillData(null); }}
             currentUser={currentUser}
             assignments={assignments}
+            activeTimer={activeTimer}
+            stopTimer={stopTimer}
+            cancelTimer={cancelTimer}
+            repeatLogId={repeatLogId}
+            logs={logs}
+            aiPreFillData={aiPreFillData}
           />
         )}
         {currentView === "history" && (
           <HistoryView 
-            logs={logs} 
+            logs={logs}
+            onRepeat={handleRepeat}
             onDeleteLog={deleteLog} 
             currentUser={currentUser}
             onAddQuery={addQuery}

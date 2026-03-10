@@ -15,6 +15,12 @@ const DEFAULT_ASSIGNMENTS: UserAssignment[] = [
   { userId: "u5", projectIds: ["PRJ-FULL"], protocolIds: ["PROT-404"] },
 ];
 
+
+export interface ActiveTimer {
+  startTime: number;
+  isRunning: boolean;
+}
+
 export function useAppStore() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [syncQueue, setSyncQueue] = useState<LogEntry[]>([]);
@@ -23,6 +29,7 @@ export function useAppStore() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [currentUser, setCurrentUser] = useState<User>(MOCK_USERS[0]);
   const [assignments, setAssignments] = useState<UserAssignment[]>(DEFAULT_ASSIGNMENTS);
+  const [activeTimer, setActiveTimer] = useState<ActiveTimer | null>(null);
 
   // Load initial state
   useEffect(() => {
@@ -213,8 +220,28 @@ export function useAppStore() {
     toast.success("Query resolved.");
   };
 
+
+  const startTimer = () => {
+    setActiveTimer({ startTime: Date.now(), isRunning: true });
+  };
+
+  const stopTimer = () => {
+    if (!activeTimer) return 0;
+    const durationMs = Date.now() - activeTimer.startTime;
+    setActiveTimer(null);
+    return Math.floor(durationMs / 60000); // Return duration in minutes
+  };
+
+  const cancelTimer = () => {
+    setActiveTimer(null);
+  };
+
   return { 
-    logs, 
+    logs,
+    activeTimer,
+    startTimer,
+    stopTimer,
+    cancelTimer,
     isLoaded, 
     addLog, 
     deleteLog, 
