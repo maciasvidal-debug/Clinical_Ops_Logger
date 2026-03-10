@@ -3,7 +3,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { LogEntry, PROJECTS, PROTOCOLS, SITES, ROLE_HIERARCHY, User, UserAssignment } from "@/lib/types";
 import { ActiveTimer } from "@/lib/store";
 import { format } from "date-fns";
-import { CheckCircle2, Clock, FileText, Users, Phone, Database, ShieldCheck, Stethoscope, ClipboardCheck, Activity } from "lucide-react";
+import { CheckCircle2, Clock, FileText, Users, Phone, Database, ShieldCheck, Stethoscope, ClipboardCheck, Activity, Sparkles } from "lucide-react";
+import { generateAIResponse } from "@/lib/actions";
 import { toast } from "sonner";
 
 const getTaskIcon = (name: string) => {
@@ -112,6 +113,31 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, act
       setMinutes(m.toString());
       toast.success(`Timer stopped. ${h}h ${m}m logged.`);
     }
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+
+  const handleAiEnhance = async () => {
+    if (!notes.trim()) {
+      toast.error("Please enter some notes to enhance first.");
+      return;
+    }
+
+    setIsAiLoading(true);
+    setAiError(null);
+
+    const prompt = `Enhance these clinical trial activity notes to be professional, concise, and structured. Return ONLY the enhanced notes:\n\n${notes}`;
+
+    const response = await generateAIResponse(prompt);
+
+    if (response.success) {
+      setNotes(response.data.trim());
+      toast.success("Notes enhanced with AI");
+    } else {
+      setAiError(response.error);
+      toast.error(response.error);
+    }
+
+    setIsAiLoading(false);
   };
 
   const availableCategories = useMemo(() => {
