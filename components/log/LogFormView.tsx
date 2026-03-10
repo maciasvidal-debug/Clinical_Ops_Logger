@@ -4,8 +4,8 @@ import { LogEntry, PROJECTS, PROTOCOLS, SITES, ROLE_HIERARCHY, User, UserAssignm
 import { ActiveTimer } from "@/lib/store";
 import { format } from "date-fns";
 import { CheckCircle2, Clock, FileText, Users, Phone, Database, ShieldCheck, Stethoscope, ClipboardCheck, Activity, Sparkles } from "lucide-react";
-import { generateAIResponse } from "@/lib/actions";
 import { toast } from "sonner";
+import { generateAIResponse } from "@/lib/actions";
 
 const getTaskIcon = (name: string) => {
   const lower = name.toLowerCase();
@@ -113,6 +113,8 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, act
       setMinutes(m.toString());
       toast.success(`Timer stopped. ${h}h ${m}m logged.`);
     }
+  };
+
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
