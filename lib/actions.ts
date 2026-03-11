@@ -47,7 +47,7 @@ export async function generateAIResponse(
   }
 }
 
-import { LogEntry, User } from "./types";
+import { LogEntry, User, Project, Protocol, Site, Role } from "./types";
 import { Type, Schema } from "@google/genai";
 
 export interface ParsedLogData {
@@ -62,10 +62,10 @@ export interface ParsedLogData {
 
 export async function parseNaturalLanguageLog(
   input: string,
-  userRole: string,
-  availableProjects: any[],
-  availableProtocols: any[],
-  availableSites: any[]
+  userRole: Role | string,
+  availableProjects: Project[],
+  availableProtocols: Protocol[],
+  availableSites: Site[]
 ): Promise<ActionResponse<ParsedLogData>> {
   try {
     if (!input || typeof input !== "string") {
@@ -137,7 +137,7 @@ export interface AIInsight {
 }
 
 export async function generateManagerInsights(
-  teamLogs: any[]
+  teamLogs: LogEntry[]
 ): Promise<ActionResponse<AIInsight[]>> {
   try {
     if (!teamLogs || teamLogs.length === 0) {

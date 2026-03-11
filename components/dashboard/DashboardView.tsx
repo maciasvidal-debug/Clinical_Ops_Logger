@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
-import { LogEntry, PROJECTS, PROTOCOLS, User, ROLE_PERMISSIONS } from "@/lib/types";
+import { LogEntry, PROJECTS, PROTOCOLS, User, ROLE_PERMISSIONS, UserAssignment } from "@/lib/types";
 import { format, subDays, isSameDay, parseISO } from "date-fns";
 import { Clock, Activity, CheckCircle2, MessageSquare, Repeat, Sparkles, Send, AlertTriangle, TrendingUp, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { parseNaturalLanguageLog, generateManagerInsights, AIInsight } from "@/lib/actions";
+import { parseNaturalLanguageLog, generateManagerInsights, AIInsight, ParsedLogData } from "@/lib/actions";
 
 import { ActiveTimer } from "@/lib/store";
 
@@ -15,8 +15,8 @@ interface DashboardViewProps {
   activeTimer?: ActiveTimer | null;
   startTimer?: () => void;
   onRepeat?: (logId: string) => void;
-  onSmartLog?: (data: any) => void;
-  assignments?: any[];
+  onSmartLog?: (data: ParsedLogData) => void;
+  assignments?: UserAssignment[];
 }
 
 export function DashboardView({ logs, onNavigate, currentUser, activeTimer, startTimer, onRepeat, onSmartLog, assignments = [] }: DashboardViewProps) {
