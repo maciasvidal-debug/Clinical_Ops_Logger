@@ -23,6 +23,10 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
 
   const permissions = ROLE_PERMISSIONS[currentUser.role];
 
+  const projectsMap = useMemo(() => new Map(PROJECTS.map(p => [p.id, p])), []);
+  const protocolsMap = useMemo(() => new Map(PROTOCOLS.map(p => [p.id, p])), []);
+  const sitesMap = useMemo(() => new Map(SITES.map(s => [s.id, s])), []);
+
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
       // Role-based visibility
@@ -122,9 +126,9 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
           ) : (
             <div className="divide-y divide-neutral-100">
               {filteredLogs.map(log => {
-                const project = PROJECTS.find(p => p.id === log.projectId);
-                const protocol = PROTOCOLS.find(p => p.id === log.protocolId);
-                const site = SITES.find(s => s.id === log.siteId);
+                const project = projectsMap.get(log.projectId);
+                const protocol = protocolsMap.get(log.protocolId);
+                const site = sitesMap.get(log.siteId);
                 
                 const canDelete = permissions.canDeleteLogs || log.userId === currentUser.id;
                 const activityName = log.subTask ? `${log.activity} › ${log.subTask}` : (log.activity || log.activityType || "Unknown Activity");
