@@ -15,7 +15,15 @@ const globalForGenAI = globalThis as unknown as {
 
 // Singleton pattern to instantiate the client
 // In development, it reuses the existing instance to avoid multiple connections due to HMR
-export const genai = globalForGenAI.genai ?? new GoogleGenAI({ apiKey: apiKey || "" });
+// We use 'let' instead of 'const' to allow mocking in tests
+export let genai = globalForGenAI.genai ?? new GoogleGenAI({ apiKey: apiKey || "" });
+
+/**
+ * For testing purposes only: allows mocking the genai client.
+ */
+export function setGenai(newGenai: any) {
+  genai = newGenai;
+}
 
 if (process.env.NODE_ENV !== "production") {
   globalForGenAI.genai = genai;
