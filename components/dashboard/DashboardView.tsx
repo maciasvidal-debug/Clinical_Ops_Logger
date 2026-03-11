@@ -373,7 +373,7 @@ const formatHours = (minutes: number) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {allInsights.length === 0 ? (
               <div className="col-span-full p-6 text-center bg-white border border-neutral-200 rounded-xl">
-                <p className="text-neutral-500 text-sm">No alerts detected yet. Click "Generate AI Insights" to analyze recent team activity.</p>
+                <p className="text-neutral-500 text-sm">No alerts detected yet. Click &quot;Generate AI Insights&quot; to analyze recent team activity.</p>
               </div>
             ) : (
               allInsights.map(alert => (
