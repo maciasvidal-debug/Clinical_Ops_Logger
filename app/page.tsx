@@ -33,8 +33,24 @@ export default function App() {
     activeTimer,
     startTimer,
     stopTimer,
-    cancelTimer
+    cancelTimer,
+    notifications,
+    templates,
+    addNotification,
+    markNotificationAsRead,
+    clearNotifications,
+    addTemplate,
+    deleteTemplate
   } = useAppStore();
+
+  const handleSimulateNotification = () => {
+    addNotification({
+      userId: currentUser.id,
+      title: "New Query Assigned",
+      message: "Manager created a new query for PROT-101.",
+      type: "warning",
+    });
+  };
 
       const handleSmartLog = (data: any) => {
     setAiPreFillData(data);
@@ -65,6 +81,10 @@ export default function App() {
         syncQueueCount={syncQueueCount}
         currentUser={currentUser}
         onChangeUser={changeUser}
+        notifications={notifications}
+        onMarkNotificationRead={markNotificationAsRead}
+        onClearNotifications={clearNotifications}
+        onSimulateNotification={handleSimulateNotification}
       >
         {currentView === "dashboard" && (
           <DashboardView logs={logs} onNavigate={setCurrentView} currentUser={currentUser} activeTimer={activeTimer} startTimer={startTimer} onRepeat={handleRepeat} onSmartLog={handleSmartLog} assignments={assignments} />
