@@ -308,3 +308,26 @@ export const ROLE_PERMISSIONS: Record<Role, Permission> = {
   SR: { canViewAllLogs: false, canDeleteLogs: true },
   RS: { canViewAllLogs: false, canDeleteLogs: true }
 };
+
+export interface AppNotification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  date: string;
+  isRead: boolean;
+  type: "info" | "warning" | "success" | "error";
+  link?: string;
+}
+
+export interface SavedTemplate {
+  id: string;
+  userId: string;
+  name: string;
+  projectId: string;
+  protocolId: string;
+  activityCategory: string;
+  activityTask: string;
+  notes?: string;
+  icon?: string;
+}

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { LayoutDashboard, Clock, History, BarChart3, Plus, WifiOff, RefreshCw, Bell, Users } from "lucide-react";
+import { LayoutDashboard, Clock, History, BarChart3, Plus, WifiOff, RefreshCw, Bell, Users, CheckCircle2, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
-import { User, MOCK_USERS } from "@/lib/types";
+import { User, MOCK_USERS, AppNotification } from "@/lib/types";
+import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
 type View = "dashboard" | "log" | "history" | "reports" | "team";
@@ -16,6 +17,10 @@ interface ShellProps {
   syncQueueCount: number;
   currentUser: User;
   onChangeUser: (userId: string) => void;
+  notifications: AppNotification[];
+  onMarkNotificationRead: (id: string) => void;
+  onClearNotifications: () => void;
+  onSimulateNotification: () => void;
 }
 
 export function Shell({ 
@@ -26,8 +31,15 @@ export function Shell({
   isSyncing, 
   syncQueueCount,
   currentUser,
-  onChangeUser
+  onChangeUser,
+  notifications,
+  onMarkNotificationRead,
+  onClearNotifications,
+  onSimulateNotification
 }: ShellProps) {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const unreadCount = notifications ? notifications.filter(n => !n.isRead && n.userId === currentUser.id).length : 0;
+  const userNotifications = notifications ? notifications.filter(n => n.userId === currentUser.id).sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()) : [];
   const navItems: { id: View; label: string; icon: any }[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "log", label: "Log Time", icon: Clock },
@@ -117,13 +129,69 @@ export function Shell({
             </div>
           )}
 
-          <button 
-            onClick={handleTestNotification}
-            className="w-full flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-          >
-            <Bell className="w-4 h-4" />
-            Test Alert
-          </button>
+
+
+
+
+          {/* Notifications Dropdown Desktop */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="w-full flex items-center justify-center gap-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-4 py-2 rounded-xl text-sm font-medium transition-colors relative"
+              title="Notifications Desktop"
+            >
+              <Bell className="w-4 h-4" />
+              Notifications
+              {unreadCount > 0 && (
+                <span className="absolute top-2 right-4 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute bottom-full left-0 mb-2 w-72 bg-white rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.1)] border border-slate-100 z-50 overflow-hidden">
+                <div className="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                  <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
+                  <div className="flex gap-2">
+                     <button onClick={onSimulateNotification} className="text-xs text-indigo-600 hover:underline" title="Simulate a push notification">Test</button>
+                     {unreadCount > 0 && (
+                        <button onClick={onClearNotifications} className="text-xs text-slate-500 hover:text-slate-700">Clear</button>
+                     )}
+                  </div>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {userNotifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-slate-500">
+                      No new notifications
+                    </div>
+                  ) : (
+                    userNotifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        className={`p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${notif.isRead ? 'opacity-60' : 'bg-indigo-50/50'}`}
+                        onClick={() => {
+                          if (!notif.isRead) onMarkNotificationRead(notif.id);
+                        }}
+                      >
+                        <div className="flex gap-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            {notif.type === 'success' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                            {notif.type === 'info' && <Bell className="w-4 h-4 text-blue-500" />}
+                            {notif.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-500" />}
+                            {notif.type === 'error' && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-slate-800">{notif.title}</p>
+                            <p className="text-xs text-slate-600 mt-0.5">{notif.message}</p>
+                            <p className="text-[10px] text-slate-400 mt-1">{formatDistanceToNow(new Date(notif.date), { addSuffix: true })}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           <button 
             onClick={() => onViewChange("log")}
@@ -155,6 +223,64 @@ export function Shell({
                 <option key={u.id} value={u.id}>{u.name}</option>
               ))}
             </select>
+          {/* Notifications Dropdown Mobile */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="p-2 text-indigo-600 bg-indigo-50 rounded-full transition-colors relative"
+              title="Notifications"
+            >
+              <Bell className="w-5 h-5" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white"></span>
+              )}
+            </button>
+
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-72 md:w-80 bg-white rounded-xl shadow-lg border border-slate-100 z-50 overflow-hidden">
+                <div className="p-3 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                  <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
+                  <div className="flex gap-2">
+                     <button onClick={onSimulateNotification} className="text-xs text-indigo-600 hover:underline" title="Simulate a push notification">Test</button>
+                     {unreadCount > 0 && (
+                        <button onClick={onClearNotifications} className="text-xs text-slate-500 hover:text-slate-700">Clear</button>
+                     )}
+                  </div>
+                </div>
+                <div className="max-h-96 overflow-y-auto">
+                  {userNotifications.length === 0 ? (
+                    <div className="p-4 text-center text-sm text-slate-500">
+                      No new notifications
+                    </div>
+                  ) : (
+                    userNotifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        className={`p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer ${notif.isRead ? 'opacity-60' : 'bg-indigo-50/50'}`}
+                        onClick={() => {
+                          if (!notif.isRead) onMarkNotificationRead(notif.id);
+                        }}
+                      >
+                        <div className="flex gap-3">
+                          <div className="flex-shrink-0 mt-0.5">
+                            {notif.type === 'success' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
+                            {notif.type === 'info' && <Bell className="w-4 h-4 text-blue-500" />}
+                            {notif.type === 'warning' && <AlertTriangle className="w-4 h-4 text-amber-500" />}
+                            {notif.type === 'error' && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-slate-800">{notif.title}</p>
+                            <p className="text-xs text-slate-600 mt-0.5">{notif.message}</p>
+                            <p className="text-[10px] text-slate-400 mt-1">{formatDistanceToNow(new Date(notif.date), { addSuffix: true })}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
             <button 
               onClick={() => onViewChange("log")}
               className="p-2 bg-indigo-50 text-indigo-600 rounded-full"

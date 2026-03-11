@@ -1,12 +1,14 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, useCallback } from "react";
-import { LogEntry, Role, User, UserAssignment, MOCK_USERS } from "./types";
+import { LogEntry, Role, User, UserAssignment, MOCK_USERS, AppNotification, SavedTemplate } from "./types";
 import { toast } from "sonner";
 
 const STORAGE_KEY = "clinical_ops_logs";
 const SYNC_QUEUE_KEY = "clinical_ops_sync_queue";
 const USER_KEY = "clinical_ops_user";
 const ASSIGNMENTS_KEY = "clinical_ops_assignments";
+const NOTIFICATIONS_KEY = "clinical_ops_notifications";
+const TEMPLATES_KEY = "clinical_ops_templates";
 
 const DEFAULT_ASSIGNMENTS: UserAssignment[] = [
   { userId: "u2", projectIds: ["PRJ-JIT"], protocolIds: ["PROT-101", "PROT-202"] },
@@ -30,6 +32,8 @@ export function useAppStore() {
   const [currentUser, setCurrentUser] = useState<User>(MOCK_USERS[0]);
   const [assignments, setAssignments] = useState<UserAssignment[]>(DEFAULT_ASSIGNMENTS);
   const [activeTimer, setActiveTimer] = useState<ActiveTimer | null>(null);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [templates, setTemplates] = useState<SavedTemplate[]>([]);
 
   // Load initial state
   useEffect(() => {
@@ -37,6 +41,8 @@ export function useAppStore() {
     const storedQueue = localStorage.getItem(SYNC_QUEUE_KEY);
     const storedUser = localStorage.getItem(USER_KEY);
     const storedAssignments = localStorage.getItem(ASSIGNMENTS_KEY);
+    const storedNotifications = localStorage.getItem(NOTIFICATIONS_KEY);
+    const storedTemplates = localStorage.getItem(TEMPLATES_KEY);
 
     if (storedLogs) {
       try {
@@ -61,6 +67,18 @@ export function useAppStore() {
         console.error("Failed to parse user", e);
       }
     }
+    if (storedNotifications) {
+      try {
+        setNotifications(JSON.parse(storedNotifications));
+      } catch (e) { console.error("Error parsing stored notifications", e); }
+    }
+
+    if (storedTemplates) {
+      try {
+        setTemplates(JSON.parse(storedTemplates));
+      } catch (e) { console.error("Error parsing stored templates", e); }
+    }
+
     if (storedAssignments) {
       try {
         setAssignments(JSON.parse(storedAssignments));
@@ -146,7 +164,61 @@ export function useAppStore() {
     }
   };
 
+
+  // Notification Actions
+  const addNotification = useCallback((notificationData: Omit<AppNotification, "id" | "date" | "isRead">) => {
+    const newNotification: AppNotification = {
+      ...notificationData,
+      id: crypto.randomUUID(),
+      date: new Date().toISOString(),
+      isRead: false,
+    };
+
+    setNotifications(prev => [newNotification, ...prev]);
+
+    // Attempt system web notification
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification(newNotification.title, { body: newNotification.message });
+    } else if ("Notification" in window && Notification.permission !== "denied") {
+       Notification.requestPermission().then(permission => {
+         if (permission === "granted") {
+           new Notification(newNotification.title, { body: newNotification.message });
+         }
+       });
+    }
+
+  }, []);
+
+  const markNotificationAsRead = useCallback((id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+  }, []);
+
+  const markAllNotificationsAsRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  }, []);
+
+  const clearNotifications = useCallback(() => {
+    setNotifications(prev => prev.filter(n => !n.isRead));
+  }, []);
+
+  // Template Actions
+  const addTemplate = useCallback((templateData: Omit<SavedTemplate, "id" | "userId">) => {
+    const newTemplate: SavedTemplate = {
+      ...templateData,
+      id: crypto.randomUUID(),
+      userId: currentUser.id,
+    };
+    setTemplates(prev => [...prev, newTemplate]);
+    toast.success("Template saved successfully.");
+  }, [currentUser.id]);
+
+  const deleteTemplate = useCallback((id: string) => {
+    setTemplates(prev => prev.filter(t => t.id !== id));
+    toast.success("Template deleted.");
+  }, []);
+
   const deleteLog = (id: string) => {
+
     const newLogs = logs.filter((l) => l.id !== id);
     setLogs(newLogs);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(newLogs));
@@ -242,6 +314,14 @@ export function useAppStore() {
     startTimer,
     stopTimer,
     cancelTimer,
+    notifications,
+    templates,
+    addNotification,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    clearNotifications,
+    addTemplate,
+    deleteTemplate,
     isLoaded, 
     addLog, 
     deleteLog, 
