@@ -4,7 +4,7 @@ import { format, subDays, isSameDay, parseISO } from "date-fns";
 import { Clock, Activity, CheckCircle2, MessageSquare, Repeat, Sparkles, Send, AlertTriangle, TrendingUp, Search } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { parseNaturalLanguageLog } from "@/lib/actions";
+import { parseNaturalLanguageLog, generateManagerInsights, AIInsight } from "@/lib/actions";
 
 import { ActiveTimer } from "@/lib/store";
 
@@ -22,6 +22,9 @@ interface DashboardViewProps {
 export function DashboardView({ logs, onNavigate, currentUser, activeTimer, startTimer, onRepeat, onSmartLog, assignments = [] }: DashboardViewProps) {
   const [nlInput, setNlInput] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isGeneratingInsights, setIsGeneratingInsights] = useState(false);
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
+
   const today = new Date();
   const permissions = ROLE_PERMISSIONS[currentUser.role];
 
@@ -149,7 +152,68 @@ export function DashboardView({ logs, onNavigate, currentUser, activeTimer, star
     return visibleLogs.reduce((acc, log) => acc + (log.queries?.filter(q => q.status === "OPEN").length || 0), 0);
   }, [visibleLogs]);
 
-  const formatHours = (minutes: number) => {
+
+  const handleGenerateAIInsights = async () => {
+    if (logs.length === 0) {
+      toast.info("No hay datos recientes para analizar.");
+      return;
+    }
+    setIsGeneratingInsights(true);
+    try {
+      const response = await generateManagerInsights(logs);
+      if (response.success) {
+        setAiInsights(response.data);
+        toast.success("AI Insights generated successfully.");
+
+        // Check for high priority alerts to notify
+        const dangerAlerts = response.data.filter(i => i.type === "danger" || i.type === "warning");
+        if (dangerAlerts.length > 0) {
+           toast("High priority items detected by AI. Please review the dashboard.", { icon: "🔔" });
+        }
+      } else {
+        toast.error(response.error || "Failed to generate AI insights.");
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setIsGeneratingInsights(false);
+    }
+  };
+
+  const allInsights = useMemo(() => {
+    const combined = [...insights];
+
+    // Add AI insights with formatting
+    aiInsights.forEach((ai, idx) => {
+      let icon = <Sparkles className="w-5 h-5 text-indigo-600" />;
+      let bg = "bg-indigo-50";
+      let border = "border-indigo-200";
+
+      if (ai.type === "warning") {
+        icon = <AlertTriangle className="w-5 h-5 text-amber-600" />;
+        bg = "bg-amber-50"; border = "border-amber-200";
+      } else if (ai.type === "danger") {
+        icon = <AlertTriangle className="w-5 h-5 text-rose-600" />;
+        bg = "bg-rose-50"; border = "border-rose-200";
+      } else if (ai.type === "success") {
+        icon = <TrendingUp className="w-5 h-5 text-emerald-600" />;
+        bg = "bg-emerald-50"; border = "border-emerald-200";
+      }
+
+      combined.push({
+        id: `ai-insight-${idx}`,
+        type: ai.type,
+        icon,
+        title: ai.title,
+        message: ai.message,
+        bg,
+        border
+      });
+    });
+
+    return combined;
+  }, [insights, aiInsights]);
+const formatHours = (minutes: number) => {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return `${h}h ${m}m`;
@@ -286,14 +350,33 @@ export function DashboardView({ logs, onNavigate, currentUser, activeTimer, star
       </div>
 
             {/* Smart Insights (Managers Only) */}
-      {insights.length > 0 && (
+      {(currentUser.role === "Manager" || currentUser.role === "Admin") && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2 mb-2">
-            <Search className="w-5 h-5 text-neutral-500" />
-            <h3 className="text-sm font-semibold text-neutral-900">Proactive Insights</h3>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <div className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-neutral-500" />
+              <h3 className="text-sm font-semibold text-neutral-900">Proactive Insights</h3>
+            </div>
+            <button
+                onClick={handleGenerateAIInsights}
+                disabled={isGeneratingInsights}
+                className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 disabled:opacity-50 transition-colors font-medium shadow-sm"
+              >
+                {isGeneratingInsights ? (
+                  <Clock className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Sparkles className="w-3.5 h-3.5" />
+                )}
+                {isGeneratingInsights ? "Analyzing..." : "Generate AI Insights"}
+              </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {insights.map(alert => (
+            {allInsights.length === 0 ? (
+              <div className="col-span-full p-6 text-center bg-white border border-neutral-200 rounded-xl">
+                <p className="text-neutral-500 text-sm">No alerts detected yet. Click "Generate AI Insights" to analyze recent team activity.</p>
+              </div>
+            ) : (
+              allInsights.map(alert => (
               <div key={alert.id} className={`${alert.bg} ${alert.border} border p-4 rounded-xl flex items-start gap-3 shadow-sm`}>
                  <div className="shrink-0 mt-0.5">
                    {alert.icon}
@@ -303,7 +386,7 @@ export function DashboardView({ logs, onNavigate, currentUser, activeTimer, star
                    <p className="text-xs text-neutral-600 mt-0.5">{alert.message}</p>
                  </div>
               </div>
-            ))}
+            )))}
           </div>
         </div>
       )}
