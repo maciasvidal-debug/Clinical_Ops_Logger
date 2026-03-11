@@ -1,7 +1,8 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { LogEntry, Role, User, UserAssignment, MOCK_USERS, AppNotification, SavedTemplate } from "./types";
 import { toast } from "sonner";
+import { encryptData, decryptData } from "./crypto";
 
 const STORAGE_KEY = "clinical_ops_logs";
 const SYNC_QUEUE_KEY = "clinical_ops_sync_queue";
@@ -35,61 +36,164 @@ export function useAppStore() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
 
+  // Refs to track the last persisted state to avoid redundant encryption and potential race conditions
+  const lastPersistedLogs = useRef<string>("");
+  const lastPersistedQueue = useRef<string>("");
+  const lastPersistedUser = useRef<string>("");
+  const lastPersistedAssignments = useRef<string>("");
+  const lastPersistedNotifications = useRef<string>("");
+  const lastPersistedTemplates = useRef<string>("");
+
   // Load initial state
   useEffect(() => {
-    const storedLogs = localStorage.getItem(STORAGE_KEY);
-    const storedQueue = localStorage.getItem(SYNC_QUEUE_KEY);
-    const storedUser = localStorage.getItem(USER_KEY);
-    const storedAssignments = localStorage.getItem(ASSIGNMENTS_KEY);
-    const storedNotifications = localStorage.getItem(NOTIFICATIONS_KEY);
-    const storedTemplates = localStorage.getItem(TEMPLATES_KEY);
+    const loadState = async () => {
+      const getItem = async (key: string) => {
+        const stored = localStorage.getItem(key);
+        if (!stored) return null;
 
-    if (storedLogs) {
-      try {
-        setLogs(JSON.parse(storedLogs));
-      } catch (e) {
-        console.error("Failed to parse logs", e);
-      }
-    }
-    if (storedQueue) {
-      try {
-        setSyncQueue(JSON.parse(storedQueue));
-      } catch (e) {
-        console.error("Failed to parse sync queue", e);
-      }
-    }
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        const user = MOCK_USERS.find(u => u.id === parsedUser.id) || MOCK_USERS[0];
-        setCurrentUser(user);
-      } catch (e) {
-        console.error("Failed to parse user", e);
-      }
-    }
-    if (storedNotifications) {
-      try {
-        setNotifications(JSON.parse(storedNotifications));
-      } catch (e) { console.error("Error parsing stored notifications", e); }
-    }
+        // Try to decrypt
+        const decrypted = await decryptData(stored);
+        if (decrypted) return decrypted;
 
-    if (storedTemplates) {
-      try {
-        setTemplates(JSON.parse(storedTemplates));
-      } catch (e) { console.error("Error parsing stored templates", e); }
-    }
+        // Fallback for legacy plaintext data (if it looks like JSON or is a simple value)
+        return stored;
+      };
 
-    if (storedAssignments) {
-      try {
-        setAssignments(JSON.parse(storedAssignments));
-      } catch (e) {
-        console.error("Failed to parse assignments", e);
+      const storedLogs = await getItem(STORAGE_KEY);
+      const storedQueue = await getItem(SYNC_QUEUE_KEY);
+      const storedUser = await getItem(USER_KEY);
+      const storedAssignments = await getItem(ASSIGNMENTS_KEY);
+      const storedNotifications = await getItem(NOTIFICATIONS_KEY);
+      const storedTemplates = await getItem(TEMPLATES_KEY);
+
+      if (storedLogs) {
+        try {
+          setLogs(JSON.parse(storedLogs));
+          lastPersistedLogs.current = storedLogs;
+        } catch (e) {
+          console.error("Failed to parse logs", e);
+        }
       }
-    }
+      if (storedQueue) {
+        try {
+          setSyncQueue(JSON.parse(storedQueue));
+          lastPersistedQueue.current = storedQueue;
+        } catch (e) {
+          console.error("Failed to parse sync queue", e);
+        }
+      }
+      if (storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          const user = MOCK_USERS.find(u => u.id === parsedUser.id) || MOCK_USERS[0];
+          setCurrentUser(user);
+          lastPersistedUser.current = JSON.stringify(user);
+        } catch (e) {
+          console.error("Failed to parse user", e);
+        }
+      }
+      if (storedNotifications) {
+        try {
+          setNotifications(JSON.parse(storedNotifications));
+          lastPersistedNotifications.current = storedNotifications;
+        } catch (e) { console.error("Error parsing stored notifications", e); }
+      }
 
-    setIsLoaded(true);
-    setIsOnline(navigator.onLine);
+      if (storedTemplates) {
+        try {
+          setTemplates(JSON.parse(storedTemplates));
+          lastPersistedTemplates.current = storedTemplates;
+        } catch (e) { console.error("Error parsing stored templates", e); }
+      }
+
+      if (storedAssignments) {
+        try {
+          setAssignments(JSON.parse(storedAssignments));
+          lastPersistedAssignments.current = storedAssignments;
+        } catch (e) {
+          console.error("Failed to parse assignments", e);
+        }
+      }
+
+      setIsLoaded(true);
+      setIsOnline(navigator.onLine);
+    };
+
+    loadState();
   }, []);
+
+  // Persistence Effects - using effects to handle async encryption and localStorage writes
+  useEffect(() => {
+    if (!isLoaded) return;
+    const data = JSON.stringify(logs);
+    if (data === lastPersistedLogs.current) return;
+
+    encryptData(data).then(encrypted => {
+      localStorage.setItem(STORAGE_KEY, encrypted);
+      lastPersistedLogs.current = data;
+    }).catch(err => console.error("Failed to persist logs", err));
+  }, [logs, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const data = JSON.stringify(syncQueue);
+    if (data === lastPersistedQueue.current) return;
+
+    if (syncQueue.length === 0) {
+      localStorage.removeItem(SYNC_QUEUE_KEY);
+      lastPersistedQueue.current = data;
+    } else {
+      encryptData(data).then(encrypted => {
+        localStorage.setItem(SYNC_QUEUE_KEY, encrypted);
+        lastPersistedQueue.current = data;
+      }).catch(err => console.error("Failed to persist sync queue", err));
+    }
+  }, [syncQueue, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const data = JSON.stringify(currentUser);
+    if (data === lastPersistedUser.current) return;
+
+    encryptData(data).then(encrypted => {
+      localStorage.setItem(USER_KEY, encrypted);
+      lastPersistedUser.current = data;
+    }).catch(err => console.error("Failed to persist user", err));
+  }, [currentUser, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const data = JSON.stringify(assignments);
+    if (data === lastPersistedAssignments.current) return;
+
+    encryptData(data).then(encrypted => {
+      localStorage.setItem(ASSIGNMENTS_KEY, encrypted);
+      lastPersistedAssignments.current = data;
+    }).catch(err => console.error("Failed to persist assignments", err));
+  }, [assignments, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const data = JSON.stringify(notifications);
+    if (data === lastPersistedNotifications.current) return;
+
+    encryptData(data).then(encrypted => {
+      localStorage.setItem(NOTIFICATIONS_KEY, encrypted);
+      lastPersistedNotifications.current = data;
+    }).catch(err => console.error("Failed to persist notifications", err));
+  }, [notifications, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const data = JSON.stringify(templates);
+    if (data === lastPersistedTemplates.current) return;
+
+    encryptData(data).then(encrypted => {
+      localStorage.setItem(TEMPLATES_KEY, encrypted);
+      lastPersistedTemplates.current = data;
+    }).catch(err => console.error("Failed to persist templates", err));
+  }, [templates, isLoaded]);
+
 
   // Online/Offline listeners
   useEffect(() => {
@@ -126,10 +230,7 @@ export function useAppStore() {
     );
 
     setLogs(syncedLogs);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(syncedLogs));
-    
     setSyncQueue([]);
-    localStorage.removeItem(SYNC_QUEUE_KEY);
     
     setIsSyncing(false);
     toast.success("All offline changes synced successfully.");
@@ -150,14 +251,10 @@ export function useAppStore() {
       synced: isOnline,
     };
     
-    const newLogs = [newLog, ...logs];
-    setLogs(newLogs);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newLogs));
+    setLogs(prev => [newLog, ...prev]);
 
     if (!isOnline) {
-      const newQueue = [...syncQueue, newLog];
-      setSyncQueue(newQueue);
-      localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(newQueue));
+      setSyncQueue(prev => [...prev, newLog]);
     } else {
       // Simulate immediate sync
       toast.success("Activity logged successfully.");
@@ -218,38 +315,29 @@ export function useAppStore() {
   }, []);
 
   const deleteLog = (id: string) => {
-
-    const newLogs = logs.filter((l) => l.id !== id);
-    setLogs(newLogs);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newLogs));
-
-    // Remove from sync queue if it was pending
-    const newQueue = syncQueue.filter((l) => l.id !== id);
-    if (newQueue.length !== syncQueue.length) {
-      setSyncQueue(newQueue);
-      localStorage.setItem(SYNC_QUEUE_KEY, JSON.stringify(newQueue));
-    }
+    setLogs(prev => prev.filter((l) => l.id !== id));
+    setSyncQueue(prev => prev.filter((l) => l.id !== id));
   };
 
   const changeUser = (userId: string) => {
     const user = MOCK_USERS.find(u => u.id === userId);
     if (user) {
       setCurrentUser(user);
-      localStorage.setItem(USER_KEY, JSON.stringify(user));
       toast.info(`Switched to ${user.name}`);
     }
   };
 
   const updateAssignments = (userId: string, projectIds: string[], protocolIds: string[]) => {
-    const newAssignments = assignments.filter(a => a.userId !== userId);
-    newAssignments.push({ userId, projectIds, protocolIds });
-    setAssignments(newAssignments);
-    localStorage.setItem(ASSIGNMENTS_KEY, JSON.stringify(newAssignments));
+    setAssignments(prev => {
+      const next = prev.filter(a => a.userId !== userId);
+      next.push({ userId, projectIds, protocolIds });
+      return next;
+    });
     toast.success("Assignments updated successfully.");
   };
 
   const addQuery = (logId: string, question: string) => {
-    const newLogs = logs.map(log => {
+    setLogs(prev => prev.map(log => {
       if (log.id === logId) {
         const queries = log.queries || [];
         return {
@@ -267,14 +355,12 @@ export function useAppStore() {
         };
       }
       return log;
-    });
-    setLogs(newLogs);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newLogs));
+    }));
     toast.success("Query added.");
   };
 
   const replyToQuery = (logId: string, queryId: string, response: string) => {
-    const newLogs = logs.map(log => {
+    setLogs(prev => prev.map(log => {
       if (log.id === logId && log.queries) {
         return {
           ...log,
@@ -286,9 +372,7 @@ export function useAppStore() {
         };
       }
       return log;
-    });
-    setLogs(newLogs);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newLogs));
+    }));
     toast.success("Query resolved.");
   };
 
