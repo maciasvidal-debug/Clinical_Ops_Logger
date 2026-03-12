@@ -72,8 +72,6 @@ export interface LogEntry {
   subTask?: string;
   notes: string;
   synced?: boolean; // For offline sync tracking
-  activityType?: string; // Legacy support
-  studyId?: string; // Legacy support
   queries?: LogQuery[];
 }
 
@@ -96,14 +94,6 @@ export const SITES: Site[] = [
   { id: "SITE-UK-01", protocolId: "PROT-202", name: "London General", country: "UK" },
   { id: "SITE-ES-01", protocolId: "PROT-303", name: "Hospital Clinic", country: "Spain" },
   { id: "SITE-MX-01", protocolId: "PROT-404", name: "Hospital General", country: "Mexico" },
-];
-
-// Legacy support
-export const STUDIES = [
-  { id: "STU-101", name: "Oncology Phase III (STU-101)" },
-  { id: "STU-202", name: "Cardiology Phase II (STU-202)" },
-  { id: "STU-303", name: "Neurology Observational (STU-303)" },
-  { id: "STU-404", name: "Vaccine Trial (STU-404)" },
 ];
 
 export const ROLES: Role[] = ["Admin", "Manager", "CRA", "CRC", "CTA", "DE", "RA", "SR", "RS"];
@@ -330,4 +320,19 @@ export interface SavedTemplate {
   activityTask: string;
   notes?: string;
   icon?: string;
+}
+
+export function dbRoleToAppRole(dbRole: string): Role {
+  switch (dbRole) {
+    case 'super_admin': return 'Admin';
+    case 'manager': return 'Manager';
+    case 'crc': return 'CRC';
+    case 'cra': return 'CRA';
+    case 'data_entry': return 'DE';
+    case 'recruitment_specialist': return 'SR';
+    case 'retention_specialist': return 'RS';
+    case 'cta': return 'CTA';
+    case 'ra': return 'RA';
+    default: return 'CRC';
+  }
 }

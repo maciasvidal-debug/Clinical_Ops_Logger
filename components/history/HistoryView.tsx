@@ -34,7 +34,7 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
         return false;
       }
 
-      const activityName = log.activity || log.activityType || "";
+      const activityName = log.activity || "";
       const subTaskName = log.subTask || "";
       const categoryName = log.category || "";
 
@@ -131,7 +131,7 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
                 const site = sitesMap.get(log.siteId);
                 
                 const canDelete = permissions.canDeleteLogs || log.userId === currentUser.id;
-                const activityName = log.subTask ? `${log.activity} › ${log.subTask}` : (log.activity || log.activityType || "Unknown Activity");
+                const activityName = log.subTask ? `${log.activity} › ${log.subTask}` : (log.activity || "Unknown Activity");
                 const isManager = currentUser.role === "Manager";
                 const isOwner = log.userId === currentUser.id;
                 
@@ -154,7 +154,7 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
                           )}
                         </div>
                         <p className="text-xs text-neutral-500 mb-2">
-                          {format(parseISO(log.date), "MMM d, yyyy")} • {log.userName || log.role} • {project?.name || log.projectId || log.studyId} 
+                          {format(parseISO(log.date), "MMM d, yyyy")} • {log.userName || log.role} • {project?.name || log.projectId}
                           {protocol && ` • ${protocol.name}`}
                           {site && ` • ${site.name}`}
                           {log.category && ` • ${log.category}`}

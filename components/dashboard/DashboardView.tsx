@@ -418,7 +418,7 @@ const formatHours = (minutes: number) => {
             visibleLogs.slice(0, 5).map((log) => {
               const project = PROJECTS_MAP.get(log.projectId);
               const protocol = PROTOCOLS_MAP.get(log.protocolId);
-              const activityName = log.subTask ? `${log.activity} › ${log.subTask}` : (log.activity || log.activityType || "Unknown Activity");
+              const activityName = log.subTask ? `${log.activity} › ${log.subTask}` : (log.activity || "Unknown Activity");
               return (
                 <div
                   key={log.id}
@@ -448,7 +448,7 @@ const formatHours = (minutes: number) => {
                       </div>
                     </div>
                     <p className="text-xs text-neutral-500 truncate mb-1">
-                      {log.userName || log.role} • {project?.name || log.projectId || log.studyId} 
+                      {log.userName || log.role} • {project?.name || log.projectId}
                       {protocol && ` • ${protocol.name}`}
                       {log.category && ` • ${log.category}`}
                     </p>
