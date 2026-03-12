@@ -225,8 +225,9 @@ export function useAppStore() {
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     // Mark all as synced
+    const syncQueueIds = new Set(syncQueue.map(q => q.id));
     const syncedLogs = logs.map(log => 
-      syncQueue.find(q => q.id === log.id) ? { ...log, synced: true } : log
+      syncQueueIds.has(log.id) ? { ...log, synced: true } : log
     );
 
     setLogs(syncedLogs);
