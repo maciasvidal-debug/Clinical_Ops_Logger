@@ -162,7 +162,7 @@ export default function AdminDashboard() {
                       <TableCell>
                         <Select
                           value={user.role}
-                          onValueChange={(val) => updateUserRoleOrStatus(user.id, { role: val })}
+                          onValueChange={(val: string) => updateUserRoleOrStatus(user.id, { role: val })}
                         >
                           <SelectTrigger className="w-[140px] h-8 text-xs">
                             <SelectValue />

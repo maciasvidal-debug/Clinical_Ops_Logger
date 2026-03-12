@@ -124,7 +124,7 @@ export default function ManagerDashboard() {
                     <TableCell>
                       <Select
                         defaultValue={user.role}
-                        onValueChange={(val) => handleAction(user.id, 'pending', val)}
+                        onValueChange={(val: string) => handleAction(user.id, 'pending', val)}
                       >
                         <SelectTrigger className="w-[180px] h-8 text-xs">
                           <SelectValue />
