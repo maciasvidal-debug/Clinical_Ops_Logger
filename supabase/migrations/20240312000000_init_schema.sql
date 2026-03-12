@@ -1,5 +1,5 @@
 -- Create custom types for roles and status
-CREATE TYPE user_role AS ENUM ('super_admin', 'manager', 'crc', 'cra', 'data_entry', 'recruitment_specialist', 'retention_specialist');
+CREATE TYPE user_role AS ENUM ('super_admin', 'manager', 'crc', 'cra', 'data_entry', 'recruitment_specialist', 'retention_specialist', 'cta', 'ra');
 CREATE TYPE approval_status AS ENUM ('pending', 'approved', 'rejected');
 
 -- Create departments table

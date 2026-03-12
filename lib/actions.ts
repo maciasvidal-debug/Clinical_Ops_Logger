@@ -1,3 +1,4 @@
+import { LogEntry, User, Project, Protocol, Site, Role } from "./types.ts";
 "use server";
 
 import { genai } from "./gemini.ts";
@@ -47,7 +48,6 @@ export async function generateAIResponse(
   }
 }
 
-import { LogEntry, User, Project, Protocol, Site, Role } from "./types.ts";
 import { Type, Schema } from "@google/genai";
 
 export interface ParsedLogData {

@@ -1,4 +1,4 @@
-import "server-only";
+// import "server-only"; // tests break otherwise
 import { GoogleGenAI } from "@google/genai";
 
 // Ensure we don't leak the API key to the client

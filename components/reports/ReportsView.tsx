@@ -48,7 +48,7 @@ export function ReportsView({ logs, currentUser }: ReportsViewProps) {
 
     visibleLogs.forEach((log) => {
       const projectName =
-        projectRecord[log.projectId] || log.projectId || log.studyId || "Unknown";
+        projectRecord[log.projectId] || log.projectId || "Unknown";
       data[projectName] = (data[projectName] || 0) + log.durationMinutes;
     });
     return Object.entries(data)
@@ -62,7 +62,7 @@ export function ReportsView({ logs, currentUser }: ReportsViewProps) {
   const activityData = useMemo(() => {
     const data: Record<string, number> = {};
     visibleLogs.forEach((log) => {
-      const activityName = log.activity || log.activityType || "Unknown";
+      const activityName = log.activity || "Unknown";
       data[activityName] = (data[activityName] || 0) + log.durationMinutes;
     });
     return Object.entries(data)
