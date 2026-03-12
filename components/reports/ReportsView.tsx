@@ -150,7 +150,7 @@ export function ReportsView({ logs, currentUser }: ReportsViewProps) {
   }, [kpiData]);
 
   const trendData = useMemo(() => {
-    const dataByDate: Record<string, any> = {};
+    const dataByDate: Record<string, { date: string, Queries: number, Consents: number, SAEs: number, Retention: number, [key: string]: string | number }> = {};
     // Sort logs by date ascending
     const sortedLogs = [...visibleLogs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
