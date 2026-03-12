@@ -3,8 +3,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"; // Global styles
 
 export const metadata: Metadata = {
-  title: "SiteFlow Clinical Ops Logger",
-  description: "A web application to streamline the logging of activities and billable hours for clinical trial site operations teams.",
+  title: "Clinical Ops Logger",
+  description: "Clinical Operations Logging Application",
 };
 
 export default function RootLayout({
