@@ -149,8 +149,8 @@ export async function generateManagerInsights(
       user: log.userName,
       date: log.date,
       durationMinutes: log.durationMinutes,
-      project: log.projectName,
-      activity: log.activityName,
+      project: log.projectId,
+      activity: log.activity,
       queries: log.queries?.length || 0
     }));
 
