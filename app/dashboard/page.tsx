@@ -35,7 +35,9 @@ export default function StaffDashboard() {
   }, [supabase])
 
   useEffect(() => {
-    fetchData()
+    setTimeout(() => {
+      void fetchData()
+    }, 0)
   }, [fetchData])
 
   const handleLogout = async () => {

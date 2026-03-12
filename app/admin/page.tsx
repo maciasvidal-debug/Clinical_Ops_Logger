@@ -42,7 +42,9 @@ export default function AdminDashboard() {
   }, [supabase])
 
   useEffect(() => {
-    fetchData()
+    setTimeout(() => {
+      void fetchData()
+    }, 0)
   }, [fetchData])
 
   const handleLogout = async () => {
