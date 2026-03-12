@@ -110,14 +110,17 @@ export function DashboardView({ logs, onNavigate, currentUser, activeTimer, star
     }
 
     // 2. Query Escalations: Find old queries (e.g. > 3 days old)
-    const oldQueries = logs.flatMap(log =>
-       (log.queries || []).filter(q => {
-          if (q.status !== "OPEN") return false;
-          const qDate = new Date(q.questionDate);
-          const diffDays = (_today.getTime() - qDate.getTime()) / (1000 * 3600 * 24);
-          return diffDays > 3;
-       })
-    );
+    const threeDaysAgoTime = _today.getTime() - (3 * 24 * 3600 * 1000);
+    const oldQueries = logs.reduce((acc, log) => {
+       if (!log.queries) return acc;
+       for (let i = 0; i < log.queries.length; i++) {
+          const q = log.queries[i];
+          if (q.status === "OPEN" && new Date(q.questionDate).getTime() < threeDaysAgoTime) {
+             acc.push(q);
+          }
+       }
+       return acc;
+    }, [] as NonNullable<LogEntry["queries"]>);
 
     if (oldQueries.length > 0) {
        alerts.push({
