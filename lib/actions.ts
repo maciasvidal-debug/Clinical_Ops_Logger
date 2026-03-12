@@ -1,6 +1,6 @@
 "use server";
 
-import { genai } from "./gemini";
+import { genai } from "./gemini.ts";
 
 // Define the response type for the Server Action
 export type ActionResponse<T> =
@@ -47,7 +47,7 @@ export async function generateAIResponse(
   }
 }
 
-import { LogEntry, User, Project, Protocol, Site, Role } from "./types";
+import { LogEntry, User, Project, Protocol, Site, Role } from "./types.ts";
 import { Type, Schema } from "@google/genai";
 
 export interface ParsedLogData {
