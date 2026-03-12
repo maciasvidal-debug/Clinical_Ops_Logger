@@ -69,7 +69,7 @@ export default function SignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDeptId || !selectedManagerId) {
+    if (departments.length > 0 && (!selectedDeptId || !selectedManagerId)) {
       toast.error('You must select a department and a manager')
       return
     }
@@ -85,8 +85,8 @@ export default function SignupPage() {
             first_name: firstName,
             last_name: lastName,
             role: role,
-            department_id: selectedDeptId,
-            manager_id: selectedManagerId,
+            department_id: selectedDeptId || null,
+            manager_id: selectedManagerId || null,
           }
         }
       })
@@ -168,50 +168,68 @@ export default function SignupPage() {
       <div className={`absolute inset-0 flex items-center justify-center p-4 z-20 transition-all duration-500 ease-in-out ${step === 1 ? 'opacity-0 pointer-events-none scale-105' : 'opacity-100 scale-100'}`}>
         <div className="absolute inset-0 bg-black/40 backdrop-blur-md" onClick={() => setStep(1)}></div>
 
-        <div className="relative w-full max-w-lg rounded-3xl bg-white/10 dark:bg-black/20 backdrop-blur-2xl border border-white/30 p-8 shadow-2xl">
+        <div className="relative w-full max-w-lg rounded-3xl bg-card text-card-foreground border border-border p-8 shadow-2xl">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white drop-shadow-md">Select your Manager</h2>
-            <p className="text-white/80 mt-2">Please identify your reporting structure to complete registration.</p>
+            <h2 className="text-3xl font-bold">Select your Manager</h2>
+            <p className="text-muted-foreground mt-2">Please identify your reporting structure to complete registration.</p>
           </div>
 
-          <form onSubmit={handleSignup} className="space-y-6">
-            <div className="space-y-2">
-              <Label className="text-white">Department</Label>
-              <Select value={selectedDeptId} onValueChange={(val) => { setSelectedDeptId(val); setSelectedManagerId(''); }}>
-                <SelectTrigger className="bg-white/20 border-white/30 text-white focus:ring-white">
-                  <SelectValue placeholder="Select your department" />
-                </SelectTrigger>
-                <SelectContent>
-                  {departments.map(dept => (
-                    <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          {departments.length === 0 ? (
+            <div className="space-y-6">
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm border border-blue-200 dark:border-blue-900">
+                <p className="font-semibold mb-1">System Initialization Mode</p>
+                <p>No departments or managers are configured yet. You will be registered as the first user.</p>
+                <p className="mt-2">After registration, please contact your database administrator or update your profile role to super_admin manually to begin setting up the system.</p>
+              </div>
+              <div className="flex gap-4 pt-4">
+                <Button type="button" variant="outline" className="w-full" onClick={() => setStep(1)}>
+                  Back
+                </Button>
+                <Button type="button" className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg" disabled={loading} onClick={handleSignup}>
+                  {loading ? 'Submitting...' : 'Complete Registration'}
+                </Button>
+              </div>
             </div>
+          ) : (
+            <form onSubmit={handleSignup} className="space-y-6">
+              <div className="space-y-2">
+                <Label>Department</Label>
+                <Select value={selectedDeptId} onValueChange={(val) => { setSelectedDeptId(val); setSelectedManagerId(''); }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {departments.map(dept => (
+                      <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <Label className="text-white">Direct Manager</Label>
-              <Select value={selectedManagerId} onValueChange={setSelectedManagerId} disabled={!selectedDeptId}>
-                <SelectTrigger className="bg-white/20 border-white/30 text-white focus:ring-white">
-                  <SelectValue placeholder={!selectedDeptId ? "Select department first" : (managers.length === 0 ? "No managers found" : "Select manager")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {managers.map(mgr => (
-                    <SelectItem key={mgr.id} value={mgr.id}>{mgr.first_name} {mgr.last_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <Label>Direct Manager</Label>
+                <Select value={selectedManagerId} onValueChange={setSelectedManagerId} disabled={!selectedDeptId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={!selectedDeptId ? "Select department first" : (managers.length === 0 ? "No managers found" : "Select manager")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {managers.map(mgr => (
+                      <SelectItem key={mgr.id} value={mgr.id}>{mgr.first_name} {mgr.last_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="flex gap-4 pt-4">
-              <Button type="button" variant="outline" className="w-full bg-white/10 text-white border-white/30 hover:bg-white/20" onClick={() => setStep(1)}>
-                Back
-              </Button>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg" disabled={loading || !selectedManagerId}>
-                {loading ? 'Submitting...' : 'Complete Registration'}
-              </Button>
-            </div>
-          </form>
+              <div className="flex gap-4 pt-4">
+                <Button type="button" variant="outline" className="w-full" onClick={() => setStep(1)}>
+                  Back
+                </Button>
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg" disabled={loading || !selectedManagerId}>
+                  {loading ? 'Submitting...' : 'Complete Registration'}
+                </Button>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>
