@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { Bot } from 'lucide-react'
+import { Bot } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -42,8 +43,9 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-24 bg-gray-50 dark:bg-zinc-950">
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white dark:bg-zinc-900 p-8 shadow-xl">
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-white dark:bg-zinc-900 p-8 shadow-xl relative">
         <div className="flex flex-col items-center">
+          <div className="absolute top-4 right-4"><ThemeToggle /></div>
           <Bot className="h-12 w-12 text-blue-600 mb-4" />
           <h2 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Sign in to your account</h2>
         </div>
