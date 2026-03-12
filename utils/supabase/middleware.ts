@@ -72,7 +72,7 @@ export async function updateSession(request: NextRequest) {
              const url = request.nextUrl.clone()
              // Redirect based on role
              if (profile.role === 'super_admin') url.pathname = '/admin';
-             else if (profile.role === 'manager') url.pathname = '/manager';
+             else if (profile.role === 'manager') url.pathname = '/dashboard';
              else url.pathname = '/dashboard';
              return NextResponse.redirect(url)
         }
