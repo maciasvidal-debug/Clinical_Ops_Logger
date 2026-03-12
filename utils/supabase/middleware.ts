@@ -42,7 +42,14 @@ export async function updateSession(request: NextRequest) {
   const isAuthRoute = currentPath.startsWith('/login') || currentPath.startsWith('/signup') || currentPath === '/';
 
   // Routes to protect
-  const isProtectedRoute = currentPath.startsWith('/dashboard') || currentPath.startsWith('/manager') || currentPath.startsWith('/admin') || currentPath.startsWith('/pending');
+  const isProtectedRoute = currentPath.startsWith('/dashboard') || currentPath.startsWith('/admin') || currentPath.startsWith('/pending');
+
+  // Legacy manager route explicitly blocked and redirected to dashboard
+  if (currentPath.startsWith('/manager')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+  }
 
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
@@ -72,19 +79,12 @@ export async function updateSession(request: NextRequest) {
              const url = request.nextUrl.clone()
              // Redirect based on role
              if (profile.role === 'super_admin') url.pathname = '/admin';
-             else if (profile.role === 'manager') url.pathname = '/dashboard';
              else url.pathname = '/dashboard';
              return NextResponse.redirect(url)
         }
 
-        // Role-based route protection
+        // Role-based route protection for admin
         if (currentPath.startsWith('/admin') && profile.role !== 'super_admin') {
-           const url = request.nextUrl.clone()
-           url.pathname = '/dashboard'
-           return NextResponse.redirect(url)
-        }
-
-        if (currentPath.startsWith('/manager') && profile.role !== 'manager' && profile.role !== 'super_admin') {
            const url = request.nextUrl.clone()
            url.pathname = '/dashboard'
            return NextResponse.redirect(url)
