@@ -44,7 +44,9 @@ export default function ManagerDashboard() {
   }, [supabase])
 
   useEffect(() => {
-    fetchData()
+    setTimeout(() => {
+      void fetchData()
+    }, 0)
   }, [fetchData])
 
   const handleLogout = async () => {

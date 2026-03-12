@@ -8,6 +8,10 @@ import { parseNaturalLanguageLog, generateManagerInsights, AIInsight, ParsedLogD
 
 import { ActiveTimer } from "@/lib/store";
 
+const PROJECTS_MAP = new Map(PROJECTS.map((p) => [p.id, p]));
+const PROTOCOLS_MAP = new Map(PROTOCOLS.map((p) => [p.id, p]));
+
+
 interface DashboardViewProps {
   logs: LogEntry[];
   onNavigate: (view: "log" | "history") => void;
@@ -412,8 +416,8 @@ const formatHours = (minutes: number) => {
             </div>
           ) : (
             visibleLogs.slice(0, 5).map((log) => {
-              const project = PROJECTS.find((p) => p.id === log.projectId);
-              const protocol = PROTOCOLS.find((p) => p.id === log.protocolId);
+              const project = PROJECTS_MAP.get(log.projectId);
+              const protocol = PROTOCOLS_MAP.get(log.protocolId);
               const activityName = log.subTask ? `${log.activity} › ${log.subTask}` : (log.activity || log.activityType || "Unknown Activity");
               return (
                 <div

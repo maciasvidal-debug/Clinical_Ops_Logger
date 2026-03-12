@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { generateManagerInsights } from './actions.js';
-import * as gemini from './gemini.js';
+import { generateManagerInsights } from './actions.ts';
+import * as gemini from './gemini.ts';
 
 // Manual mock of genai
 const mockGenaiInvalidJson = {
@@ -22,10 +22,10 @@ const mockGenaiHappyPath = {
 
 test('generateManagerInsights handles JSON parse error', async () => {
   const originalGenai = gemini.genai;
-  gemini.setGenai(mockGenaiInvalidJson);
+  gemini.setGenai(mockGenaiInvalidJson as any);
 
   try {
-    const teamLogs = [{ userName: 'Test User', date: '2023-01-01', durationMinutes: 60, projectName: 'Test Project', activityName: 'Test Activity' }];
+    const teamLogs: any = [{ userName: 'Test User', date: '2023-01-01', durationMinutes: 60, projectName: 'Test Project', activityName: 'Test Activity' }];
     const result = await generateManagerInsights(teamLogs);
 
     assert.strictEqual(result.success, false);
@@ -37,10 +37,10 @@ test('generateManagerInsights handles JSON parse error', async () => {
 
 test('generateManagerInsights handles happy path', async () => {
   const originalGenai = gemini.genai;
-  gemini.setGenai(mockGenaiHappyPath);
+  gemini.setGenai(mockGenaiHappyPath as any);
 
   try {
-    const teamLogs = [{ userName: 'Test User', date: '2023-01-01', durationMinutes: 60, projectName: 'Test Project', activityName: 'Test Activity' }];
+    const teamLogs: any = [{ userName: 'Test User', date: '2023-01-01', durationMinutes: 60, projectName: 'Test Project', activityName: 'Test Activity' }];
     const result = await generateManagerInsights(teamLogs);
 
     assert.strictEqual(result.success, true);
