@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css"; // Global styles
 
 export const metadata: Metadata = {
-  title: "My Google AI Studio App",
-  description: "My Google AI Studio App",
+  title: "SiteFlow Clinical Ops Logger",
+  description: "A web application to streamline the logging of activities and billable hours for clinical trial site operations teams.",
 };
 
 export default function RootLayout({
