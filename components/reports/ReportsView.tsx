@@ -41,9 +41,14 @@ export function ReportsView({ logs, currentUser }: ReportsViewProps) {
 
   const projectData = useMemo(() => {
     const data: Record<string, number> = {};
+    const projectRecord: Record<string, string> = {};
+    for (const p of PROJECTS) {
+      projectRecord[p.id] = p.name;
+    }
+
     visibleLogs.forEach((log) => {
       const projectName =
-        PROJECTS.find((p) => p.id === log.projectId)?.name || log.projectId || log.studyId || "Unknown";
+        projectRecord[log.projectId] || log.projectId || log.studyId || "Unknown";
       data[projectName] = (data[projectName] || 0) + log.durationMinutes;
     });
     return Object.entries(data)
