@@ -1,202 +1,145 @@
-import { LogEntry, User, Project, Protocol, Site, Role } from "./types.ts";
 "use server";
 
-import { genai } from "./gemini.ts";
+import { getGeminiClient } from "./gemini";
+import { Type } from "@google/genai";
+import { 
+  ROLE_HIERARCHY, 
+  UserRole, 
+  Project, 
+  Protocol 
+} from "./types";
 
-// Define the response type for the Server Action
-export type ActionResponse<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
-
-/**
- * Generates an AI response using the Gemini API.
- * This function runs exclusively on the server and safely handles errors.
- *
- * @param prompt - The user input prompt.
- * @returns A structured ActionResponse with either the generated text or an error message.
- */
-export async function generateAIResponse(
-  prompt: string
-): Promise<ActionResponse<string>> {
-  try {
-    if (!prompt || typeof prompt !== "string") {
-      return { success: false, error: "Se requiere un prompt de texto válido." };
-    }
-
-    // Attempt to generate content using the instantiated client
-    const response = await genai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
-
-    const generatedText = response.text;
-
-    if (!generatedText) {
-      return { success: false, error: "La API no devolvió una respuesta de texto válida." };
-    }
-
-    return { success: true, data: generatedText };
-  } catch (error) {
-    // Log the actual error securely on the server for debugging
-    console.error("Error generating AI response:", error);
-
-    // Return a controlled error message to the client (Zero Regressions)
-    return {
-      success: false,
-      error: "Ocurrió un error al procesar tu solicitud. Por favor, intenta de nuevo más tarde.",
-    };
-  }
-}
-
-import { Type, Schema } from "@google/genai";
+export type ActionResponse<T> = { success: true; data: T } | { success: false; error: string };
 
 export interface ParsedLogData {
-  projectId?: string;
-  protocolId?: string;
-  siteId?: string;
-  activityName?: string;
-  hours?: number;
-  minutes?: number;
+  duration_minutes?: number;
+  project_id?: string;
+  protocol_id?: string;
+  category?: string;
+  activity?: string;
+  sub_task?: string;
   notes?: string;
 }
 
 export async function parseNaturalLanguageLog(
   input: string,
-  userRole: Role | string,
+  userRole: UserRole,
   availableProjects: Project[],
-  availableProtocols: Protocol[],
-  availableSites: Site[]
+  availableProtocols: Protocol[]
 ): Promise<ActionResponse<ParsedLogData>> {
   try {
-    if (!input || typeof input !== "string") {
-      return { success: false, error: "Se requiere un texto válido." };
-    }
-
+    const ai = getGeminiClient();
+    
+    const availableCategories = ROLE_HIERARCHY[userRole] || [];
+    
     const prompt = `
-You are an AI assistant helping a clinical operations professional log their time.
-They have provided the following natural language description of their activity:
-"${input}"
+      You are an AI assistant for a Clinical Operations time tracking app.
+      Parse the following natural language input into a structured log entry.
+      
+      User Input: "${input}"
+      
+      Available Projects: ${JSON.stringify(availableProjects.map(p => ({ id: p.id, name: p.name })))}
+      Available Protocols: ${JSON.stringify(availableProtocols.map(p => ({ id: p.id, name: p.name, projectId: p.project_id })))}
+      Available Categories and Tasks for this user's role (${userRole}): ${JSON.stringify(availableCategories)}
+      
+      Extract the following:
+      - duration_minutes: Total duration in minutes (e.g., "2 hours" = 120).
+      - project_id: The ID of the best matching project.
+      - protocol_id: The ID of the best matching protocol.
+      - category: The name of the best matching category.
+      - activity: The name of the best matching task/activity.
+      - sub_task: The name of the best matching sub-task (if applicable).
+      - notes: Any additional context or notes from the input.
+      
+      If you cannot determine a field with high confidence, omit it.
+    `;
 
-Their role is: ${userRole}
-
-Available Projects (ID: Name): ${availableProjects.map(p => p.id + ': ' + p.name).join(', ')}
-Available Protocols (ID: Name): ${availableProtocols.map(p => p.id + ': ' + p.name).join(', ')}
-Available Sites (ID: Name): ${availableSites.map(s => s.id + ': ' + s.name).join(', ')}
-
-Extract the relevant information and map it to the provided IDs if possible. Also, reply in the same language as the input text.`;
-
-    const responseSchema: Schema = {
-      type: Type.OBJECT,
-      properties: {
-        projectId: { type: Type.STRING, description: "The ID of the matched project, or null if none match", nullable: true },
-        protocolId: { type: Type.STRING, description: "The ID of the matched protocol, or null if none match", nullable: true },
-        siteId: { type: Type.STRING, description: "The ID of the matched site, or null if none match", nullable: true },
-        activityName: { type: Type.STRING, description: "A short 2-5 word description of the activity/task", nullable: true },
-        hours: { type: Type.NUMBER, description: "Extracted hours, or 0", nullable: true },
-        minutes: { type: Type.NUMBER, description: "Extracted minutes, or 0", nullable: true },
-        notes: { type: Type.STRING, description: "The original text or a useful summary", nullable: true }
-      }
-    };
-
-    const response = await genai.models.generateContent({
-      model: "gemini-2.5-flash",
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        responseSchema: responseSchema
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            duration_minutes: { type: Type.NUMBER },
+            project_id: { type: Type.STRING },
+            protocol_id: { type: Type.STRING },
+            category: { type: Type.STRING },
+            activity: { type: Type.STRING },
+            sub_task: { type: Type.STRING },
+            notes: { type: Type.STRING }
+          }
+        }
       }
     });
 
-    const generatedText = response.text;
-
-    if (!generatedText) {
-      return { success: false, error: "Failed to generate a valid response." };
+    const text = response.text;
+    if (!text) {
+      return { success: false, error: "No response from AI" };
     }
 
-    try {
-      const parsed = JSON.parse(generatedText);
-      return { success: true, data: parsed };
-    } catch (e) {
-       console.error("JSON parse error:", e, "Text:", generatedText);
-       return { success: false, error: "Failed to parse AI response into structured data." };
-    }
-
-  } catch (error) {
-    console.error("Error parsing natural language log:", error);
-    return {
-      success: false,
-      error: "An error occurred while analyzing your input. Please try again.",
-    };
+    const data = JSON.parse(text);
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("AI Parsing Error:", error);
+    return { success: false, error: error.message || "Failed to parse input" };
   }
 }
 
-export interface AIInsight {
-  title: string;
-  message: string;
-  type: "warning" | "success" | "danger" | "info";
-}
-
-export async function generateManagerInsights(
-  teamLogs: LogEntry[]
-): Promise<ActionResponse<AIInsight[]>> {
+export async function generateAIReport(
+  logs: any[],
+  userRole: UserRole,
+  userName: string
+): Promise<ActionResponse<string>> {
   try {
-    if (!teamLogs || teamLogs.length === 0) {
-      return { success: false, error: "No logs provided to analyze." };
-    }
-
-    // Limit to 100 recent logs to avoid exceeding context window
-    const recentLogs = teamLogs.slice(0, 100).map(log => ({
-      user: log.userName,
+    const ai = getGeminiClient();
+    
+    // Summarize logs to reduce token usage
+    const summarizedLogs = logs.map(log => ({
       date: log.date,
-      durationMinutes: log.durationMinutes,
-      project: log.projectId,
+      duration: log.duration_minutes,
+      project: log.project_id, // We don't have project names here easily without passing them, but ID might be enough or we can pass names
+      protocol: log.protocol_id,
       activity: log.activity,
-      queries: log.queries?.length || 0
+      sub_task: log.sub_task,
+      user: log.user_profiles?.first_name ? `${log.user_profiles.first_name} ${log.user_profiles.last_name}` : log.role
     }));
 
-    const prompt = `You are an AI assistant helping a clinical operations manager analyze their team's recent activity logs.\nHere is a summary of recent logs (max 100):\n${JSON.stringify(recentLogs, null, 2)}\n\nAnalyze this data and generate 1 to 3 insightful observations or alerts for the manager.\nExamples of good insights:\n- \"Warning: [User] has logged a lot of hours in the past few days, potential burnout risk.\"\n- \"Success: The team has been very active resolving queries in [Project].\"\n- \"Danger: A high volume of new queries were created today.\"\n\nReply in the same language as the activity names (likely English or Spanish).\n\nReturn an array of JSON objects with the following keys:\n- title: A short title for the insight.\n- message: A detailed but concise explanation (1-2 sentences).\n- type: Must be one of \"warning\", \"success\", \"danger\", or \"info\".`;
+    const prompt = `
+      You are an expert Clinical Operations Manager and Data Analyst.
+      Generate a weekly summary report based on the following time tracking logs.
+      
+      User Role: ${userRole}
+      User Name: ${userName}
+      
+      Logs Data (JSON):
+      ${JSON.stringify(summarizedLogs)}
+      
+      Instructions:
+      1. Analyze the data and provide a concise, insightful summary of the week's activities.
+      2. Tailor the insights to the user's role:
+         - If Manager: Focus on team productivity, project distribution, bottlenecks, and query resolution rates.
+         - If CRA/CRC: Focus on individual performance, time spent on key activities (e.g., monitoring, patient visits), and areas for efficiency improvement.
+      3. Highlight any anomalies or notable trends (e.g., "A significant amount of time was spent on SAE follow-ups this week").
+      4. Format the output in clean, readable Markdown. Use headings, bullet points, and bold text for emphasis.
+      5. Keep the tone professional, encouraging, and actionable.
+      6. Do not include any raw JSON or technical jargon in the final output.
+    `;
 
-    const responseSchema: Schema = {
-      type: Type.ARRAY,
-      items: {
-        type: Type.OBJECT,
-        properties: {
-          title: { type: Type.STRING },
-          message: { type: Type.STRING },
-          type: { type: Type.STRING, enum: ["warning", "success", "danger", "info"] }
-        },
-        required: ["title", "message", "type"]
-      }
-    };
-
-    const response = await genai.models.generateContent({
-      model: "gemini-2.5-flash",
+    const response = await ai.models.generateContent({
+      model: "gemini-3.1-pro-preview",
       contents: prompt,
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: responseSchema
-      }
     });
 
-    const generatedText = response.text;
-
-    if (!generatedText) {
-      return { success: false, error: "Failed to generate AI insights." };
+    const text = response.text;
+    if (!text) {
+      return { success: false, error: "No response from AI" };
     }
 
-    try {
-      const parsed = JSON.parse(generatedText);
-      return { success: true, data: parsed };
-    } catch (e) {
-       console.error("JSON parse error in manager insights:", e, "Text:", generatedText);
-       return { success: false, error: "Failed to parse AI response into structured insights." };
-    }
-
-  } catch (error) {
-    console.error("Error generating manager insights:", error);
-    return {
-      success: false,
-      error: "An error occurred while generating insights. Please try again.",
-    };
+    return { success: true, data: text };
+  } catch (error: any) {
+    console.error("AI Report Generation Error:", error);
+    return { success: false, error: error.message || "Failed to generate report" };
   }
 }

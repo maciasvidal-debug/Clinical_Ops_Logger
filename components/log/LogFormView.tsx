@@ -1,11 +1,28 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useMemo, useEffect } from "react";
-import { LogEntry, PROJECTS, PROTOCOLS, SITES, ROLE_HIERARCHY, User, UserAssignment } from "@/lib/types";
-import { ActiveTimer } from "@/lib/store";
+import { 
+  LogEntry, 
+  UserProfile, 
+  Project, 
+  Protocol, 
+  Site, 
+  ROLE_HIERARCHY 
+} from "@/lib/types";
 import { format } from "date-fns";
-import { CheckCircle2, Clock, FileText, Users, Phone, Database, ShieldCheck, Stethoscope, ClipboardCheck, Activity, Sparkles } from "lucide-react";
+import { 
+  CheckCircle2, 
+  Clock, 
+  FileText, 
+  Users, 
+  Phone, 
+  Database, 
+  ShieldCheck, 
+  Stethoscope, 
+  ClipboardCheck, 
+  Activity, 
+  Sparkles 
+} from "lucide-react";
 import { toast } from "sonner";
-import { generateAIResponse } from "@/lib/actions";
+import { parseNaturalLanguageLog } from "@/lib/actions";
 
 const getTaskIcon = (name: string) => {
   const lower = name.toLowerCase();
@@ -20,179 +37,109 @@ const getTaskIcon = (name: string) => {
 };
 
 interface LogFormViewProps {
-  onAddLog: (log: Omit<LogEntry, "id" | "synced" | "userId" | "userName">) => void;
+  onAddLog: (log: Omit<LogEntry, "id" | "synced" | "user_id" | "user_profiles" | "created_at" | "updated_at">) => void;
   onSuccess: () => void;
-  currentUser: User;
-  assignments: UserAssignment[];
-  activeTimer?: ActiveTimer | null;
-  stopTimer?: () => number;
-  cancelTimer?: () => void;
-  repeatLogId?: string | null;
-  logs?: LogEntry[];
-  aiPreFillData?: any | null;
+  profile: UserProfile | null;
+  projects: Project[];
+  protocols: Protocol[];
+  sites: Site[];
+  initialData?: Partial<LogEntry> | null;
 }
 
-export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, activeTimer, stopTimer, cancelTimer, repeatLogId, logs, aiPreFillData }: LogFormViewProps) {
-  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
-  const [hours, setHours] = useState("1");
-  const [minutes, setMinutes] = useState("0");
+export function LogFormView({ 
+  onAddLog, 
+  onSuccess, 
+  profile, 
+  projects, 
+  protocols, 
+  sites, 
+  initialData 
+}: LogFormViewProps) {
+  const [date, setDate] = useState(initialData?.date || format(new Date(), "yyyy-MM-dd"));
+  const [hours, setHours] = useState(initialData?.duration_minutes ? Math.floor(initialData.duration_minutes / 60).toString() : "1");
+  const [minutes, setMinutes] = useState(initialData?.duration_minutes ? (initialData.duration_minutes % 60).toString() : "0");
   
-  const userAssignment = useMemo(() => {
-    return assignments.find(a => a.userId === currentUser.id) || { projectIds: [] as string[], protocolIds: [] as string[] };
-  }, [assignments, currentUser.id]);
+  const [projectId, setProjectId] = useState(initialData?.project_id || "");
+  const [protocolId, setProtocolId] = useState(initialData?.protocol_id || "");
+  const [siteId, setSiteId] = useState(initialData?.site_id || "");
 
-  const availableProjects = useMemo(() => {
-    return PROJECTS.filter(p => userAssignment.projectIds.includes(p.id));
-  }, [userAssignment.projectIds]);
-
-  const [projectId, setProjectId] = useState("");
-
-  useEffect(() => {
-    if (availableProjects.length > 0 && !availableProjects.find(p => p.id === projectId)) {
-      setProjectId(availableProjects[0].id);
-    } else if (availableProjects.length === 0) {
-      setProjectId("");
-    }
-  }, [availableProjects, projectId]);
-  
   const availableProtocols = useMemo(() => {
-    return PROTOCOLS.filter(p => p.projectId === projectId && userAssignment.protocolIds.includes(p.id));
-  }, [projectId, userAssignment.protocolIds]);
-  const [protocolId, setProtocolId] = useState("");
+    return protocols.filter(p => p.project_id === projectId);
+  }, [projectId, protocols]);
 
-  const availableSites = useMemo(() => SITES.filter(s => s.protocolId === protocolId), [protocolId]);
-  const [siteId, setSiteId] = useState("");
+  const availableSites = useMemo(() => {
+    return sites.filter(s => s.protocol_id === protocolId);
+  }, [protocolId, sites]);
 
   useEffect(() => {
-    if (availableProtocols.length > 0) {
+    if (projects.length > 0 && !projectId) {
+      setProjectId(projects[0].id);
+    }
+  }, [projects, projectId]);
+
+  useEffect(() => {
+    if (availableProtocols.length > 0 && !availableProtocols.find(p => p.id === protocolId)) {
       setProtocolId(availableProtocols[0].id);
-    } else {
-       
+    } else if (availableProtocols.length === 0) {
       setProtocolId("");
     }
-  }, [availableProtocols]);
+  }, [availableProtocols, protocolId]);
 
   useEffect(() => {
-    if (availableSites.length > 0) {
+    if (availableSites.length > 0 && !availableSites.find(s => s.id === siteId)) {
       setSiteId(availableSites[0].id);
-    } else {
-       
+    } else if (availableSites.length === 0) {
       setSiteId("");
     }
-  }, [availableSites]);
+  }, [availableSites, siteId]);
 
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(initialData?.notes || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [elapsedTimerStr, setElapsedTimerStr] = useState("00:00:00");
-
-  useEffect(() => {
-    if (!activeTimer) return;
-
-    const interval = setInterval(() => {
-      const now = Date.now();
-      const diff = now - activeTimer.startTime;
-
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-
-      setElapsedTimerStr(
-        `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
-      );
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [activeTimer]);
-
-  const handleStopTimer = () => {
-    if (stopTimer) {
-      const durationMins = stopTimer();
-      const h = Math.floor(durationMins / 60);
-      const m = durationMins % 60;
-      setHours(h.toString());
-      setMinutes(m.toString());
-      toast.success(`Timer stopped. ${h}h ${m}m logged.`);
-    }
-  };
-
-  const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
-
-  const handleAiEnhance = async () => {
-    if (!notes.trim()) {
-      toast.error("Please enter some notes to enhance first.");
-      return;
-    }
-
-    setIsAiLoading(true);
-    setAiError(null);
-
-    const prompt = `Enhance these clinical trial activity notes to be professional, concise, and structured. Return ONLY the enhanced notes:\n\n${notes}`;
-
-    const response = await generateAIResponse(prompt);
-
-    if (response.success) {
-      setNotes(response.data.trim());
-      toast.success("Notes enhanced with AI");
-    } else {
-      setAiError(response.error);
-      toast.error(response.error);
-    }
-
-    setIsAiLoading(false);
-  };
+  
+  const [aiInput, setAiInput] = useState("");
+  const [isParsing, setIsParsing] = useState(false);
 
   const availableCategories = useMemo(() => {
-    return ROLE_HIERARCHY[currentUser.role] || [];
-  }, [currentUser.role]);
+    if (!profile?.role) return [];
+    return ROLE_HIERARCHY[profile.role] || [];
+  }, [profile?.role]);
 
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [activityId, setActivityId] = useState<string>("");
-  const [subTaskId, setSubTaskId] = useState<string>("");
+  const initialCategory = availableCategories.find(c => c.name === initialData?.category);
+  const initialTask = initialCategory?.tasks.find(t => t.name === initialData?.activity);
+  const initialSubTask = initialTask?.subTasks?.find(s => s.name === initialData?.sub_task);
 
-  // Reset category and activity when role changes
+  const [categoryId, setCategoryId] = useState<string>(initialCategory?.id || "");
+  const [activityId, setActivityId] = useState<string>(initialTask?.id || "");
+  const [subTaskId, setSubTaskId] = useState<string>(initialSubTask?.id || "");
+
   useEffect(() => {
-    if (availableCategories.length > 0) {
+    if (availableCategories.length > 0 && !categoryId) {
       setCategoryId(availableCategories[0].id);
-      if (availableCategories[0].tasks.length > 0) {
-        setActivityId(availableCategories[0].tasks[0].id);
-      } else {
-        setActivityId("");
-      }
-    } else {
-      setCategoryId("");
-      setActivityId("");
     }
-  }, [availableCategories]);
+  }, [availableCategories, categoryId]);
 
-  // Reset activity when category changes
   useEffect(() => {
     const category = availableCategories.find(c => c.id === categoryId);
-    if (category && category.tasks.length > 0) {
+    if (category && category.tasks.length > 0 && !category.tasks.find(t => t.id === activityId)) {
       setActivityId(category.tasks[0].id);
-    } else {
-      setActivityId("");
     }
-  }, [categoryId, availableCategories]);
+  }, [categoryId, availableCategories, activityId]);
 
-  // Reset subTask when activity changes
   useEffect(() => {
     const category = availableCategories.find(c => c.id === categoryId);
     const task = category?.tasks.find(t => t.id === activityId);
-    if (task && task.subTasks && task.subTasks.length > 0) {
+    if (task && task.subTasks && task.subTasks.length > 0 && !task.subTasks.find(s => s.id === subTaskId)) {
       setSubTaskId(task.subTasks[0].id);
-    } else {
-      setSubTaskId("");
     }
-  }, [activityId, categoryId, availableCategories]);
+  }, [activityId, categoryId, availableCategories, subTaskId]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    const durationMinutes = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
+    const duration_minutes = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
     
-    if (durationMinutes <= 0) {
+    if (duration_minutes <= 0) {
       toast.error("Please enter a valid duration.");
       setIsSubmitting(false);
       return;
@@ -219,14 +166,14 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, act
 
     onAddLog({
       date,
-      durationMinutes,
-      projectId,
-      protocolId,
-      siteId,
-      role: currentUser.role,
+      duration_minutes,
+      project_id: projectId,
+      protocol_id: protocolId,
+      site_id: siteId,
+      role: profile?.role || "crc",
       category: categoryName,
       activity: activityName,
-      subTask: subTaskName,
+      sub_task: subTaskName,
       notes
     });
 
@@ -238,12 +185,100 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, act
 
   const currentCategory = availableCategories.find(c => c.id === categoryId);
 
+  const handleAIParsing = async () => {
+    if (!aiInput.trim() || !profile) return;
+    setIsParsing(true);
+    try {
+      const result = await parseNaturalLanguageLog(
+        aiInput,
+        profile.role,
+        projects,
+        protocols
+      );
+      
+      if (result.success && result.data) {
+        const data = result.data;
+        if (data.duration_minutes) {
+          setHours(Math.floor(data.duration_minutes / 60).toString());
+          setMinutes((data.duration_minutes % 60).toString());
+        }
+        if (data.project_id) setProjectId(data.project_id);
+        if (data.protocol_id) setProtocolId(data.protocol_id);
+        
+        if (data.category) {
+          const cat = availableCategories.find(c => c.name.toLowerCase() === data.category?.toLowerCase());
+          if (cat) {
+            setCategoryId(cat.id);
+            if (data.activity) {
+              const act = cat.tasks.find(t => t.name.toLowerCase() === data.activity?.toLowerCase());
+              if (act) {
+                setActivityId(act.id);
+                if (data.sub_task) {
+                  const sub = act.subTasks?.find(s => s.name.toLowerCase() === data.sub_task?.toLowerCase());
+                  if (sub) setSubTaskId(sub.id);
+                }
+              }
+            }
+          }
+        }
+        if (data.notes) setNotes(data.notes);
+        toast.success("AI parsed your input successfully!");
+        setAiInput("");
+      } else {
+        toast.error(!result.success ? result.error : "Failed to parse input");
+      }
+    } catch (error) {
+      toast.error("An error occurred during AI parsing");
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-6 pb-12">
       <header>
         <h2 className="text-2xl font-bold tracking-tight text-neutral-900">Log Time</h2>
-        <p className="text-neutral-500">Record your clinical trial activities as {currentUser.role}.</p>
+        <p className="text-neutral-500">Record activities as {profile?.role?.replace('_', ' ')}.</p>
       </header>
+
+      {/* AI Smart Logging */}
+      <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="w-5 h-5 text-indigo-600" />
+          <h3 className="text-sm font-semibold text-indigo-900">AI Smart Logging</h3>
+        </div>
+        <p className="text-xs text-indigo-700/80 mb-4">
+          Describe what you did in natural language, and let AI fill out the form for you.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <input 
+            type="text"
+            value={aiInput}
+            onChange={e => setAiInput(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAIParsing()}
+            placeholder='e.g., "Spent 2 hours doing remote monitoring for site 01 on protocol 101"'
+            className="flex-1 px-4 py-2.5 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm shadow-sm"
+          />
+          <button
+            type="button"
+            onClick={handleAIParsing}
+            disabled={isParsing || !aiInput.trim()}
+            className="w-full sm:w-auto px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white rounded-xl text-sm font-medium transition-colors shadow-sm flex items-center justify-center gap-2 shrink-0"
+          >
+            {isParsing ? (
+              <>
+                <Clock className="w-4 h-4 animate-spin" />
+                Parsing...
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                Auto-Fill
+              </>
+            )}
+          </button>
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm space-y-6">
         
@@ -262,50 +297,31 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, act
           
           <div className="space-y-2">
             <label className="text-sm font-medium text-neutral-700">Duration</label>
-            {activeTimer ? (
-              <div className="flex flex-col gap-2">
-                 <div className="w-full px-3 py-2.5 bg-rose-50 border border-rose-200 rounded-xl flex justify-between items-center text-rose-700 shadow-sm">
-                    <div className="flex items-center gap-2 font-mono font-medium text-base">
-                      <Clock className="w-4 h-4 animate-pulse" />
-                      {elapsedTimerStr}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleStopTimer}
-                      className="text-sm bg-rose-600 hover:bg-rose-700 text-white px-4 py-1.5 rounded-lg font-medium transition-colors shadow-sm"
-                    >
-                      Stop Timer
-                    </button>
-                 </div>
-                 <button type="button" onClick={cancelTimer} className="text-xs text-rose-500 hover:text-rose-700 self-end mr-1 font-medium transition-colors">Cancel Timer</button>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 relative">
+                <input 
+                  type="number" 
+                  min="0"
+                  required
+                  value={hours}
+                  onChange={e => setHours(e.target.value)}
+                  className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">h</span>
               </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <div className="flex-1 relative">
-                  <input
-                    type="number"
-                    min="0"
-                    required
-                    value={hours}
-                    onChange={e => setHours(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">h</span>
-                </div>
-                <div className="flex-1 relative">
-                  <input
-                    type="number"
-                    min="0"
-                    max="59"
-                    required
-                    value={minutes}
-                    onChange={e => setMinutes(e.target.value)}
-                    className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">m</span>
-                </div>
+              <div className="flex-1 relative">
+                <input 
+                  type="number" 
+                  min="0"
+                  max="59"
+                  required
+                  value={minutes}
+                  onChange={e => setMinutes(e.target.value)}
+                  className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">m</span>
               </div>
-            )}
+            </div>
           </div>
         </div>
 
@@ -317,12 +333,12 @@ export function LogFormView({ onAddLog, onSuccess, currentUser, assignments, act
               value={projectId}
               onChange={e => setProjectId(e.target.value)}
               className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none appearance-none"
-              disabled={availableProjects.length === 0}
+              disabled={projects.length === 0}
             >
-              {availableProjects.length === 0 ? (
+              {projects.length === 0 ? (
                 <option value="">No Projects Assigned</option>
               ) : (
-                availableProjects.map(p => (
+                projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))
               )}

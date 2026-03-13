@@ -1,5 +1,5 @@
 {
-  "name": "Clinical Ops Logger",
+  "name": "SiteFlow Clinical Ops Logger",
   "description": "A web application to streamline the logging of activities and billable hours for clinical trial site operations teams.",
   "requestFramePermissions": []
 }

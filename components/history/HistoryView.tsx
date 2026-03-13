@@ -1,19 +1,44 @@
 import React, { useState, useMemo } from "react";
-import { LogEntry, PROJECTS, PROTOCOLS, SITES, ROLE_PERMISSIONS, Role, User } from "@/lib/types";
+import { 
+  LogEntry, 
+  UserProfile, 
+  Project, 
+  Protocol, 
+  Site 
+} from "@/lib/types";
 import { format, parseISO } from "date-fns";
-import { Search, Filter, Trash2, Clock, CloudOff, MessageSquarePlus, MessageSquare, CheckCircle2 } from "lucide-react";
+import { 
+  Search, 
+  Filter, 
+  Trash2, 
+  Clock, 
+  MessageSquarePlus, 
+  MessageSquare, 
+  CheckCircle2 
+} from "lucide-react";
 import { toast } from "sonner";
 
 interface HistoryViewProps {
-  onRepeat?: (logId: string) => void;
   logs: LogEntry[];
   onDeleteLog: (id: string) => void;
-  currentUser: User;
+  profile: UserProfile | null;
+  projects: Project[];
+  protocols: Protocol[];
+  sites: Site[];
   onAddQuery: (logId: string, question: string) => void;
   onReplyToQuery: (logId: string, queryId: string, response: string) => void;
 }
 
-export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onReplyToQuery, onRepeat }: HistoryViewProps) {
+export function HistoryView({ 
+  logs, 
+  onDeleteLog, 
+  profile, 
+  projects, 
+  protocols, 
+  sites, 
+  onAddQuery, 
+  onReplyToQuery 
+}: HistoryViewProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [projectFilter, setProjectFilter] = useState("ALL");
   const [activeQueryLogId, setActiveQueryLogId] = useState<string | null>(null);
@@ -21,31 +46,20 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
   const [replyText, setReplyText] = useState("");
   const [activeReplyQueryId, setActiveReplyQueryId] = useState<string | null>(null);
 
-  const permissions = ROLE_PERMISSIONS[currentUser.role];
-
-  const projectsMap = useMemo(() => new Map(PROJECTS.map(p => [p.id, p])), []);
-  const protocolsMap = useMemo(() => new Map(PROTOCOLS.map(p => [p.id, p])), []);
-  const sitesMap = useMemo(() => new Map(SITES.map(s => [s.id, s])), []);
-
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
-      // Role-based visibility
-      if (!permissions.canViewAllLogs && log.userId !== currentUser.id) {
-        return false;
-      }
-
       const activityName = log.activity || "";
-      const subTaskName = log.subTask || "";
+      const subTaskName = log.sub_task || "";
       const categoryName = log.category || "";
 
       const matchesSearch = activityName.toLowerCase().includes(searchTerm.toLowerCase()) || 
                             subTaskName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            log.notes.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesProject = projectFilter === "ALL" || log.projectId === projectFilter;
+                            (log.notes?.toLowerCase().includes(searchTerm.toLowerCase()) || false);
+      const matchesProject = projectFilter === "ALL" || log.project_id === projectFilter;
       return matchesSearch && matchesProject;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [logs, searchTerm, projectFilter, permissions, currentUser.id]);
+  }, [logs, searchTerm, projectFilter]);
 
   const formatHours = (minutes: number) => {
     const h = Math.floor(minutes / 60);
@@ -56,12 +70,13 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
   };
 
   const handleDelete = (id: string, logUserId: string) => {
-    if (!permissions.canDeleteLogs && logUserId !== currentUser.id) {
+    const isManager = profile?.role === "manager" || profile?.role === "super_admin";
+    if (!isManager && logUserId !== profile?.id) {
       toast.error("You don't have permission to delete this entry.");
       return;
     }
     
-    if (window.confirm("Are you sure you want to delete this entry?")) {
+    if (confirm("Are you sure you want to delete this entry?")) {
       onDeleteLog(id);
       toast.success("Entry deleted.");
     }
@@ -108,7 +123,7 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
             className="w-full sm:w-48 pl-9 pr-8 py-2 bg-white border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-sm appearance-none"
           >
             <option value="ALL">All Projects</option>
-            {PROJECTS.map(p => (
+            {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
@@ -126,14 +141,9 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
           ) : (
             <div className="divide-y divide-neutral-100">
               {filteredLogs.map(log => {
-                const project = projectsMap.get(log.projectId);
-                const protocol = protocolsMap.get(log.protocolId);
-                const site = sitesMap.get(log.siteId);
-                
-                const canDelete = permissions.canDeleteLogs || log.userId === currentUser.id;
-                const activityName = log.subTask ? `${log.activity} › ${log.subTask}` : (log.activity || "Unknown Activity");
-                const isManager = currentUser.role === "Manager";
-                const isOwner = log.userId === currentUser.id;
+                const activityName = log.sub_task ? `${log.activity} › ${log.sub_task}` : (log.activity || "Unknown Activity");
+                const isManager = profile?.role === "manager" || profile?.role === "super_admin";
+                const isOwner = log.user_id === profile?.id;
                 
                 return (
                   <div key={log.id} className="p-5 hover:bg-neutral-50 transition-colors group">
@@ -144,19 +154,13 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
                             {activityName}
                           </h3>
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                            {formatHours(log.durationMinutes)}
+                            {formatHours(log.duration_minutes)}
                           </span>
-                          {log.synced === false && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700" title="Pending Sync">
-                              <CloudOff className="w-3 h-3" />
-                              Offline
-                            </span>
-                          )}
                         </div>
                         <p className="text-xs text-neutral-500 mb-2">
-                          {format(parseISO(log.date), "MMM d, yyyy")} • {log.userName || log.role} • {project?.name || log.projectId}
-                          {protocol && ` • ${protocol.name}`}
-                          {site && ` • ${site.name}`}
+                          {format(parseISO(log.date), "MMM d, yyyy")} • {log.user_profiles?.first_name} {log.user_profiles?.last_name} • {log.project_id} 
+                          {log.protocol_id && ` • ${log.protocol_id}`}
+                          {log.site_id && ` • ${log.site_id}`}
                           {log.category && ` • ${log.category}`}
                         </p>
                         {log.notes && (
@@ -166,9 +170,9 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
                         )}
 
                         {/* Queries Section */}
-                        {log.queries && log.queries.length > 0 && (
+                        {log.log_queries && log.log_queries.length > 0 && (
                           <div className="mt-4 space-y-3">
-                            {[...log.queries].sort((a, b) => new Date(a.questionDate).getTime() - new Date(b.questionDate).getTime()).map(query => (
+                            {[...log.log_queries].sort((a, b) => new Date(a.question_date).getTime() - new Date(b.question_date).getTime()).map(query => (
                               <div key={query.id} className="bg-amber-50/50 border border-amber-100 rounded-xl p-4 text-sm">
                                 <div className="flex items-start gap-2 mb-2 relative">
                                   <MessageSquare className="w-4 h-4 text-amber-600 mt-0.5 shrink-0 relative z-10 bg-amber-50/50" />
@@ -176,8 +180,8 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
                                     <div className="absolute left-2 top-4 bottom-[-16px] w-px bg-amber-200" />
                                   )}
                                   <div>
-                                    <span className="font-semibold text-neutral-900">{query.managerName}</span>
-                                    <span className="text-neutral-500 ml-2 text-xs">{format(parseISO(query.questionDate), "MMM d, yyyy HH:mm")}</span>
+                                    <span className="font-semibold text-neutral-900">Manager</span>
+                                    <span className="text-neutral-500 ml-2 text-xs">{format(parseISO(query.question_date), "MMM d, yyyy HH:mm")}</span>
                                     <p className="text-neutral-700 mt-1">{query.question}</p>
                                   </div>
                                 </div>
@@ -186,9 +190,9 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
                                   <div className="ml-6 mt-3 flex items-start gap-2 bg-white p-3 rounded-lg border border-neutral-100 relative">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0 relative z-10 bg-white" />
                                     <div>
-                                      <span className="font-semibold text-neutral-900">{log.userName}</span>
-                                      <span className="text-neutral-500 ml-2 text-xs">{query.responseDate && format(parseISO(query.responseDate), "MMM d, yyyy HH:mm")}</span>
-                                      <p className="text-neutral-700 mt-1">{query.staffResponse}</p>
+                                      <span className="font-semibold text-neutral-900">Staff</span>
+                                      <span className="text-neutral-500 ml-2 text-xs">{query.response_date && format(parseISO(query.response_date), "MMM d, yyyy HH:mm")}</span>
+                                      <p className="text-neutral-700 mt-1">{query.staff_response}</p>
                                     </div>
                                   </div>
                                 ) : (
@@ -278,9 +282,9 @@ export function HistoryView({ logs, onDeleteLog, currentUser, onAddQuery, onRepl
                             <MessageSquarePlus className="w-4 h-4" />
                           </button>
                         )}
-                        {canDelete && (
+                        {(isManager || isOwner) && (
                           <button
-                            onClick={() => handleDelete(log.id, log.userId)}
+                            onClick={() => handleDelete(log.id, log.user_id)}
                             className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Delete entry"
                           >

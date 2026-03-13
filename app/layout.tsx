@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css"; // Global styles
 
 export const metadata: Metadata = {
-  title: "Clinical Ops Logger",
-  description: "Clinical Operations Logging Application",
+  title: "SiteFlow Clinical Ops Logger",
+  description: "Time & Activity Logging for Clinical Operations",
 };
 
 export default function RootLayout({
@@ -13,17 +12,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
-      </body>
+    <html lang="en">
+      <body suppressHydrationWarning>{children}</body>
     </html>
   );
 }
