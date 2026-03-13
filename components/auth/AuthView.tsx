@@ -4,9 +4,12 @@ import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Activity, Loader2, Mail, Lock, User, Briefcase } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/layout/LanguageSelector";
 import { UserRole } from "@/lib/types";
 
 export function AuthView() {
+  const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
@@ -23,7 +26,7 @@ export function AuthView() {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Welcome back!");
+        toast.success(t.common.success);
       } else {
         const { data, error } = await supabase.auth.signUp({ 
           email, 
@@ -42,7 +45,7 @@ export function AuthView() {
         }
       }
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Authentication failed");
+      toast.error(t.common.error);
     } finally {
       setLoading(false);
     }
@@ -50,6 +53,9 @@ export function AuthView() {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-4">
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSelector />
+      </div>
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
         <div className="bg-indigo-600 p-8 text-white text-center">
           <div className="flex justify-center mb-4">
@@ -58,19 +64,19 @@ export function AuthView() {
             </div>
           </div>
           <h1 className="text-2xl font-bold tracking-tight">SiteFlow</h1>
-          <p className="text-indigo-100 text-sm mt-1">Clinical Operations Logger</p>
+          <p className="text-indigo-100 text-sm mt-1">{t.shell.appSubtitle}</p>
         </div>
 
         <div className="p-8">
           <h2 className="text-xl font-semibold text-neutral-900 mb-6 text-center">
-            {isLogin ? "Sign In" : "Create Account"}
+            {isLogin ? t.auth.signIn : t.auth.createAccount}
           </h2>
 
           <form onSubmit={handleAuth} className="space-y-4">
             {!isLogin && (
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-neutral-500 uppercase">First Name</label>
+                  <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.firstName.toUpperCase()}</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                     <input
@@ -84,7 +90,7 @@ export function AuthView() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-medium text-neutral-500 uppercase">Last Name</label>
+                  <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.lastName.toUpperCase()}</label>
                   <input
                     type="text"
                     required
@@ -99,7 +105,7 @@ export function AuthView() {
 
             {!isLogin && (
               <div className="space-y-1">
-                <label className="text-xs font-medium text-neutral-500 uppercase">Role</label>
+                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.roleTitle.toUpperCase()}</label>
                 <div className="relative">
                   <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                   <select
@@ -121,7 +127,7 @@ export function AuthView() {
             )}
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-500 uppercase">Email</label>
+              <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.email.toUpperCase()}</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                 <input
@@ -136,7 +142,7 @@ export function AuthView() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-500 uppercase">Password</label>
+              <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.password.toUpperCase()}</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
                 <input
@@ -158,7 +164,7 @@ export function AuthView() {
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                isLogin ? "Sign In" : "Create Account"
+                isLogin ? t.auth.signIn : t.auth.signUp
               )}
             </button>
           </form>
@@ -168,14 +174,14 @@ export function AuthView() {
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
             >
-              {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+              {isLogin ? t.auth.noAccount : t.auth.haveAccount}
             </button>
           </div>
         </div>
       </div>
       
       <p className="mt-8 text-neutral-400 text-xs text-center max-w-xs">
-        By signing in, you agree to SiteFlow&apos;s Terms of Service and Privacy Policy.
+        {t.auth.termsText}
       </p>
     </div>
   );

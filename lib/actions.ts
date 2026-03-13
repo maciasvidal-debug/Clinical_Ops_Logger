@@ -26,7 +26,8 @@ export async function parseNaturalLanguageLog(
   input: string,
   userRole: UserRole,
   availableProjects: Project[],
-  availableProtocols: Protocol[]
+  availableProtocols: Protocol[],
+  language: "en" | "es" | "pt" = "en"
 ): Promise<ActionResponse<ParsedLogData>> {
   try {
     const ai = getGeminiClient();
@@ -38,6 +39,7 @@ export async function parseNaturalLanguageLog(
       Parse the following natural language input into a structured log entry.
       
       User Input: "${input}"
+      User Language Preference: ${language === "es" ? "Spanish (LATAM)" : language === "pt" ? "Portuguese" : "English"} (Ensure the notes field is localized to this language if generated)
       
       Available Projects: ${JSON.stringify(availableProjects.map(p => ({ id: p.id, name: p.name })))}
       Available Protocols: ${JSON.stringify(availableProtocols.map(p => ({ id: p.id, name: p.name, projectId: p.project_id })))}
@@ -91,7 +93,8 @@ export async function parseNaturalLanguageLog(
 export async function generateAIReport(
   logs: LogEntry[],
   userRole: UserRole,
-  userName: string
+  userName: string,
+  language: "en" | "es" | "pt" = "en"
 ): Promise<ActionResponse<string>> {
   try {
     const ai = getGeminiClient();

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { 
   LogEntry, 
   UserProfile, 
@@ -39,6 +40,7 @@ export function HistoryView({
   onAddQuery, 
   onReplyToQuery 
 }: HistoryViewProps) {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [projectFilter, setProjectFilter] = useState("ALL");
   const [activeQueryLogId, setActiveQueryLogId] = useState<string | null>(null);
@@ -122,7 +124,7 @@ export function HistoryView({
             onChange={e => setProjectFilter(e.target.value)}
             className="w-full sm:w-48 pl-9 pr-8 py-2 bg-white border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-sm appearance-none"
           >
-            <option value="ALL">All Projects</option>
+            <option value="ALL">{t.history.allProjects}</option>
             {projects.map(p => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
