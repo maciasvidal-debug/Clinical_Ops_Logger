@@ -41,8 +41,8 @@ export function AuthView() {
           toast.success("Account created! Please wait for manager approval.");
         }
       }
-    } catch (error: any) {
-      toast.error(error.message || "Authentication failed");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Authentication failed");
     } finally {
       setLoading(false);
     }
