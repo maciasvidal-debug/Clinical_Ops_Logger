@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { 
   LogEntry, 
   UserProfile, 
@@ -14,6 +14,7 @@ import {
 } from "./types";
 import { toast } from "sonner";
 import { supabase } from "./supabase";
+import { encryptData, decryptData } from "./crypto";
 import { User } from "@supabase/supabase-js";
 
 const TIMER_KEY = "clinical_ops_timer";
@@ -33,19 +34,26 @@ export function useAppStore() {
   const [isOnline, setIsOnline] = useState(() => 
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
-  const [activeTimer, setActiveTimer] = useState<{ startTime: string | null }>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(TIMER_KEY);
-      if (stored) {
+  const [activeTimer, setActiveTimer] = useState<{ startTime: string | null }>({ startTime: null });
+  const isTimerInitialized = useRef(false);
+
+  // Async load encrypted timer
+  useEffect(() => {
+    if (isTimerInitialized.current || typeof window === "undefined") return;
+    isTimerInitialized.current = true;
+
+    const stored = localStorage.getItem(TIMER_KEY);
+    if (stored) {
+      decryptData(stored).then(decrypted => {
         try {
-          return JSON.parse(stored);
+          const parsed = JSON.parse(decrypted);
+          setActiveTimer(parsed);
         } catch (e) {
-          console.error("Failed to parse timer", e);
+          console.error("Failed to parse decrypted timer", e);
         }
-      }
+      });
     }
-    return { startTime: null };
-  });
+  }, []);
 
   // Load profile data
   const fetchProfile = useCallback(async (userId: string) => {
@@ -265,7 +273,10 @@ export function useAppStore() {
   const startTimer = () => {
     const newState = { startTime: new Date().toISOString() };
     setActiveTimer(newState);
-    localStorage.setItem(TIMER_KEY, JSON.stringify(newState));
+    // Persist securely
+    encryptData(JSON.stringify(newState)).then(encrypted => {
+      localStorage.setItem(TIMER_KEY, encrypted);
+    });
     toast.success("Timer started");
   };
 

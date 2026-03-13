@@ -101,7 +101,7 @@ export function Shell({
     return () => clearInterval(interval);
   }, [activeTimer?.startTime]);
 
-  const navItems: { id: View; label: string; icon: any }[] = [
+  const navItems: { id: View; label: string; icon: React.ElementType }[] = [
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "log", label: "Log Time", icon: Clock },
     { id: "history", label: "History", icon: History },

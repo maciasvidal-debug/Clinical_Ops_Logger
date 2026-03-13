@@ -6,7 +6,8 @@ import {
   ROLE_HIERARCHY, 
   UserRole, 
   Project, 
-  Protocol 
+  Protocol,
+  LogEntry
 } from "./types";
 
 export type ActionResponse<T> = { success: true; data: T } | { success: false; error: string };
@@ -81,14 +82,14 @@ export async function parseNaturalLanguageLog(
 
     const data = JSON.parse(text);
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("AI Parsing Error:", error);
-    return { success: false, error: error.message || "Failed to parse input" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to parse input" };
   }
 }
 
 export async function generateAIReport(
-  logs: any[],
+  logs: LogEntry[],
   userRole: UserRole,
   userName: string
 ): Promise<ActionResponse<string>> {
@@ -138,8 +139,8 @@ export async function generateAIReport(
     }
 
     return { success: true, data: text };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("AI Report Generation Error:", error);
-    return { success: false, error: error.message || "Failed to generate report" };
+    return { success: false, error: error instanceof Error ? error.message : "Failed to generate report" };
   }
 }
