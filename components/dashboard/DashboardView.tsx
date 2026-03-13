@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { useTranslation } from "@/lib/i18n";
 import {
   LogEntry,
   UserProfile,
@@ -37,6 +38,7 @@ export function DashboardView({
   profile,
   onRepeatLog,
 }: DashboardViewProps) {
+  const { t } = useTranslation();
   const today = new Date();
   
   const todayLogs = logs.filter((log) =>
@@ -101,7 +103,7 @@ export function DashboardView({
         <h2 className="text-2xl font-bold tracking-tight text-neutral-900">
           Dashboard
         </h2>
-        <p className="text-neutral-500">Overview of activities.</p>
+        <p className="text-neutral-500">{t.dashboard.overview}</p>
       </header>
 
       {/* Stats Grid */}
@@ -128,7 +130,7 @@ export function DashboardView({
             <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
               <Activity className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-medium text-neutral-600">This Week</h3>
+            <h3 className="text-sm font-medium text-neutral-600">{t.dashboard.thisWeekLogs}</h3>
           </div>
           <p className="text-3xl font-light tracking-tight text-neutral-900">
             {formatHours(thisWeekMinutes)}
@@ -146,7 +148,7 @@ export function DashboardView({
             >
               <div className="flex items-center gap-2 text-amber-800">
                 <MessageSquare className="w-4 h-4" />
-                <span className="text-sm font-medium">Open Queries</span>
+                <span className="text-sm font-medium">{t.dashboard.openQueries}</span>
               </div>
               <span className="bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                 {openQueriesCount}
@@ -234,7 +236,7 @@ export function DashboardView({
           <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-neutral-500" />
-              <h3 className="font-semibold text-neutral-900">Recent Entries</h3>
+              <h3 className="font-semibold text-neutral-900">{t.dashboard.recentEntries}</h3>
             </div>
             <button
               onClick={() => onNavigate("history")}

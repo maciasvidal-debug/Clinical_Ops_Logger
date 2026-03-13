@@ -21,6 +21,8 @@ import {
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
 import { UserProfile, AppNotification } from "@/lib/types";
+import { LanguageSelector } from "./LanguageSelector";
+import { useTranslation } from "@/lib/i18n";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/lib/supabase";
@@ -62,6 +64,7 @@ export function Shell({
 }: ShellProps) {
   const [elapsedTime, setElapsedTime] = useState("00:00");
   const [showNotifications, setShowNotifications] = useState(false);
+  const { t } = useTranslation();
   const notifRef = useRef<HTMLDivElement>(null);
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -190,7 +193,7 @@ export function Shell({
           <div className="flex items-center gap-2 md:hidden">
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600">
               <Activity className="w-5 h-5" />
-              <span className="sr-only">SiteFlow</span>
+              <span className="sr-only">{t.shell.appName}</span>
             </div>
             <h1 className="text-lg font-bold tracking-tight text-indigo-900">SiteFlow</h1>
           </div>
@@ -209,7 +212,7 @@ export function Shell({
                   title="Stop Timer & Log"
                 >
                   <Square className="w-3 h-3 fill-current" />
-                  <span>Stop & Log</span>
+                  <span>{t.shell.stopLog}</span>
                 </button>
               </div>
             ) : (
@@ -218,10 +221,11 @@ export function Shell({
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-full text-sm font-medium transition-colors border border-neutral-200 shadow-sm"
               >
                 <Play className="w-4 h-4 fill-current text-green-600" />
-                <span className="inline">Smart Timer</span>
+                <span className="inline">{t.shell.smartTimer}</span>
               </button>
             )}
 
+            <LanguageSelector />
             {/* Notifications Dropdown */}
             <div className="relative" ref={notifRef}>
               <button
@@ -244,7 +248,7 @@ export function Shell({
                     className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden z-50"
                   >
                     <div className="p-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
-                      <h3 className="font-semibold text-neutral-900">Notifications</h3>
+                      <h3 className="font-semibold text-neutral-900">{t.shell.notifications}</h3>
                       {notifications.length > 0 && (
                         <button 
                           onClick={() => profile && onClearNotifications?.(profile.id)}
@@ -258,7 +262,7 @@ export function Shell({
                       {notifications.length === 0 ? (
                         <div className="p-8 text-center text-neutral-500 flex flex-col items-center">
                           <Bell className="w-8 h-8 text-neutral-300 mb-2" />
-                          <p className="text-sm">No new notifications</p>
+                          <p className="text-sm">{t.shell.noNotifications}</p>
                         </div>
                       ) : (
                         <div className="divide-y divide-neutral-100">
