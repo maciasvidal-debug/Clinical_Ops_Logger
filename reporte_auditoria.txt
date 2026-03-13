@@ -1,0 +1,64 @@
+# Reporte de Auditoría Integral del Repositorio - AI Studio Applet
+
+Este documento contiene un análisis detallado del estado actual del repositorio. La revisión incluyó aspectos de compilación, seguridad (vulnerabilidades de paquetes), rendimiento, buenas prácticas y estandarización del código base, con el objetivo de identificar problemas antes de iterar con Gemini AI Studio.
+
+---
+
+## 1. Problemas de Compilación (Build) y Entorno
+**Hallazgo:** La compilación (`npm run build`) finaliza exitosamente, sin embargo, muestra una advertencia importante sobre la falta de variables de entorno de Supabase durante la optimización y renderizado estático de Next.js.
+*   **Mensaje de error/warning:** `Supabase environment variables are missing. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.`
+*   **Solución recomendada:** Asegúrate de crear o configurar tu archivo `.env.local` (y asegurar que los valores existan en el entorno de producción en Vercel) con las siguientes variables requeridas para Supabase y Gemini AI.
+
+**Ejemplo de configuración esperada en `.env.local`:**
+```env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL="https://tu-proyecto.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="tu_llave_anon_publica"
+
+# Gemini AI Configuration
+NEXT_PUBLIC_GEMINI_API_KEY="tu_llave_api_de_gemini"
+```
+
+---
+
+## 2. Vulnerabilidades y Dependencias Residuales
+**Hallazgo:** El análisis con `npm audit` reportó 7 vulnerabilidades de severidad baja relacionadas con la dependencia `firebase-tools`. Sin embargo, analizando la arquitectura de la aplicación, el proyecto utiliza **Supabase** como backend en lugar de Firebase.
+*   **Detalle:** Las vulnerabilidades provienen de paquetes transitivos dentro del árbol de dependencias de `firebase-tools`. Esta parece ser una dependencia residual (instalada en devDependencies) que no es utilizada en el código fuente (no hay configuraciones de Firebase en el repositorio).
+*   **Solución recomendada:** Desinstalar `firebase-tools` por completo ejecutando el comando:
+    `npm uninstall firebase-tools`
+    Esto eliminará el código muerto, reducirá el tamaño de tus módulos, y automáticamente solucionará las vulnerabilidades del reporte de auditoría.
+
+---
+
+## 3. Seguridad y Persistencia de Datos
+**Hallazgo:** Almacenamiento no seguro de datos del estado de la aplicación en el cliente (`localStorage`).
+*   **Detalle:** En `lib/store.ts`, se guarda y lee el estado del temporizador activo (`TIMER_KEY`) directamente de `localStorage` en texto plano (ej. `localStorage.setItem(TIMER_KEY, JSON.stringify(newState));`). Adicionalmente, no se encontró el archivo `lib/crypto.ts` que se espera para las utilidades de encriptación y desencriptación AES-GCM (Web Crypto API).
+*   **Solución recomendada:**
+    1. Crear el archivo `lib/crypto.ts` con funciones de encriptación simétrica AES-GCM.
+    2. Modificar las lecturas y escrituras hacia `localStorage` en `lib/store.ts` utilizando la capa de encriptación, para proteger el estado (especialmente si en el futuro se guardan logs o tokens locales).
+
+---
+
+## 4. Tipado Estricto (TypeScript) vs Tipado Dinámico (`any`)
+**Hallazgo:** Uso del tipo `any` a lo largo del repositorio, evadiendo la seguridad de tipos que ofrece TypeScript e incrementando la probabilidad de errores en tiempo de ejecución.
+*   **Detalles:**
+    *   **En `lib/actions.ts`:**
+        *   Los bloques `try/catch` definen genéricamente el error: `catch (error: any)`.
+        *   La función `generateAIReport` recibe los logs como `logs: any[]` en lugar de utilizar la interfaz `LogEntry[]` del archivo `lib/types.ts`.
+    *   **En Componentes (ej. `components/reports/ReportsView.tsx`):**
+        *   Variables definidas como `Record<string, any>`.
+    *   **En Componentes (ej. `components/layout/Shell.tsx` y `components/auth/AuthView.tsx`):**
+        *   Iconos y errores del catch están definidos como `any`.
+*   **Solución recomendada:** Reemplazar todas las apariciones de `any` con interfaces y tipos definidos en `lib/types.ts`. En el caso de los errores de los `catch`, utilizar `catch (error: unknown)` y realizar validaciones tipo `if (error instanceof Error)` para acceder a `error.message`.
+
+---
+
+## 5. Mejores Prácticas en el Código Backend (AI Actions)
+**Hallazgo:** El manejo de la respuesta de AI y la instanciación de clases en Server Actions de `lib/actions.ts`.
+*   **Solución recomendada:**
+    *   Asegurarse de mantener el archivo `lib/gemini.ts` bajo la directiva `import "server-only"` y un patrón Singleton para evitar instanciaciones duplicadas en HMR y exponer credenciales en el cliente (actualmente esto **sí** se está implementando correctamente, pero es una nota para que no se modifique al iterar el código).
+    *   En `parseNaturalLanguageLog`, se debería usar el esquema nativo de 'Structured Outputs' de Gemini (configurando adecuadamente `responseSchema`) en lugar de depender únicamente del prompt string. Actualmente está correctamente integrado en `responseSchema`, lo cual es una excelente práctica.
+
+---
+
+Este reporte debería utilizarse como hoja de ruta al momento de interactuar con Gemini AI Studio mañana para estabilizar la base de código.
