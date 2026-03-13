@@ -7,6 +7,7 @@ import { Activity, Loader2, Mail, Lock, User, Briefcase } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/LanguageSelector";
 import { UserRole } from "@/lib/types";
+import { LegalModal } from "./LegalModal";
 
 export function AuthView() {
   const { t } = useTranslation();
@@ -17,6 +18,10 @@ export function AuthView() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<UserRole>("cra");
+
+  // Legal modal state
+  const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [legalModalType, setLegalModalType] = useState<"terms" | "privacy">("terms");
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,12 +56,30 @@ export function AuthView() {
     }
   };
 
+  const openLegalModal = (type: "terms" | "privacy") => {
+    setLegalModalType(type);
+    setIsLegalModalOpen(true);
+  };
+
+  const getLegalContent = () => {
+    if (legalModalType === "terms") {
+      return {
+        title: t.legal.termsTitle,
+        content: t.legal.termsContent
+      };
+    }
+    return {
+      title: t.legal.privacyTitle,
+      content: t.legal.privacyContent
+    };
+  };
+
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-4">
-      <div className="absolute top-4 right-4 z-50">
+      <div className="absolute top-4 right-4 z-40">
         <LanguageSelector />
       </div>
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden relative z-10">
         <div className="bg-indigo-600 p-8 text-white text-center">
           <div className="flex justify-center mb-4">
             <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
@@ -180,9 +203,31 @@ export function AuthView() {
         </div>
       </div>
       
-      <p className="mt-8 text-neutral-400 text-xs text-center max-w-xs">
-        {t.auth.termsText}
+      <p className="mt-8 text-neutral-400 text-xs text-center max-w-xs relative z-10">
+        {t.auth.termsPrefix}
+        <button
+          onClick={() => openLegalModal("terms")}
+          className="hover:underline hover:text-neutral-500 font-medium transition-colors outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+        >
+          {t.auth.termsLink}
+        </button>
+        {t.auth.termsAnd}
+        <button
+          onClick={() => openLegalModal("privacy")}
+          className="hover:underline hover:text-neutral-500 font-medium transition-colors outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+        >
+          {t.auth.privacyLink}
+        </button>.
       </p>
+
+      {isLegalModalOpen && (
+        <LegalModal
+          isOpen={isLegalModalOpen}
+          onClose={() => setIsLegalModalOpen(false)}
+          title={getLegalContent().title}
+          content={getLegalContent().content}
+        />
+      )}
     </div>
   );
 }
