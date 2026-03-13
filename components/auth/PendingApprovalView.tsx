@@ -4,8 +4,11 @@ import React from "react";
 import { supabase } from "@/lib/supabase";
 import { Activity, Clock, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/layout/LanguageSelector";
 
 export function PendingApprovalView({ email }: { email: string }) {
+  const { t } = useTranslation();
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     toast.info("Signed out");
@@ -13,6 +16,9 @@ export function PendingApprovalView({ email }: { email: string }) {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-4">
+      <div className="absolute top-4 right-4 z-50">
+        <LanguageSelector />
+      </div>
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden text-center">
         <div className="bg-amber-500 p-8 text-white">
           <div className="flex justify-center mb-4">
@@ -20,7 +26,7 @@ export function PendingApprovalView({ email }: { email: string }) {
               <Clock className="w-8 h-8" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">Pending Approval</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t.auth.pendingApproval}</h1>
           <p className="text-amber-50 text-sm mt-1">SiteFlow Clinical Ops Logger</p>
         </div>
 

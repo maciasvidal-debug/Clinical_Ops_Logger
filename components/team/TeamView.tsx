@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { 
   UserProfile, 
   Project, 
@@ -40,6 +41,7 @@ export function TeamView({
   onUpdateUserStatus,
   onRefresh
 }: TeamViewProps) {
+  const { t } = useTranslation();
   const staffUsers = useMemo(() => 
     profiles.filter(u => u.role !== "manager" && u.role !== "super_admin"),
     [profiles]
@@ -82,7 +84,7 @@ export function TeamView({
   return (
     <div className="space-y-6 h-full flex flex-col">
       <header className="shrink-0">
-        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">Team Management</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.team.title}</h2>
         <p className="text-neutral-500">Manage your team and their assignments.</p>
       </header>
 

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { LogEntry, Project, UserProfile, ROLE_PERMISSIONS } from "@/lib/types";
 import { generateAIReport } from "@/lib/actions";
 import Markdown from "react-markdown";
@@ -37,6 +38,7 @@ const COLORS = [
 ];
 
 export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
+  const { t, language } = useTranslation();
   const permissions = ROLE_PERMISSIONS[profile.role];
 
   const visibleLogs = useMemo(() => {

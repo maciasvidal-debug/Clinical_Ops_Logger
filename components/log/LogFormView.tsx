@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { 
   LogEntry, 
   UserProfile, 
@@ -55,6 +56,7 @@ export function LogFormView({
   sites, 
   initialData 
 }: LogFormViewProps) {
+  const { t, language } = useTranslation();
   const [date, setDate] = useState(initialData?.date || format(new Date(), "yyyy-MM-dd"));
   const [hours, setHours] = useState(initialData?.duration_minutes ? Math.floor(initialData.duration_minutes / 60).toString() : "1");
   const [minutes, setMinutes] = useState(initialData?.duration_minutes ? (initialData.duration_minutes % 60).toString() : "0");
@@ -237,15 +239,15 @@ export function LogFormView({
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-12">
       <header>
-        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">Log Time</h2>
-        <p className="text-neutral-500">Record activities as {profile?.role?.replace('_', ' ')}.</p>
+        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.logForm.title}</h2>
+        <p className="text-neutral-500">{t.logForm.subtitle} {profile?.role?.replace('_', ' ')}.</p>
       </header>
 
       {/* AI Smart Logging */}
       <div className="bg-gradient-to-br from-indigo-50 to-purple-50 p-6 rounded-2xl border border-indigo-100 shadow-sm">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="w-5 h-5 text-indigo-600" />
-          <h3 className="text-sm font-semibold text-indigo-900">AI Smart Logging</h3>
+          <h3 className="text-sm font-semibold text-indigo-900">{t.logForm.aiSmartLogging}</h3>
         </div>
         <p className="text-xs text-indigo-700/80 mb-4">
           Describe what you did in natural language, and let AI fill out the form for you.
@@ -285,7 +287,7 @@ export function LogFormView({
         {/* Date & Duration */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Date</label>
+            <label className="text-sm font-medium text-neutral-700">{t.logForm.date}</label>
             <input 
               type="date" 
               required
@@ -296,7 +298,7 @@ export function LogFormView({
           </div>
           
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Duration</label>
+            <label className="text-sm font-medium text-neutral-700">{t.logForm.duration}</label>
             <div className="flex items-center gap-3">
               <div className="flex-1 relative">
                 <input 
@@ -307,7 +309,7 @@ export function LogFormView({
                   onChange={e => setHours(e.target.value)}
                   className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">h</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">{t.logForm.hours}</span>
               </div>
               <div className="flex-1 relative">
                 <input 
@@ -319,7 +321,7 @@ export function LogFormView({
                   onChange={e => setMinutes(e.target.value)}
                   className="w-full pl-3 pr-8 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">m</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm">{t.logForm.minutes}</span>
               </div>
             </div>
           </div>
@@ -328,7 +330,7 @@ export function LogFormView({
         {/* Hierarchy: Project > Protocol > Site */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Project</label>
+            <label className="text-sm font-medium text-neutral-700">{t.logForm.project}</label>
             <select 
               value={projectId}
               onChange={e => setProjectId(e.target.value)}
@@ -346,7 +348,7 @@ export function LogFormView({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Protocol</label>
+            <label className="text-sm font-medium text-neutral-700">{t.logForm.protocol}</label>
             <select 
               value={protocolId}
               onChange={e => setProtocolId(e.target.value)}
@@ -364,7 +366,7 @@ export function LogFormView({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-700">Site (Optional)</label>
+            <label className="text-sm font-medium text-neutral-700">{t.logForm.siteOptional}</label>
             <select 
               value={siteId}
               onChange={e => setSiteId(e.target.value)}
@@ -381,7 +383,7 @@ export function LogFormView({
 
         {/* Category */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-neutral-700">Category</label>
+          <label className="text-sm font-medium text-neutral-700">{t.logForm.category}</label>
           <select 
             value={categoryId}
             onChange={e => setCategoryId(e.target.value)}
@@ -400,7 +402,7 @@ export function LogFormView({
         {/* Activity Task */}
         {currentCategory && currentCategory.tasks.length > 0 && (
           <div className="space-y-3">
-            <label className="text-sm font-semibold text-neutral-900">Specific Activity</label>
+            <label className="text-sm font-semibold text-neutral-900">{t.logForm.specificActivity}</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {currentCategory.tasks.map(task => {
                 const isActive = activityId === task.id;
@@ -469,7 +471,7 @@ export function LogFormView({
 
         {/* Notes */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-neutral-700">Notes (Optional)</label>
+          <label className="text-sm font-medium text-neutral-700">{t.logForm.notesOptional}</label>
           <textarea 
             rows={3}
             value={notes}
