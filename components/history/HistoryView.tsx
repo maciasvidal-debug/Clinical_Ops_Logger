@@ -101,7 +101,7 @@ export function HistoryView({
   return (
     <div className="space-y-6 h-full flex flex-col">
       <header className="shrink-0">
-        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">History</h2>
+        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.navigation.history}</h2>
         <p className="text-neutral-500">View and manage past activities.</p>
       </header>
 

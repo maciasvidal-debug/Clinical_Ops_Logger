@@ -105,16 +105,16 @@ export function Shell({
   }, [activeTimer?.startTime]);
 
   const navItems: { id: View; label: string; icon: React.ElementType }[] = [
-    { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { id: "log", label: "Log Time", icon: Clock },
-    { id: "history", label: "History", icon: History },
-    { id: "reports", label: "Reports", icon: BarChart3 },
-    ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "team" as View, label: "Team", icon: Users }] : []),
+    { id: "dashboard", label: t.navigation.dashboard, icon: LayoutDashboard },
+    { id: "log", label: t.navigation.log, icon: Clock },
+    { id: "history", label: t.navigation.history, icon: History },
+    { id: "reports", label: t.navigation.reports, icon: BarChart3 },
+    ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "team" as View, label: t.navigation.team, icon: Users }] : []),
   ];
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    toast.info("Signed out successfully");
+    toast.info(t.common.success);
   };
 
   return (
@@ -124,9 +124,9 @@ export function Shell({
         <div className="p-6">
           <div className="flex items-center gap-2 mb-1">
             <Activity className="w-6 h-6 text-indigo-600" />
-            <h1 className="text-xl font-bold tracking-tight text-indigo-900">SiteFlow</h1>
+            <h1 className="text-xl font-bold tracking-tight text-indigo-900">{t.shell.appName}</h1>
           </div>
-          <p className="text-xs text-neutral-500">Clinical Ops Logger</p>
+          <p className="text-xs text-neutral-500">{t.shell.appSubtitle}</p>
         </div>
         
         <div className="px-4 mb-6">
@@ -139,7 +139,7 @@ export function Shell({
                 {profile?.first_name} {profile?.last_name}
               </p>
               <p className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">
-                {profile?.role?.replace('_', ' ')}
+                {profile?.role ? t.roles[profile.role] : ''}
               </p>
             </div>
           </div>
@@ -173,7 +173,7 @@ export function Shell({
             className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-neutral-600 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
             <LogOut className="w-5 h-5" />
-            Sign Out
+            {t.navigation.signOut}
           </button>
 
           <button 
@@ -181,7 +181,7 @@ export function Shell({
             className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
-            New Entry
+            {t.navigation.newEntry}
           </button>
         </div>
       </aside>
@@ -195,7 +195,7 @@ export function Shell({
               <Activity className="w-5 h-5" />
               <span className="sr-only">{t.shell.appName}</span>
             </div>
-            <h1 className="text-lg font-bold tracking-tight text-indigo-900">SiteFlow</h1>
+            <h1 className="text-lg font-bold tracking-tight text-indigo-900">{t.shell.appName}</h1>
           </div>
           
           <div className="flex items-center gap-3">
