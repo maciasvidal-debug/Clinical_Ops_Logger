@@ -1,3 +1,5 @@
+import { updateLogEntryStatus, saveTodo } from "@/lib/actions";
+import { useAppStore } from "@/lib/store";
 import React, { useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
 import {
@@ -23,6 +25,7 @@ import {
   Copy,
   BarChart3,
   PieChart,
+  ListTodo
 } from "lucide-react";
 
 interface DashboardViewProps {
@@ -39,6 +42,8 @@ export function DashboardView({
   onRepeatLog,
 }: DashboardViewProps) {
   const { t } = useTranslation();
+  const { todos, updateTodo } = useAppStore();
+  const pendingTodos = todos.filter((t: any) => t.status === "pending" && t.user_id === profile?.id);
   const today = new Date();
   
   const todayLogs = logs.filter((log) =>
@@ -231,7 +236,63 @@ export function DashboardView({
           </div>
         </div>
 
-        {/* Recent Activity */}
+
+      {/* Pending To-Dos Widget */}
+      {pendingTodos.length > 0 && (
+        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm mb-6">
+          <div className="flex items-center gap-2 mb-4 text-amber-800">
+            <ListTodo className="w-5 h-5" />
+            <h2 className="text-lg font-semibold">Continuar trabajando en...</h2>
+          </div>
+          <div className="grid gap-3">
+            {pendingTodos.map((todo: any) => (
+              <div
+                key={todo.id}
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/80 rounded-xl border border-amber-100/50 shadow-sm hover:bg-white transition-colors"
+              >
+                <div>
+                  <h3 className="font-medium text-neutral-900">{todo.title}</h3>
+                  {todo.notes && (
+                    <p className="text-sm text-neutral-500 mt-1 line-clamp-1">{todo.notes}</p>
+                  )}
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-100/50 px-2 py-1 rounded-md">
+                      <Clock className="w-3 h-3" /> Pendiente
+                    </span>
+                    <span className="text-xs text-neutral-400">
+                      Creado: {format(new Date(todo.created_at), "dd MMM")}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 mt-4 sm:mt-0">
+                  <button
+                    onClick={() => {
+                       // Pre-fill form behavior would go here,
+                       // but for simplicity, they can just navigate to the form
+                       onNavigate("log");
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
+                  >
+                    Registrar Tiempo
+                  </button>
+                  <button
+                    onClick={async () => {
+                      const res = await saveTodo({ id: todo.id, status: 'completed' });
+                      if(res.success) updateTodo(todo.id, { status: 'completed' });
+                    }}
+                    className="p-2 text-neutral-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    title="Mark as completed"
+                  >
+                    <CheckCircle2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recent Activity */}
         <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col">
           <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
             <div className="flex items-center gap-2">

@@ -14,6 +14,7 @@ import {
 } from "./types";
 import { toast } from "sonner";
 import { supabase } from "./supabase";
+import { getActivitiesConfig, getTodos, saveTodo } from "./actions";
 import { encryptData, decryptData } from "./crypto";
 import { User } from "@supabase/supabase-js";
 
@@ -30,6 +31,8 @@ export function useAppStore() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [projectAssignments, setProjectAssignments] = useState<UserProjectAssignment[]>([]);
   const [protocolAssignments, setProtocolAssignments] = useState<UserProtocolAssignment[]>([]);
+  const [todos, setTodos] = useState<any[]>([]);
+  const [activityCategories, setActivityCategories] = useState<any[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isOnline, setIsOnline] = useState(() => 
     typeof navigator !== "undefined" ? navigator.onLine : true
@@ -270,6 +273,10 @@ export function useAppStore() {
     }
   };
 
+  const addTodo = (todo: any) => setTodos((prev: any) => [todo, ...prev]);
+  const updateTodo = (id: string, updates: any) => setTodos((prev: any) => prev.map((t: any) => t.id === id ? { ...t, ...updates } : t));
+  const deleteTodo = (id: string) => setTodos((prev: any) => prev.filter((t: any) => t.id !== id));
+
   const startTimer = () => {
     const newState = { startTime: new Date().toISOString() };
     setActiveTimer(newState);
@@ -366,6 +373,13 @@ export function useAppStore() {
     updateUserStatus,
     signOut,
     refreshProfile: () => user && fetchProfile(user.id).then(setProfile),
-    refreshAppData: () => user && profile && fetchAppData(user.id, profile.role)
+    refreshAppData: () => user && profile && fetchAppData(user.id, profile.role),
+    todos,
+    setTodos,
+    addTodo,
+    updateTodo,
+    deleteTodo,
+    activityCategories,
+    setActivityCategories
   };
 }

@@ -30,8 +30,8 @@ import { supabase } from "@/lib/supabase";
 type View = "dashboard" | "log" | "history" | "reports" | "team";
 
 interface ShellProps {
-  currentView: View;
-  onViewChange: (view: View) => void;
+  currentView: string;
+  onViewChange: (view: any) => void;
   children: React.ReactNode;
   isOnline: boolean;
   isSyncing: boolean;
