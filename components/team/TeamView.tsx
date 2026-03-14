@@ -68,14 +68,14 @@ export function TeamView({
       <div className="flex flex-col items-center justify-center h-[60vh] text-neutral-500 space-y-4">
         <Users className="w-12 h-12 text-neutral-300" />
         <div className="text-center">
-          <p className="font-medium text-neutral-900">No team members found</p>
-          <p className="text-sm">If you have staff assigned, they will appear here.</p>
+          <p className="font-medium text-neutral-900">{t.team.noTeamMembers}</p>
+          <p className="text-sm">{t.team.ifStaffAssigned}</p>
         </div>
         <button 
           onClick={() => onRefresh?.()}
           className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
         >
-          Refresh Team Data
+          {t.team.refreshTeamData}
         </button>
       </div>
     );
@@ -85,7 +85,7 @@ export function TeamView({
     <div className="space-y-6 h-full flex flex-col">
       <header className="shrink-0">
         <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.team.title}</h2>
-        <p className="text-neutral-500">Manage your team and their assignments.</p>
+        <p className="text-neutral-500">{t.team.subtitle}</p>
       </header>
 
       <div className="flex flex-col md:flex-row gap-6 flex-1 min-h-0">
@@ -93,7 +93,7 @@ export function TeamView({
         <div className="w-full md:w-64 bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col shrink-0">
           <div className="p-4 border-b border-neutral-100 bg-neutral-50/50 hidden md:flex items-center gap-2">
             <Users className="w-4 h-4 text-indigo-600" />
-            <h3 className="font-semibold text-neutral-900">Team Members</h3>
+            <h3 className="font-semibold text-neutral-900">{t.team.teamMembers}</h3>
           </div>
           <div className="flex md:flex-col overflow-x-auto md:overflow-y-auto p-3 md:p-2 gap-2 md:gap-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
             {staffUsers.map(user => (
@@ -125,6 +125,7 @@ export function TeamView({
           protocolAssignments={protocolAssignments.filter(a => a.user_id === selectedUser.id)}
           onUpdateAssignments={onUpdateAssignments}
           onUpdateUserStatus={onUpdateUserStatus}
+          t={t}
         />
       </div>
     </div>
@@ -139,6 +140,7 @@ interface AssignmentManagerProps {
   protocolAssignments: UserProtocolAssignment[];
   onUpdateAssignments: (userId: string, projectIds: string[], protocolIds: string[]) => void;
   onUpdateUserStatus: (userId: string, status: "active" | "rejected") => void;
+  t: any;
 }
 
 function AssignmentManager({
@@ -148,7 +150,8 @@ function AssignmentManager({
   projectAssignments,
   protocolAssignments,
   onUpdateAssignments,
-  onUpdateUserStatus
+  onUpdateUserStatus,
+  t
 }: AssignmentManagerProps) {
   const [localProjectIds, setLocalProjectIds] = useState<string[]>(projectAssignments.map(a => a.project_id));
   const [localProtocolIds, setLocalProtocolIds] = useState<string[]>(protocolAssignments.map(a => a.protocol_id));
@@ -175,7 +178,7 @@ function AssignmentManager({
 
   const handleSave = () => {
     onUpdateAssignments(user.id, localProjectIds, localProtocolIds);
-    toast.success("Assignments updated successfully");
+    toast.success(t.team.assignmentsSuccess);
   };
 
   return (
@@ -184,14 +187,14 @@ function AssignmentManager({
         <div className="flex items-center gap-4">
           <h3 className="font-semibold text-neutral-900 flex items-center gap-2">
             <Shield className="w-4 h-4 text-indigo-600 shrink-0" />
-            <span className="truncate">{user.first_name}&apos;s Profile</span>
+            <span className="truncate">{user.first_name}{t.team.profileSuffix}</span>
           </h3>
           <span className={`text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold ${
             user.status === "active" ? "bg-emerald-100 text-emerald-700" :
             user.status === "pending" ? "bg-amber-100 text-amber-700" :
             "bg-red-100 text-red-700"
           }`}>
-            {user.status}
+            {t.status[user.status]}
           </span>
         </div>
         
@@ -203,14 +206,14 @@ function AssignmentManager({
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium rounded-lg transition-colors shadow-sm"
               >
                 <UserCheck className="w-3 h-3" />
-                Approve
+                {t.team.approve}
               </button>
               <button
                 onClick={() => onUpdateUserStatus(user.id, "rejected")}
                 className="flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors shadow-sm"
               >
                 <UserX className="w-3 h-3" />
-                Reject
+                {t.team.reject}
               </button>
             </>
           )}
@@ -218,7 +221,7 @@ function AssignmentManager({
             onClick={handleSave}
             className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm shrink-0"
           >
-            Save Assignments
+            {t.team.saveAssignments}
           </button>
         </div>
       </div>
@@ -226,16 +229,16 @@ function AssignmentManager({
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-            <p className="text-xs text-neutral-500 uppercase tracking-wider font-bold mb-1">Role</p>
-            <p className="text-sm font-semibold text-neutral-900 capitalize">{user.role.replace('_', ' ')}</p>
+            <p className="text-xs text-neutral-500 uppercase tracking-wider font-bold mb-1">{t.team.role}</p>
+            <p className="text-sm font-semibold text-neutral-900 capitalize">{t.roles[user.role]}</p>
           </div>
           <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-            <p className="text-xs text-neutral-500 uppercase tracking-wider font-bold mb-1">Email</p>
+            <p className="text-xs text-neutral-500 uppercase tracking-wider font-bold mb-1">{t.common.email}</p>
             <p className="text-sm font-semibold text-neutral-900 truncate">{user.email}</p>
           </div>
         </div>
 
-        <h4 className="text-sm font-bold text-neutral-900 mb-4">Project & Protocol Assignments</h4>
+        <h4 className="text-sm font-bold text-neutral-900 mb-4">{t.team.projectProtocolAssignments}</h4>
         
         {projects.map(project => {
           const isProjectSelected = localProjectIds.includes(project.id);
@@ -282,7 +285,7 @@ function AssignmentManager({
               {isProjectSelected && projectProtocols.length > 0 && (
                 <div className="p-4 pt-0 border-t border-indigo-100/50 bg-white/50">
                   <h5 className="text-xs font-semibold text-indigo-900 mb-3 uppercase tracking-wider mt-4 px-1">
-                    Select Protocols for {project.name}
+                    {t.team.selectProtocolsFor} {project.name}
                   </h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {projectProtocols.map(protocol => {
