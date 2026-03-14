@@ -16,11 +16,13 @@ import { toast } from "sonner";
 import { supabase } from "./supabase";
 import { getActivitiesConfig, getTodos, saveTodo } from "./actions";
 import { encryptData, decryptData } from "./crypto";
+import { useTranslation } from "./i18n";
 import { User } from "@supabase/supabase-js";
 
 const TIMER_KEY = "clinical_ops_timer";
 
 export function useAppStore() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -180,21 +182,21 @@ export function useAppStore() {
     }]).select().single();
 
     if (error) {
-      toast.error("Failed to save log entry");
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
       console.error(error);
     } else {
       setLogs([data as LogEntry, ...logs]);
-      toast.success("Activity logged successfully");
+      toast.success(t.toasts.saveSuccessTitle, { description: t.toasts.saveSuccessDesc });
     }
   };
 
   const deleteLog = async (id: string) => {
     const { error } = await supabase.from("log_entries").delete().eq("id", id);
     if (error) {
-      toast.error("Failed to delete log entry");
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
     } else {
       setLogs(logs.filter(l => l.id !== id));
-      toast.success("Log entry deleted");
+      toast.success(t.toasts.deleteSuccessTitle, { description: t.toasts.deleteSuccessDesc });
     }
   };
 
@@ -213,7 +215,7 @@ export function useAppStore() {
     }]).select().single();
 
     if (error) {
-      toast.error("Failed to add query");
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
     } else {
       setLogs(logs.map(l => l.id === logId ? { ...l, log_queries: [...(l.log_queries || []), data as LogQuery] } : l));
       
@@ -226,7 +228,7 @@ export function useAppStore() {
         link: "history"
       }]);
       
-      toast.success("Query added");
+      toast.success(t.toasts.queryAddedTitle, { description: t.toasts.queryAddedDesc });
     }
   };
 
@@ -240,7 +242,7 @@ export function useAppStore() {
     }).eq("id", queryId).select().single();
 
     if (error) {
-      toast.error("Failed to reply to query");
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
     } else {
       setLogs(logs.map(l => l.id === logId ? {
         ...l,
@@ -257,7 +259,7 @@ export function useAppStore() {
         link: "team"
       }]);
 
-      toast.success("Query resolved");
+      toast.success(t.toasts.queryResolvedTitle, { description: t.toasts.queryResolvedDesc });
     }
   };
 
@@ -286,7 +288,7 @@ export function useAppStore() {
     encryptData(JSON.stringify(newState)).then(encrypted => {
       localStorage.setItem(TIMER_KEY, encrypted);
     });
-    toast.success("Timer started");
+    toast.success(t.toasts.timerStartedTitle, { description: t.toasts.timerStartedDesc });
   };
 
   const stopTimer = () => {
@@ -325,10 +327,10 @@ export function useAppStore() {
   const updateUserStatus = async (userId: string, status: UserStatus) => {
     const { error } = await supabase.from("user_profiles").update({ status }).eq("id", userId);
     if (error) {
-      toast.error("Failed to update user status");
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
     } else {
       setProfiles(profiles.map(p => p.id === userId ? { ...p, status } : p));
-      toast.success(`User status updated to ${status}`);
+      toast.success(t.toasts.statusUpdatedTitle, { description: t.toasts.statusUpdatedDesc });
       
       // Notify user
       await supabase.from("app_notifications").insert([{

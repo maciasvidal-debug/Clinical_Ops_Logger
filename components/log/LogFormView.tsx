@@ -142,19 +142,19 @@ export function LogFormView({
     const duration_minutes = (parseInt(hours) || 0) * 60 + (parseInt(minutes) || 0);
     
     if (duration_minutes <= 0) {
-      toast.error("Please enter a valid duration.");
+      toast.error(t.toasts.validationErrorTitle, { description: t.toasts.validationErrorDesc });
       setIsSubmitting(false);
       return;
     }
 
     if (!projectId || !protocolId) {
-      toast.error("Please select a project and protocol.");
+      toast.error(t.toasts.missingFieldsTitle, { description: t.toasts.missingFieldsDesc });
       setIsSubmitting(false);
       return;
     }
 
     if (!categoryId || !activityId) {
-      toast.error("Please select a category and activity.");
+      toast.error(t.toasts.missingFieldsTitle, { description: t.toasts.missingFieldsDesc });
       setIsSubmitting(false);
       return;
     }
@@ -224,13 +224,13 @@ export function LogFormView({
           }
         }
         if (data.notes) setNotes(data.notes);
-        toast.success("AI parsed your input successfully!");
+        toast.success(t.toasts.aiSuccessTitle, { description: t.toasts.aiSuccessDesc });
         setAiInput("");
       } else {
-        toast.error(!result.success ? result.error : "Failed to parse input");
+        toast.error(t.toasts.aiErrorTitle, { description: !result.success && result.error ? result.error : t.toasts.aiErrorDesc });
       }
     } catch (error) {
-      toast.error("An error occurred during AI parsing");
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
     } finally {
       setIsParsing(false);
     }

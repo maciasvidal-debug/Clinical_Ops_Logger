@@ -74,13 +74,13 @@ export function HistoryView({
   const handleDelete = (id: string, logUserId: string) => {
     const isManager = profile?.role === "manager" || profile?.role === "super_admin";
     if (!isManager && logUserId !== profile?.id) {
-      toast.error("You don't have permission to delete this entry.");
+      toast.error(t.toasts.accessDeniedTitle, { description: t.toasts.accessDeniedDesc });
       return;
     }
     
     if (confirm("Are you sure you want to delete this entry?")) {
       onDeleteLog(id);
-      toast.success("Entry deleted.");
+      toast.success(t.toasts.deleteSuccessTitle, { description: t.toasts.deleteSuccessDesc });
     }
   };
 

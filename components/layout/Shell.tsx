@@ -114,7 +114,7 @@ export function Shell({
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    toast.info(t.common.success);
+    toast.success(t.toasts.notificationsClearedTitle, { description: t.toasts.notificationsClearedDesc });
   };
 
   return (

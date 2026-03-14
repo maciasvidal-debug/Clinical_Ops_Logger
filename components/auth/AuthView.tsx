@@ -31,7 +31,7 @@ export function AuthView() {
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success(t.common.success);
+        toast.success(t.toasts.loginSuccessTitle, { description: t.toasts.loginSuccessDesc });
       } else {
         const { data, error } = await supabase.auth.signUp({ 
           email, 
@@ -46,11 +46,11 @@ export function AuthView() {
         });
         if (error) throw error;
         if (data.user) {
-          toast.success("Account created! Please wait for manager approval.");
+          toast.success(t.toasts.signupSuccessTitle, { description: t.toasts.signupSuccessDesc });
         }
       }
     } catch (error: unknown) {
-      toast.error(t.common.error);
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
     } finally {
       setLoading(false);
     }

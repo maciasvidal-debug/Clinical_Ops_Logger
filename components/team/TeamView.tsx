@@ -178,7 +178,7 @@ function AssignmentManager({
 
   const handleSave = () => {
     onUpdateAssignments(user.id, localProjectIds, localProtocolIds);
-    toast.success(t.team.assignmentsSuccess);
+    toast.success(t.toasts.assignmentsSuccessTitle, { description: t.toasts.assignmentsSuccessDesc });
   };
 
   return (
