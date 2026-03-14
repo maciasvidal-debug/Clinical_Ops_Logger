@@ -14,7 +14,16 @@ import { LogEntry } from "@/lib/types";
 import { Toaster } from "sonner";
 import { format } from "date-fns";
 
-type View = "dashboard" | "log" | "history" | "reports" | "team";
+
+import { SettingsView } from "@/components/settings/SettingsView";
+
+
+
+
+
+
+
+export type View = "dashboard" | "log" | "history" | "reports" | "team" | "settings";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>("dashboard");
@@ -46,7 +55,8 @@ export default function App() {
     updateAssignments,
     updateUserStatus,
     signOut,
-    refreshAppData
+    refreshAppData,
+    todos
   } = useAppStore();
 
   // Push Notifications Reminder
@@ -71,6 +81,14 @@ export default function App() {
             icon: "/favicon.ico",
           });
         }
+      }
+
+      const pendingTodos = todos?.filter((t: any) => t.status === "pending" && t.user_id === profile.id);
+      if (pendingTodos.length > 0 && Notification.permission === "granted") {
+        new Notification("Tareas Pendientes", {
+          body: `Tienes ${pendingTodos.length} tareas pendientes. Haz clic para continuarlas.`,
+          icon: "/favicon.ico",
+        });
       }
 
       if (profile.role === "manager") {
@@ -102,7 +120,7 @@ export default function App() {
     checkReminders();
     const interval = setInterval(checkReminders, 60 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [logs, user, profile, notifications]);
+  }, [logs, user, profile, notifications, todos]);
 
   const handleRepeatLog = (log: LogEntry) => {
     setLogFormInitialData(log);
@@ -242,6 +260,9 @@ export default function App() {
             profile={profile} 
             projects={projects}
           />
+        )}
+                {currentView === "settings" && profile && (
+          <SettingsView profile={profile} />
         )}
         {currentView === "team" && (profile?.role === "manager" || profile?.role === "super_admin") && (
           <TeamView

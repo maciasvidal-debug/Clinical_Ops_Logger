@@ -1,16 +1,15 @@
 "use server";
 
+import { supabase } from "./supabase";
+import { DbActivityCategory, Todo } from "./types";
+
 import { getGeminiClient } from "./gemini";
 import { Type } from "@google/genai";
-import { 
-  ROLE_HIERARCHY, 
-  UserRole, 
-  Project, 
-  Protocol,
-  LogEntry
-} from "./types";
+import { ROLE_HIERARCHY, UserRole, Project, Protocol, LogEntry } from "./types";
 
-export type ActionResponse<T> = { success: true; data: T } | { success: false; error: string };
+export type ActionResponse<T> =
+  | { success: true; data: T }
+  | { success: false; error: string };
 
 export interface ParsedLogData {
   duration_minutes?: number;
@@ -27,13 +26,13 @@ export async function parseNaturalLanguageLog(
   userRole: UserRole,
   availableProjects: Project[],
   availableProtocols: Protocol[],
-  language: "en" | "es" | "pt" = "en"
+  language: "en" | "es" | "pt" = "en",
 ): Promise<ActionResponse<ParsedLogData>> {
   try {
     const ai = getGeminiClient();
-    
+
     const availableCategories = ROLE_HIERARCHY[userRole] || [];
-    
+
     const prompt = `
       You are an AI assistant for a Clinical Operations time tracking app.
       Parse the following natural language input into a structured log entry.
@@ -41,8 +40,8 @@ export async function parseNaturalLanguageLog(
       User Input: "${input}"
       User Language Preference: ${language === "es" ? "Spanish (LATAM)" : language === "pt" ? "Portuguese" : "English"} (Ensure the notes field is localized to this language if generated)
       
-      Available Projects: ${JSON.stringify(availableProjects.map(p => ({ id: p.id, name: p.name })))}
-      Available Protocols: ${JSON.stringify(availableProtocols.map(p => ({ id: p.id, name: p.name, projectId: p.project_id })))}
+      Available Projects: ${JSON.stringify(availableProjects.map((p) => ({ id: p.id, name: p.name })))}
+      Available Protocols: ${JSON.stringify(availableProtocols.map((p) => ({ id: p.id, name: p.name, projectId: p.project_id })))}
       Available Categories and Tasks for this user's role (${userRole}): ${JSON.stringify(availableCategories)}
       
       Extract the following:
@@ -71,10 +70,10 @@ export async function parseNaturalLanguageLog(
             category: { type: Type.STRING },
             activity: { type: Type.STRING },
             sub_task: { type: Type.STRING },
-            notes: { type: Type.STRING }
-          }
-        }
-      }
+            notes: { type: Type.STRING },
+          },
+        },
+      },
     });
 
     const text = response.text;
@@ -86,7 +85,10 @@ export async function parseNaturalLanguageLog(
     return { success: true, data };
   } catch (error: unknown) {
     console.error("AI Parsing Error:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to parse input" };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to parse input",
+    };
   }
 }
 
@@ -94,20 +96,22 @@ export async function generateAIReport(
   logs: LogEntry[],
   userRole: UserRole,
   userName: string,
-  language: "en" | "es" | "pt" = "en"
+  language: "en" | "es" | "pt" = "en",
 ): Promise<ActionResponse<string>> {
   try {
     const ai = getGeminiClient();
-    
+
     // Summarize logs to reduce token usage
-    const summarizedLogs = logs.map(log => ({
+    const summarizedLogs = logs.map((log) => ({
       date: log.date,
       duration: log.duration_minutes,
       project: log.project_id, // We don't have project names here easily without passing them, but ID might be enough or we can pass names
       protocol: log.protocol_id,
       activity: log.activity,
       sub_task: log.sub_task,
-      user: log.user_profiles?.first_name ? `${log.user_profiles.first_name} ${log.user_profiles.last_name}` : log.role
+      user: log.user_profiles?.first_name
+        ? `${log.user_profiles.first_name} ${log.user_profiles.last_name}`
+        : log.role,
     }));
 
     const prompt = `
@@ -144,6 +148,137 @@ export async function generateAIReport(
     return { success: true, data: text };
   } catch (error: unknown) {
     console.error("AI Report Generation Error:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to generate report" };
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to generate report",
+    };
+  }
+}
+
+// --- Configuration API Actions ---
+
+export async function getActivitiesConfig(): Promise<{
+  success: boolean;
+  data?: DbActivityCategory[];
+  error?: string;
+}> {
+
+  try {
+    const { data: categories, error } = await supabase
+      .from("activity_categories")
+      .select(
+        `
+        *,
+        category_roles(role),
+        activity_tasks (
+          *,
+          activity_subtasks (*)
+        )
+      `,
+      )
+      .order("name");
+
+    if (error) throw error;
+    return {
+      success: true,
+      data: categories as unknown as DbActivityCategory[],
+    };
+  } catch (error: unknown) {
+    console.error("Error fetching activities config:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error ? error.message : "Failed to load activities",
+    };
+  }
+}
+
+export async function getTodos(): Promise<{
+  success: boolean;
+  data?: Todo[];
+  error?: string;
+}> {
+
+  try {
+    const { data: todos, error } = await supabase
+      .from("todos")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return { success: true, data: todos as Todo[] };
+  } catch (error: unknown) {
+    console.error("Error fetching todos:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to load todos",
+    };
+  }
+}
+
+export async function saveTodo(
+  todo: Partial<Todo>,
+): Promise<{ success: boolean; data?: Todo; error?: string }> {
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const payload = {
+      ...todo,
+      user_id: user.id,
+    };
+
+    let result;
+    if (todo.id) {
+      if (todo.status === "completed" && !todo.completed_at) {
+        payload.completed_at = new Date().toISOString();
+      }
+      result = await supabase
+        .from("todos")
+        .update(payload)
+        .eq("id", todo.id)
+        .select()
+        .single();
+    } else {
+      result = await supabase.from("todos").insert([payload]).select().single();
+    }
+
+    if (result.error) throw result.error;
+    return { success: true, data: result.data as Todo };
+  } catch (error: unknown) {
+    console.error("Error saving todo:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to save todo",
+    };
+  }
+}
+
+export async function updateLogEntryStatus(
+  id: string,
+  status: "completed" | "pending",
+): Promise<{ success: boolean; error?: string }> {
+
+  try {
+    const { error } = await supabase
+      .from("log_entries")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Error updating log entry status:", error);
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to update log entry status",
+    };
   }
 }
