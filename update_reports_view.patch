@@ -1,0 +1,78 @@
+--- components/reports/ReportsView.tsx
++++ components/reports/ReportsView.tsx
+@@ -4,7 +4,7 @@
+ import { generateAIReport } from "@/lib/actions";
+ import Markdown from "react-markdown";
+-import { Sparkles, Loader2 } from "lucide-react";
++import { Sparkles, Loader2, Printer } from "lucide-react";
+ import {
+   BarChart,
+   Bar,
+@@ -19,6 +19,7 @@
+   ComposedChart,
+ } from "recharts";
+ import { format, parseISO } from "date-fns";
++import { TimesheetReport } from "./TimesheetReport";
+
+ interface ReportsViewProps {
+   logs: LogEntry[];
+@@ -176,6 +177,7 @@
+   const [aiReport, setAiReport] = useState<string | null>(null);
+   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+   const [aiError, setAiError] = useState<string | null>(null);
++  const [showTimesheetModal, setShowTimesheetModal] = useState(false);
+
+   const handleGenerateAIReport = async () => {
+     setIsGeneratingAI(true);
+@@ -197,20 +199,35 @@
+           <p className="text-neutral-500">
+             Analyze time distribution across studies and activities.
+           </p>
+         </div>
+-        <button
+-          onClick={handleGenerateAIReport}
+-          disabled={isGeneratingAI || visibleLogs.length === 0}
+-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl font-medium transition-colors shadow-sm whitespace-nowrap"
+-        >
+-          {isGeneratingAI ? (
+-            <Loader2 className="w-4 h-4 animate-spin" />
+-          ) : (
+-            <Sparkles className="w-4 h-4" />
+-          )}
+-          {isGeneratingAI ? "Analyzing Data..." : "Generate AI Insights"}
+-        </button>
++        <div className="flex flex-col sm:flex-row gap-3">
++          <button
++            onClick={() => setShowTimesheetModal(true)}
++            disabled={visibleLogs.length === 0}
++            className="flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 disabled:text-neutral-400 disabled:bg-neutral-50 rounded-xl font-medium transition-colors shadow-sm whitespace-nowrap"
++          >
++            <Printer className="w-4 h-4" />
++            Export Timesheet
++          </button>
++          <button
++            onClick={handleGenerateAIReport}
++            disabled={isGeneratingAI || visibleLogs.length === 0}
++            className="flex items-center justify-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl font-medium transition-colors shadow-sm whitespace-nowrap"
++          >
++            {isGeneratingAI ? (
++              <Loader2 className="w-4 h-4 animate-spin" />
++            ) : (
++              <Sparkles className="w-4 h-4" />
++            )}
++            {isGeneratingAI ? "Analyzing Data..." : "Generate AI Insights"}
++          </button>
++        </div>
+       </header>
++
++      {showTimesheetModal && (
++        <TimesheetReport
++          logs={visibleLogs}
++          profile={profile}
++          projects={projects}
++          aiReport={aiReport}
++          onClose={() => setShowTimesheetModal(false)}
++        />
++      )}
+
+       {aiError && (
