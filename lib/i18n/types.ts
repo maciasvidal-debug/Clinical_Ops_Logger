@@ -1,6 +1,48 @@
 export type Language = 'en' | 'es' | 'pt';
 
 export interface Dictionary {
+  toasts: {
+    loginSuccessTitle: string;
+    loginSuccessDesc: string;
+    logoutSuccessTitle: string;
+    logoutSuccessDesc: string;
+    signupSuccessTitle: string;
+    signupSuccessDesc: string;
+    networkErrorTitle: string;
+    networkErrorDesc: string;
+    validationErrorTitle: string;
+    validationErrorDesc: string;
+    missingFieldsTitle: string;
+    missingFieldsDesc: string;
+    saveSuccessTitle: string;
+    saveSuccessDesc: string;
+    deleteSuccessTitle: string;
+    deleteSuccessDesc: string;
+    loadingTitle: string;
+    loadingDesc: string;
+    noResultsTitle: string;
+    noResultsDesc: string;
+    accessDeniedTitle: string;
+    accessDeniedDesc: string;
+    errorTitle: string;
+    errorDesc: string;
+    aiSuccessTitle: string;
+    aiSuccessDesc: string;
+    aiErrorTitle: string;
+    aiErrorDesc: string;
+    queryAddedTitle: string;
+    queryAddedDesc: string;
+    queryResolvedTitle: string;
+    queryResolvedDesc: string;
+    timerStartedTitle: string;
+    timerStartedDesc: string;
+    statusUpdatedTitle: string;
+    statusUpdatedDesc: string;
+    notificationsClearedTitle: string;
+    notificationsClearedDesc: string;
+    assignmentsSuccessTitle: string;
+    assignmentsSuccessDesc: string;
+  };
   common: {
     loading: string; save: string; cancel: string; delete: string; edit: string; close: string; success: string; error: string; yes: string; no: string; confirm: string; refresh: string; email: string;
   };

@@ -11,7 +11,7 @@ export function PendingApprovalView({ email }: { email: string }) {
   const { t } = useTranslation();
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    toast.info("Signed out");
+    toast.success(t.toasts.logoutSuccessTitle, { description: t.toasts.logoutSuccessDesc });
   };
 
   return (
