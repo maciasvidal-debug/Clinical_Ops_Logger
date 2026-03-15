@@ -85,13 +85,18 @@ export function DashboardView({
   }, [logs]);
 
   const categoryDistribution = useMemo(() => {
-    const dist: Record<string, number> = {};
-    currentWeekLogs.forEach((log) => {
+    const dist = new Map<string, number>();
+    for (let i = 0; i < currentWeekLogs.length; i++) {
+      const log = currentWeekLogs[i];
       if (log.category) {
-        dist[log.category] = (dist[log.category] || 0) + log.duration_minutes;
+        dist.set(log.category, (dist.get(log.category) || 0) + log.duration_minutes);
       }
-    });
-    return Object.entries(dist)
+    }
+    const entries: [string, number][] = [];
+    for (const entry of dist) {
+      entries.push(entry);
+    }
+    return entries
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
   }, [currentWeekLogs]);
