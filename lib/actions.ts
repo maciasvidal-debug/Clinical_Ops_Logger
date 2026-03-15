@@ -6,6 +6,7 @@ import { DbActivityCategory, Todo } from "./types";
 import { getGeminiClient } from "./gemini";
 import { Type } from "@google/genai";
 import { ROLE_HIERARCHY, UserRole, Project, Protocol, LogEntry } from "./types";
+import { dictionaries } from "./i18n/dictionaries";
 
 export type ActionResponse<T> =
   | { success: true; data: T }
@@ -29,6 +30,14 @@ export async function parseNaturalLanguageLog(
   language: "en" | "es" | "pt" = "en",
 ): Promise<ActionResponse<ParsedLogData>> {
   try {
+    if (!input || typeof input !== "string") {
+      return { success: false, error: "Invalid input." };
+    }
+
+    if (input.length > 2000) {
+      return { success: false, error: dictionaries[language].logForm.aiInputTooLong };
+    }
+
     const ai = getGeminiClient();
 
     const availableCategories = ROLE_HIERARCHY[userRole] || [];
