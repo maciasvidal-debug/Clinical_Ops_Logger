@@ -6,17 +6,32 @@ Este documento explica cómo hacer la transición de los correos ficticios de pr
 
 La mejor práctica es **no crear un usuario nuevo**, sino actualizar el usuario de prueba existente (el que ya tiene el rol de administrador y datos asociados) con tu correo real. De esta forma no pierdes la configuración ni los permisos.
 
-### Pasos:
-1. Ve al panel de control de [Supabase](https://supabase.com/dashboard) y entra a tu proyecto **SiteFlow**.
-2. En el menú lateral izquierdo, haz clic en **Authentication** (icono de usuarios).
-3. Asegúrate de estar en la pestaña **Users**.
-4. Busca en la lista el correo ficticio que has estado usando para entrar como administrador.
-5. Haz clic en el ícono de los **tres puntos verticales (⋮)** a la derecha de ese usuario y selecciona **"Edit user"** (Editar usuario).
-6. En el campo **Email Address**, borra el correo ficticio y escribe **tu correo real**.
-7. Si ves una opción que dice *"Send confirmation email"* o similar, puedes desmarcarla para que el cambio se aplique inmediatamente, o dejarla marcada y luego ir a tu bandeja de entrada real para confirmar el cambio.
-8. Haz clic en **"Save"** (Guardar).
+La forma más rápida, limpia y efectiva (sin modificar el código de la aplicación) es hacerlo directamente en la base de datos de Supabase.
 
-¡Listo! A partir de ahora, cuando entres a la aplicación, usarás tu correo real. Al solicitar el acceso, el código OTP o el Magic Link llegará directamente a tu bandeja de entrada.
+### Pasos para cambiar el correo:
+1. Ve al panel de control de [Supabase](https://supabase.com/dashboard) y entra a tu proyecto **SiteFlow**.
+2. En el menú lateral izquierdo, haz clic en **SQL Editor**.
+3. Haz clic en **New query** (Nueva consulta).
+4. Copia y pega el siguiente código en el editor, reemplazando los correos por los tuyos:
+
+```sql
+UPDATE auth.users
+SET email = 'tu_correo_real@ejemplo.com'
+WHERE email = 'correo_ficticio_actual@ejemplo.com';
+```
+
+5. Haz clic en el botón verde **Run** (Ejecutar). Si ves "Success" o "1 rows affected", el cambio fue exitoso.
+
+### Pasos para cambiar la contraseña (Opcional):
+Si también quieres actualizar la contraseña de ese usuario para que deje de ser la de prueba, puedes usar este otro comando SQL en el mismo editor:
+
+```sql
+UPDATE auth.users
+SET encrypted_password = crypt('TuNuevaContraseña123', gen_salt('bf'))
+WHERE email = 'tu_correo_real@ejemplo.com';
+```
+
+¡Listo! A partir de ahora, cuando entres a la aplicación, usarás tu correo real con la contraseña que hayas configurado.
 
 ---
 
