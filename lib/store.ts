@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { supabase } from "./supabase";
 import { getActivitiesConfig, getTodos, saveTodo } from "./actions";
 import { encryptData, decryptData } from "./crypto";
+import { logError } from "./utils";
 import { useTranslation } from "./i18n";
 import { User } from "@supabase/supabase-js";
 
@@ -54,7 +55,7 @@ export function useAppStore() {
           const parsed = JSON.parse(decrypted);
           setActiveTimer(parsed);
         } catch (e) {
-          console.error("Failed to parse decrypted timer", e);
+          logError(e, "store_parsing_timer");
         }
       });
     }
@@ -70,7 +71,7 @@ export function useAppStore() {
 
     if (error) {
       if (error.code !== "PGRST116") {
-        console.error("Error fetching profile:", error.message || error);
+        logError(error, "fetch_profile", userId);
       }
       return null;
     }
@@ -183,7 +184,7 @@ export function useAppStore() {
 
     if (error) {
       toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
-      console.error(error);
+      logError(error, "add_log", user.id);
     } else {
       setLogs([data as LogEntry, ...logs]);
       toast.success(t.toasts.saveSuccessTitle, { description: t.toasts.saveSuccessDesc });
