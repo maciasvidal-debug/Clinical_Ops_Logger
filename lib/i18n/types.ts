@@ -3,7 +3,7 @@ export type Language = 'en' | 'es' | 'pt';
 export interface Dictionary {
   toasts: {
     loginSuccessTitle: string;
-    loginSuccessDesc: string;
+    loginSuccessDesc: string; otpSentTitle: string; otpSentDesc: string; otpVerifiedTitle: string; otpVerifiedDesc: string;
     logoutSuccessTitle: string;
     logoutSuccessDesc: string;
     signupSuccessTitle: string;
@@ -47,7 +47,7 @@ export interface Dictionary {
     loading: string; save: string; cancel: string; delete: string; edit: string; close: string; success: string; error: string; yes: string; no: string; confirm: string; refresh: string; email: string;
   };
   navigation: { dashboard: string; log: string; history: string; reports: string; team: string; signOut: string; newEntry: string; };
-  auth: { signIn: string; signUp: string; createAccount: string; haveAccount: string; noAccount: string; firstName: string; lastName: string; roleTitle: string; termsPrefix: string; termsLink: string; termsAnd: string; privacyLink: string; signOut: string; email: string; password: string; accessDenied: string; pendingApproval: string; contactAdmin: string; };
+  auth: { signIn: string; signUp: string; createAccount: string; haveAccount: string; noAccount: string; firstName: string; lastName: string; roleTitle: string; termsPrefix: string; termsLink: string; termsAnd: string; privacyLink: string; signOut: string; sendOtp: string; verifyOtp: string; otpCode: string; useOtp: string; usePassword: string; checkEmailForOtp: string; otpPlaceholder: string; email: string; password: string; accessDenied: string; pendingApproval: string; contactAdmin: string; };
   roles: { super_admin: string; manager: string; crc: string; cra: string; data_entry: string; recruitment_specialist: string; retention_specialist: string; cta: string; ra: string; };
   status: { active: string; pending: string; rejected: string; };
   dashboard: { overview: string; todayLogs: string; thisWeekLogs: string; openQueries: string; actions: string; logNewActivity: string; viewHistory: string; quickLog: string; repeatRecent: string; activityDistribution: string; recentEntries: string; viewAll: string; noRecentEntries: string; time: string; entries: string; teamManagement: string; reviewTeamHistory: string; };

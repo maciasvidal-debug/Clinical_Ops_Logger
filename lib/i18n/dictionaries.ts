@@ -2,7 +2,7 @@ import { Dictionary, Language } from './types';
 
 export const en: Dictionary = {
   toasts: {
-    loginSuccessTitle: 'Success!',
+    loginSuccessTitle: 'Success!', otpSentTitle: 'Code Sent!', otpSentDesc: 'Please check your email.', otpVerifiedTitle: 'Verified!', otpVerifiedDesc: 'Login successful.',
     loginSuccessDesc: 'Great to see you again!',
     logoutSuccessTitle: 'Signed out',
     logoutSuccessDesc: 'Come back soon!',
@@ -45,7 +45,7 @@ export const en: Dictionary = {
   },
   common: { loading: 'Loading...', save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', close: 'Close', success: 'Success', error: 'Error', yes: 'Yes', no: 'No', confirm: 'Confirm', refresh: 'Refresh', email: 'Email', },
   navigation: { dashboard: 'Dashboard', log: 'Log Time', history: 'History', reports: 'Reports', team: 'Team', signOut: 'Sign Out', newEntry: 'New Entry', },
-  auth: { signIn: 'Sign In', signUp: 'Sign Up', createAccount: 'Create Account', haveAccount: 'Already have an account? Sign in', noAccount: "Don't have an account? Sign up", firstName: 'First Name', lastName: 'Last Name', roleTitle: 'Role', termsPrefix: 'By signing in, you agree to SiteFlow\'s ', termsLink: 'Terms of Service', termsAnd: ' and ', privacyLink: 'Privacy Policy', signOut: 'Sign Out', email: 'Email', password: 'Password', accessDenied: 'Access Denied', pendingApproval: 'Pending Approval', contactAdmin: 'Please contact your administrator.', },
+  auth: { signIn: 'Sign In', signUp: 'Sign Up', createAccount: 'Create Account', haveAccount: 'Already have an account? Sign in', noAccount: "Don't have an account? Sign up", firstName: 'First Name', lastName: 'Last Name', roleTitle: 'Role', termsPrefix: 'By signing in, you agree to SiteFlow\'s ', termsLink: 'Terms of Service', termsAnd: ' and ', privacyLink: 'Privacy Policy', signOut: 'Sign Out', sendOtp: 'Send Code', verifyOtp: 'Verify Code', otpCode: 'Code', useOtp: 'Use OTP', usePassword: 'Use Password', checkEmailForOtp: 'Check your email for the OTP code.', otpPlaceholder: '123456', email: 'Email', password: 'Password', accessDenied: 'Access Denied', pendingApproval: 'Pending Approval', contactAdmin: 'Please contact your administrator.', },
   roles: { super_admin: 'Super Admin', manager: 'Manager', crc: 'CRC', cra: 'CRA', data_entry: 'Data Entry', recruitment_specialist: 'Recruitment Specialist', retention_specialist: 'Retention Specialist', cta: 'CTA', ra: 'RA', },
   status: { active: 'Active', pending: 'Pending', rejected: 'Rejected', },
   dashboard: { overview: 'Overview of activities.', todayLogs: 'Today', thisWeekLogs: 'This Week', openQueries: 'Open Queries', actions: 'Actions', logNewActivity: 'Log New Activity', viewHistory: 'View History', quickLog: 'QUICK LOG', repeatRecent: 'Repeat Recent', activityDistribution: 'Activity Distribution', recentEntries: 'Recent Entries', viewAll: 'View All', noRecentEntries: 'No recent entries to show.', time: 'Time', entries: 'Entries', teamManagement: 'Team Management', reviewTeamHistory: 'Review Team History', },
@@ -59,7 +59,7 @@ export const en: Dictionary = {
 
 export const es: Dictionary = {
   toasts: {
-    loginSuccessTitle: '¡Éxito!',
+    loginSuccessTitle: '¡Éxito!', otpSentTitle: '¡Código Enviado!', otpSentDesc: 'Por favor revisa tu correo.', otpVerifiedTitle: '¡Verificado!', otpVerifiedDesc: 'Inicio de sesión exitoso.',
     loginSuccessDesc: '¡Qué bueno verte de nuevo!',
     logoutSuccessTitle: 'Sesión cerrada',
     logoutSuccessDesc: '¡Vuelve pronto!',
@@ -102,7 +102,7 @@ export const es: Dictionary = {
   },
   common: { loading: 'Cargando...', save: 'Guardar', cancel: 'Cancelar', delete: 'Eliminar', edit: 'Editar', close: 'Cerrar', success: 'Éxito', error: 'Error', yes: 'Sí', no: 'No', confirm: 'Confirmar', refresh: 'Actualizar', email: 'Correo Electrónico', },
   navigation: { dashboard: 'Panel', log: 'Registrar', history: 'Historial', reports: 'Reportes', team: 'Equipo', signOut: 'Cerrar Sesión', newEntry: 'Nuevo Registro', },
-  auth: { signIn: 'Iniciar Sesión', signUp: 'Registrarse', createAccount: 'Crear Cuenta', haveAccount: '¿Ya tienes cuenta? Inicia sesión', noAccount: '¿No tienes cuenta? Regístrate', firstName: 'Nombre', lastName: 'Apellido', roleTitle: 'Rol', termsPrefix: 'Al iniciar sesión, aceptas los ', termsLink: 'Términos de Servicio', termsAnd: ' y la ', privacyLink: 'Política de Privacidad', signOut: 'Cerrar Sesión', email: 'Correo Electrónico', password: 'Contraseña', accessDenied: 'Acceso Denegado', pendingApproval: 'Aprobación Pendiente', contactAdmin: 'Por favor, contacta a tu administrador.', },
+  auth: { signIn: 'Iniciar Sesión', signUp: 'Registrarse', createAccount: 'Crear Cuenta', haveAccount: '¿Ya tienes cuenta? Inicia sesión', noAccount: '¿No tienes cuenta? Regístrate', firstName: 'Nombre', lastName: 'Apellido', roleTitle: 'Rol', termsPrefix: 'Al iniciar sesión, aceptas los ', termsLink: 'Términos de Servicio', termsAnd: ' y la ', privacyLink: 'Política de Privacidad', signOut: 'Cerrar Sesión', sendOtp: 'Enviar Código', verifyOtp: 'Verificar', otpCode: 'Código', useOtp: 'Usar Código (OTP)', usePassword: 'Usar Contraseña', checkEmailForOtp: 'Revisa tu correo electrónico para ver el código OTP.', otpPlaceholder: '123456', email: 'Correo Electrónico', password: 'Contraseña', accessDenied: 'Acceso Denegado', pendingApproval: 'Aprobación Pendiente', contactAdmin: 'Por favor, contacta a tu administrador.', },
   roles: { super_admin: 'Súper Admin', manager: 'Gerente', crc: 'CRC', cra: 'CRA', data_entry: 'Data Entry', recruitment_specialist: 'Especialista de Reclutamiento', retention_specialist: 'Especialista de Retención', cta: 'CTA', ra: 'RA', },
   status: { active: 'Activo', pending: 'Pendiente', rejected: 'Rechazado', },
   dashboard: { overview: 'Resumen de actividades.', todayLogs: 'Hoy', thisWeekLogs: 'Esta Semana', openQueries: 'Consultas Abiertas', actions: 'Acciones', logNewActivity: 'Registrar Nueva Actividad', viewHistory: 'Ver Historial', quickLog: 'REGISTRO RÁPIDO', repeatRecent: 'Repetir Reciente', activityDistribution: 'Distribución de Actividad', recentEntries: 'Entradas Recientes', viewAll: 'Ver Todo', noRecentEntries: 'No hay entradas recientes.', time: 'Tiempo', entries: 'Entradas', teamManagement: 'Gestión de Equipo', reviewTeamHistory: 'Revisar Historial de Equipo', },
@@ -116,7 +116,7 @@ export const es: Dictionary = {
 
 export const pt: Dictionary = {
   toasts: {
-    loginSuccessTitle: 'Sucesso!',
+    loginSuccessTitle: 'Sucesso!', otpSentTitle: 'Código Enviado!', otpSentDesc: 'Por favor, verifique seu e-mail.', otpVerifiedTitle: 'Verificado!', otpVerifiedDesc: 'Login bem-sucedido.',
     loginSuccessDesc: 'Que bom ver você novamente!',
     logoutSuccessTitle: 'Sessão encerrada',
     logoutSuccessDesc: 'Volte logo!',
@@ -159,7 +159,7 @@ export const pt: Dictionary = {
   },
   common: { loading: 'Carregando...', save: 'Salvar', cancel: 'Cancelar', delete: 'Excluir', edit: 'Editar', close: 'Fechar', success: 'Sucesso', error: 'Erro', yes: 'Sim', no: 'Não', confirm: 'Confirmar', refresh: 'Atualizar', email: 'E-mail', },
   navigation: { dashboard: 'Painel', log: 'Registrar Tempo', history: 'Histórico', reports: 'Relatórios', team: 'Equipe', signOut: 'Sair', newEntry: 'Nova Entrada', },
-  auth: { signIn: 'Entrar', signUp: 'Inscrever-se', createAccount: 'Criar Conta', haveAccount: 'Já tem uma conta? Entrar', noAccount: 'Não tem uma conta? Inscrever-se', firstName: 'Nome', lastName: 'Sobrenome', roleTitle: 'Função', termsPrefix: 'Ao entrar, você concorda com os ', termsLink: 'Termos de Serviço', termsAnd: ' e a ', privacyLink: 'Política de Privacidade', signOut: 'Sair', email: 'E-mail', password: 'Senha', accessDenied: 'Acesso Negado', pendingApproval: 'Aprovação Pendente', contactAdmin: 'Por favor, contate o seu administrador.', },
+  auth: { signIn: 'Entrar', signUp: 'Inscrever-se', createAccount: 'Criar Conta', haveAccount: 'Já tem uma conta? Entrar', noAccount: 'Não tem uma conta? Inscrever-se', firstName: 'Nome', lastName: 'Sobrenome', roleTitle: 'Função', termsPrefix: 'Ao entrar, você concorda com os ', termsLink: 'Termos de Serviço', termsAnd: ' e a ', privacyLink: 'Política de Privacidade', signOut: 'Sair', sendOtp: 'Enviar Código', verifyOtp: 'Verificar', otpCode: 'Código', useOtp: 'Usar Código (OTP)', usePassword: 'Usar Senha', checkEmailForOtp: 'Verifique seu e-mail para ver o código OTP.', otpPlaceholder: '123456', email: 'E-mail', password: 'Senha', accessDenied: 'Acesso Negado', pendingApproval: 'Aprovação Pendente', contactAdmin: 'Por favor, contate o seu administrador.', },
   roles: { super_admin: 'Super Administrador', manager: 'Gerente', crc: 'CRC', cra: 'CRA', data_entry: 'Data Entry', recruitment_specialist: 'Especialista em Recrutamento', retention_specialist: 'Especialista em Retenção', cta: 'CTA', ra: 'RA', },
   status: { active: 'Ativo', pending: 'Pendente', rejected: 'Rejeitado', },
   dashboard: { overview: 'Visão geral das atividades.', todayLogs: 'Hoje', thisWeekLogs: 'Esta Semana', openQueries: 'Consultas Abertas', actions: 'Ações', logNewActivity: 'Registrar Nova Atividade', viewHistory: 'Ver Histórico', quickLog: 'REGISTRO RÁPIDO', repeatRecent: 'Repetir Reciente', activityDistribution: 'Distribuição de Atividade', recentEntries: 'Entradas Recientes', viewAll: 'Ver Tudo', noRecentEntries: 'Nenhuma entrada recente.', time: 'Tempo', entries: 'Entradas', teamManagement: 'Gestão de Equipe', reviewTeamHistory: 'Revisar Histórico da Equipe', },

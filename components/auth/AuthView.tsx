@@ -3,18 +3,22 @@
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { Activity, Loader2, Mail, Lock, User, Briefcase } from "lucide-react";
+import { Activity, Loader2, Mail, Lock, User, Briefcase, KeyRound } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/LanguageSelector";
 import { UserRole } from "@/lib/types";
 import { LegalModal } from "./LegalModal";
 
+type LoginMode = "password" | "otp_request" | "otp_verify";
+
 export function AuthView() {
   const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(true);
+  const [loginMode, setLoginMode] = useState<LoginMode>("password");
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otpCode, setOtpCode] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<UserRole>("cra");
@@ -29,9 +33,23 @@ export function AuthView() {
 
     try {
       if (isLogin) {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        toast.success(t.toasts.loginSuccessTitle, { description: t.toasts.loginSuccessDesc });
+        if (loginMode === "password") {
+          const { error } = await supabase.auth.signInWithPassword({ email, password });
+          if (error) throw error;
+          toast.success(t.toasts.loginSuccessTitle, { description: t.toasts.loginSuccessDesc });
+        } else if (loginMode === "otp_request") {
+          const { error } = await supabase.auth.signInWithOtp({
+            email,
+            options: { shouldCreateUser: false }
+          });
+          if (error) throw error;
+          setLoginMode("otp_verify");
+          toast.success(t.toasts.otpSentTitle, { description: t.toasts.otpSentDesc });
+        } else if (loginMode === "otp_verify") {
+          const { error } = await supabase.auth.verifyOtp({ email, token: otpCode, type: 'email' });
+          if (error) throw error;
+          toast.success(t.toasts.otpVerifiedTitle, { description: t.toasts.otpVerifiedDesc });
+        }
       } else {
         const { data, error } = await supabase.auth.signUp({ 
           email, 
@@ -50,7 +68,11 @@ export function AuthView() {
         }
       }
     } catch (error: unknown) {
-      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
+      if (error instanceof Error) {
+        toast.error(t.toasts.errorTitle, { description: error.message || t.toasts.errorDesc });
+      } else {
+        toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
+      }
     } finally {
       setLoading(false);
     }
@@ -92,7 +114,7 @@ export function AuthView() {
 
         <div className="p-8">
           <h2 className="text-xl font-semibold text-neutral-900 mb-6 text-center">
-            {isLogin ? t.auth.signIn : t.auth.createAccount}
+            {isLogin ? (loginMode === "otp_verify" ? t.auth.verifyOtp : t.auth.signIn) : t.auth.createAccount}
           </h2>
 
           <form onSubmit={handleAuth} className="space-y-4">
@@ -149,35 +171,58 @@ export function AuthView() {
               </div>
             )}
 
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.email.toUpperCase()}</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                  placeholder="name@company.com"
-                />
+            {(!isLogin || loginMode !== "otp_verify") && (
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.email.toUpperCase()}</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    placeholder="name@company.com"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.password.toUpperCase()}</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                  placeholder="••••••••"
-                />
+            {isLogin && loginMode === "otp_verify" && (
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.otpCode.toUpperCase()}</label>
+                <p className="text-sm text-neutral-600 mb-2">{t.auth.checkEmailForOtp}</p>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="text"
+                    required
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center tracking-widest font-mono text-lg"
+                    placeholder={t.auth.otpPlaceholder}
+                    maxLength={6}
+                  />
+                </div>
               </div>
-            </div>
+            )}
+
+            {(!isLogin || loginMode === "password") && (
+              <div className="space-y-1">
+                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.password.toUpperCase()}</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+            )}
 
             <button
               type="submit"
@@ -187,14 +232,49 @@ export function AuthView() {
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                isLogin ? t.auth.signIn : t.auth.signUp
+                isLogin
+                  ? (loginMode === "password" ? t.auth.signIn : (loginMode === "otp_request" ? t.auth.sendOtp : t.auth.verifyOtp))
+                  : t.auth.signUp
               )}
             </button>
           </form>
 
+          {isLogin && (
+            <div className="mt-4 flex flex-col space-y-2">
+              <div className="relative flex items-center py-2">
+                <div className="flex-grow border-t border-neutral-200"></div>
+                <span className="flex-shrink-0 mx-4 text-neutral-400 text-xs uppercase">OR</span>
+                <div className="flex-grow border-t border-neutral-200"></div>
+              </div>
+
+              {loginMode === "password" ? (
+                <button
+                  type="button"
+                  onClick={() => setLoginMode("otp_request")}
+                  className="w-full bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 py-2.5 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2 text-sm"
+                >
+                  <Mail className="w-4 h-4" />
+                  {t.auth.useOtp}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setLoginMode("password")}
+                  className="w-full bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 py-2.5 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2 text-sm"
+                >
+                  <Lock className="w-4 h-4" />
+                  {t.auth.usePassword}
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="mt-6 text-center">
             <button
-              onClick={() => setIsLogin(!isLogin)}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setLoginMode("password");
+              }}
               className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
             >
               {isLogin ? t.auth.noAccount : t.auth.haveAccount}
