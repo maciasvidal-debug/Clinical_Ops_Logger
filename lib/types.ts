@@ -556,8 +556,8 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
   ],
   "cra": [
     {
-      "id": "site_visits",
-      "name": "Site Monitoring Visits",
+      "id": "startup_reg",
+      "name": "01. START-UP & REGULATORY",
       "tasks": [
         {
           "id": "ssv",
@@ -588,7 +588,13 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "IP handling review"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "id": "conduct",
+      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "tasks": [
         {
           "id": "rmv",
           "name": "Routine Monitoring Visit (RMV)",
@@ -604,23 +610,6 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
             }
           ]
         },
-        {
-          "id": "cov",
-          "name": "Close-Out Visit (COV)",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "cov_ip",
-              "name": "Final IP reconciliation"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "remote_mgt",
-      "name": "Remote Monitoring & Management",
-      "tasks": [
         {
           "id": "central_mon",
           "name": "Centralized Monitoring",
@@ -675,23 +664,55 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
             }
           ]
+        },
+        {
+          "id": "cov",
+          "name": "Close-Out Visit (COV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cov_ip",
+              "name": "Final IP reconciliation"
+            }
+          ]
         }
       ]
     }
   ],
   "cta": [
     {
-      "id": "tmf_mgt",
-      "name": "Trial Master File (TMF)",
+      "id": "startup_reg",
+      "name": "01. START-UP & REGULATORY",
       "tasks": [
         {
           "id": "doc_proc",
-          "name": "Document Processing",
+          "name": "Trial Master File (TMF) Processing",
           "roleContext": "cro_led",
           "subTasks": [
             {
               "id": "dp_up",
               "name": "Uploading to eTMF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conduct",
+      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "tasks": [
+        {
+          "id": "site_comm",
+          "name": "Site Communication",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "sc_call",
+              "name": "Weekly check-in calls"
+            },
+            {
+              "id": "sc_email",
+              "name": "Email correspondence"
             }
           ]
         }
@@ -721,6 +742,47 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
             }
           ]
+        },
+        {
+          "id": "ssv",
+          "name": "Site Selection Visit (SSV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "ssv_fac",
+              "name": "Facility assessment"
+            },
+            {
+              "id": "ssv_pi",
+              "name": "PI qualification review"
+            }
+          ]
+        },
+        {
+          "id": "siv",
+          "name": "Site Initiation Visit (SIV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "siv_train",
+              "name": "Protocol training"
+            },
+            {
+              "id": "siv_ip",
+              "name": "IP handling review"
+            }
+          ]
+        },
+        {
+          "id": "doc_proc",
+          "name": "Trial Master File (TMF) Processing",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "dp_up",
+              "name": "Uploading to eTMF"
+            }
+          ]
         }
       ]
     },
@@ -812,6 +874,51 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "Programación de visitas en ventana y registro"
             }
           ]
+        },
+        {
+          "id": "rmv",
+          "name": "Routine Monitoring Visit (RMV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "rmv_sdv",
+              "name": "SDV/SDR"
+            },
+            {
+              "id": "rmv_ip",
+              "name": "IP accountability"
+            }
+          ]
+        },
+        {
+          "id": "central_mon",
+          "name": "Centralized Monitoring",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cm_kri",
+              "name": "KRI review"
+            },
+            {
+              "id": "cm_trend",
+              "name": "Data trending analysis"
+            }
+          ]
+        },
+        {
+          "id": "site_comm",
+          "name": "Site Communication",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "sc_call",
+              "name": "Weekly check-in calls"
+            },
+            {
+              "id": "sc_email",
+              "name": "Email correspondence"
+            }
+          ]
         }
       ]
     },
@@ -862,57 +969,6 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
             }
           ]
-        }
-      ]
-    },
-    {
-      "id": "site_visits",
-      "name": "Site Monitoring Visits",
-      "tasks": [
-        {
-          "id": "ssv",
-          "name": "Site Selection Visit (SSV)",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "ssv_fac",
-              "name": "Facility assessment"
-            },
-            {
-              "id": "ssv_pi",
-              "name": "PI qualification review"
-            }
-          ]
-        },
-        {
-          "id": "siv",
-          "name": "Site Initiation Visit (SIV)",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "siv_train",
-              "name": "Protocol training"
-            },
-            {
-              "id": "siv_ip",
-              "name": "IP handling review"
-            }
-          ]
-        },
-        {
-          "id": "rmv",
-          "name": "Routine Monitoring Visit (RMV)",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "rmv_sdv",
-              "name": "SDV/SDR"
-            },
-            {
-              "id": "rmv_ip",
-              "name": "IP accountability"
-            }
-          ]
         },
         {
           "id": "cov",
@@ -922,59 +978,6 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
             {
               "id": "cov_ip",
               "name": "Final IP reconciliation"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "remote_mgt",
-      "name": "Remote Monitoring & Management",
-      "tasks": [
-        {
-          "id": "central_mon",
-          "name": "Centralized Monitoring",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "cm_kri",
-              "name": "KRI review"
-            },
-            {
-              "id": "cm_trend",
-              "name": "Data trending analysis"
-            }
-          ]
-        },
-        {
-          "id": "site_comm",
-          "name": "Site Communication",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "sc_call",
-              "name": "Weekly check-in calls"
-            },
-            {
-              "id": "sc_email",
-              "name": "Email correspondence"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "tmf_mgt",
-      "name": "Trial Master File (TMF)",
-      "tasks": [
-        {
-          "id": "doc_proc",
-          "name": "Document Processing",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "dp_up",
-              "name": "Uploading to eTMF"
             }
           ]
         }
@@ -1004,6 +1007,47 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
             }
           ]
+        },
+        {
+          "id": "ssv",
+          "name": "Site Selection Visit (SSV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "ssv_fac",
+              "name": "Facility assessment"
+            },
+            {
+              "id": "ssv_pi",
+              "name": "PI qualification review"
+            }
+          ]
+        },
+        {
+          "id": "siv",
+          "name": "Site Initiation Visit (SIV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "siv_train",
+              "name": "Protocol training"
+            },
+            {
+              "id": "siv_ip",
+              "name": "IP handling review"
+            }
+          ]
+        },
+        {
+          "id": "doc_proc",
+          "name": "Trial Master File (TMF) Processing",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "dp_up",
+              "name": "Uploading to eTMF"
+            }
+          ]
         }
       ]
     },
@@ -1095,6 +1139,51 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "Programación de visitas en ventana y registro"
             }
           ]
+        },
+        {
+          "id": "rmv",
+          "name": "Routine Monitoring Visit (RMV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "rmv_sdv",
+              "name": "SDV/SDR"
+            },
+            {
+              "id": "rmv_ip",
+              "name": "IP accountability"
+            }
+          ]
+        },
+        {
+          "id": "central_mon",
+          "name": "Centralized Monitoring",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cm_kri",
+              "name": "KRI review"
+            },
+            {
+              "id": "cm_trend",
+              "name": "Data trending analysis"
+            }
+          ]
+        },
+        {
+          "id": "site_comm",
+          "name": "Site Communication",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "sc_call",
+              "name": "Weekly check-in calls"
+            },
+            {
+              "id": "sc_email",
+              "name": "Email correspondence"
+            }
+          ]
         }
       ]
     },
@@ -1145,57 +1234,6 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
               "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
             }
           ]
-        }
-      ]
-    },
-    {
-      "id": "site_visits",
-      "name": "Site Monitoring Visits",
-      "tasks": [
-        {
-          "id": "ssv",
-          "name": "Site Selection Visit (SSV)",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "ssv_fac",
-              "name": "Facility assessment"
-            },
-            {
-              "id": "ssv_pi",
-              "name": "PI qualification review"
-            }
-          ]
-        },
-        {
-          "id": "siv",
-          "name": "Site Initiation Visit (SIV)",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "siv_train",
-              "name": "Protocol training"
-            },
-            {
-              "id": "siv_ip",
-              "name": "IP handling review"
-            }
-          ]
-        },
-        {
-          "id": "rmv",
-          "name": "Routine Monitoring Visit (RMV)",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "rmv_sdv",
-              "name": "SDV/SDR"
-            },
-            {
-              "id": "rmv_ip",
-              "name": "IP accountability"
-            }
-          ]
         },
         {
           "id": "cov",
@@ -1211,61 +1249,8 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       ]
     },
     {
-      "id": "remote_mgt",
-      "name": "Remote Monitoring & Management",
-      "tasks": [
-        {
-          "id": "central_mon",
-          "name": "Centralized Monitoring",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "cm_kri",
-              "name": "KRI review"
-            },
-            {
-              "id": "cm_trend",
-              "name": "Data trending analysis"
-            }
-          ]
-        },
-        {
-          "id": "site_comm",
-          "name": "Site Communication",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "sc_call",
-              "name": "Weekly check-in calls"
-            },
-            {
-              "id": "sc_email",
-              "name": "Email correspondence"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "tmf_mgt",
-      "name": "Trial Master File (TMF)",
-      "tasks": [
-        {
-          "id": "doc_proc",
-          "name": "Document Processing",
-          "roleContext": "cro_led",
-          "subTasks": [
-            {
-              "id": "dp_up",
-              "name": "Uploading to eTMF"
-            }
-          ]
-        }
-      ]
-    },
-    {
       "id": "sys_admin",
-      "name": "System Administration",
+      "name": "06. SYSTEM ADMINISTRATION",
       "tasks": [
         {
           "id": "user_mgt",
