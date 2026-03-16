@@ -22,6 +22,7 @@ export interface DbActivitySubtask {
 }
 
 export interface DbActivityTask {
+  role_context?: "site_led" | "cro_led" | "shared";
   id: string;
   category_id: string;
   name: string;
@@ -161,6 +162,7 @@ export interface UserProtocolAssignment {
 }
 
 export interface ActivityTask {
+  roleContext?: "site_led" | "cro_led" | "shared";
   id: string;
   name: string;
   subTasks?: { id: string; name: string }[];
@@ -173,190 +175,1112 @@ export interface ActivityCategory {
 }
 
 export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
-  cra: [
+  "ra": [
     {
-      id: "site_visits",
-      name: "Site Monitoring Visits",
-      tasks: [
+      "id": "startup_reg",
+      "name": "01. START-UP & REGULATORY",
+      "tasks": [
         {
-          id: "ssv",
-          name: "Site Selection Visit (SSV)",
-          subTasks: [
-            { id: "ssv_fac", name: "Facility assessment" },
-            { id: "ssv_pi", name: "PI qualification review" },
-          ],
-        },
-        {
-          id: "siv",
-          name: "Site Initiation Visit (SIV)",
-          subTasks: [
-            { id: "siv_train", name: "Protocol training" },
-            { id: "siv_ip", name: "IP handling review" },
-          ],
-        },
-        {
-          id: "rmv",
-          name: "Routine Monitoring Visit (RMV)",
-          subTasks: [
-            { id: "rmv_sdv", name: "SDV/SDR" },
-            { id: "rmv_ip", name: "IP accountability" },
-          ],
-        },
-        {
-          id: "cov",
-          name: "Close-Out Visit (COV)",
-          subTasks: [{ id: "cov_ip", name: "Final IP reconciliation" }],
-        },
-      ],
-    },
-    {
-      id: "remote_mgt",
-      name: "Remote Monitoring & Management",
-      tasks: [
-        {
-          id: "central_mon",
-          name: "Centralized Monitoring",
-          subTasks: [
-            { id: "cm_kri", name: "KRI review" },
-            { id: "cm_trend", name: "Data trending analysis" },
-          ],
-        },
-        {
-          id: "site_comm",
-          name: "Site Communication",
-          subTasks: [
-            { id: "sc_call", name: "Weekly check-in calls" },
-            { id: "sc_email", name: "Email correspondence" },
-          ],
-        },
-      ],
-    },
+          "id": "gest_reg_dossier",
+          "name": "Gestión Regulatoria y Dossier",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "sometimiento_inicial",
+              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+            },
+            {
+              "id": "act_isf",
+              "name": "Actualización y foliación del Investigator Site File (ISF)"
+            },
+            {
+              "id": "gest_cta",
+              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+            }
+          ]
+        }
+      ]
+    }
   ],
-  crc: [
+  "recruitment_specialist": [
     {
-      id: "patient_visits",
-      name: "Patient Visits & Clinical",
-      tasks: [
+      "id": "recruitment_retention",
+      "name": "02. RECRUITMENT & RETENTION",
+      "tasks": [
         {
-          id: "screening",
-          name: "Screening & Consent",
-          subTasks: [
-            { id: "scr_cons", name: "Consent visit completed" },
-            { id: "scr_fail", name: "Participant screenfailed" },
-          ],
-        },
-        {
-          id: "randomization",
-          name: "Randomization",
-          subTasks: [
-            { id: "rnd_enr", name: "Participant Randomized/Enrolled" },
-          ],
-        },
-        {
-          id: "treatment",
-          name: "Study Visits",
-          subTasks: [
-            { id: "vis_fu", name: "Follow-up visit completed" },
-            { id: "vis_eot", name: "EOT visit completed" },
-          ],
-        },
-      ],
+          "id": "ejec_reclutamiento",
+          "name": "Ejecución de Reclutamiento",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "pre_screening_logs",
+              "name": "Ejecución de Pre-screening y logs"
+            },
+            {
+              "id": "gest_bd_pacientes",
+              "name": "Gestión de bases de datos de pacientes potenciales"
+            }
+          ]
+        }
+      ]
     },
-  ],
-  recruitment_specialist: [
     {
-      id: "outreach",
-      name: "Outreach & Advertising",
-      tasks: [
+      "id": "qa_closeout",
+      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "tasks": [
         {
-          id: "campaign",
-          name: "Campaign Management",
-          subTasks: [{ id: "camp_social", name: "Social media ad placement" }],
-        },
-      ],
-    },
+          "id": "soporte_auditoria",
+          "name": "Soporte a Auditoría y Monitorización",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "prep_visitas",
+              "name": "Preparación de visitas (SDV/SDR readiness)"
+            },
+            {
+              "id": "ejec_qc",
+              "name": "Ejecución de actividades de Control de Calidad"
+            },
+            {
+              "id": "resp_hallazgos",
+              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+            }
+          ]
+        }
+      ]
+    }
   ],
-  retention_specialist: [
+  "retention_specialist": [
     {
-      id: "pt_engagement",
-      name: "Patient Engagement",
-      tasks: [
+      "id": "recruitment_retention",
+      "name": "02. RECRUITMENT & RETENTION",
+      "tasks": [
         {
-          id: "retention_comms",
-          name: "Retention Communications",
-          subTasks: [{ id: "ret_call", name: "Retention call made" }],
-        },
-      ],
+          "id": "estrategias_retencion",
+          "name": "Estrategias de Retención",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "coord_logistica",
+              "name": "Coordinación de logística y transporte para sujetos"
+            },
+            {
+              "id": "llamadas_seguimiento",
+              "name": "Llamadas de recordatorio y seguimiento de visitas"
+            }
+          ]
+        }
+      ]
     },
-  ],
-  ra: [
     {
-      id: "irb_iec",
-      name: "IRB/IEC Submissions",
-      tasks: [
+      "id": "conduct",
+      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "tasks": [
         {
-          id: "init_sub",
-          name: "Initial Submissions",
-          subTasks: [{ id: "init_prot", name: "Protocol/ICF preparation" }],
-        },
-      ],
+          "id": "control_visitas",
+          "name": "Control de Visitas de Sujetos",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "prog_visitas",
+              "name": "Programación de visitas en ventana y registro"
+            }
+          ]
+        }
+      ]
     },
-  ],
-  cta: [
     {
-      id: "tmf_mgt",
-      name: "Trial Master File (TMF)",
-      tasks: [
+      "id": "qa_closeout",
+      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "tasks": [
         {
-          id: "doc_proc",
-          name: "Document Processing",
-          subTasks: [{ id: "dp_up", name: "Uploading to eTMF" }],
-        },
-      ],
-    },
+          "id": "soporte_auditoria",
+          "name": "Soporte a Auditoría y Monitorización",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "prep_visitas",
+              "name": "Preparación de visitas (SDV/SDR readiness)"
+            },
+            {
+              "id": "ejec_qc",
+              "name": "Ejecución de actividades de Control de Calidad"
+            },
+            {
+              "id": "resp_hallazgos",
+              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+            }
+          ]
+        }
+      ]
+    }
   ],
-  data_entry: [
+  "data_entry": [
     {
-      id: "edc_mgt",
-      name: "EDC Management",
-      tasks: [
+      "id": "conduct",
+      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "tasks": [
         {
-          id: "data_trans",
-          name: "Data Transcription",
-          subTasks: [{ id: "dt_first", name: "First pass data entry" }],
+          "id": "gest_datos_ecrf",
+          "name": "Gestión de Datos eCRF",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "transcripcion_fuente",
+              "name": "Transcripción de fuente a eCRF"
+            },
+            {
+              "id": "carga_labs",
+              "name": "Carga de resultados de laboratorios y procedimientos"
+            },
+            {
+              "id": "registro_logs",
+              "name": "Registro y actualización de logs de CM/EAs"
+            }
+          ]
         },
-      ],
+        {
+          "id": "resolucion_discrepancias",
+          "name": "Resolución de Discrepancias",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "resp_tecnica_queries",
+              "name": "Respuesta técnica a Queries"
+            },
+            {
+              "id": "ejec_correcciones",
+              "name": "Ejecución de correcciones en sistema EDC y fuente"
+            },
+            {
+              "id": "gest_firmas_inv",
+              "name": "Gestión de firmas del Investigador (Sign-off)"
+            }
+          ]
+        }
+      ]
     },
-  ],
-  manager: [
     {
-      id: "proj_mgt",
-      name: "Project Management",
-      tasks: [
+      "id": "qa_closeout",
+      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "tasks": [
         {
-          id: "resourcing",
-          name: "Resourcing",
-          subTasks: [
-            { id: "res_ass", name: "CRA/CRC assignment" },
-            { id: "res_time", name: "Timesheet approval" },
-          ],
-        },
-      ],
-    },
+          "id": "soporte_auditoria",
+          "name": "Soporte a Auditoría y Monitorización",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "prep_visitas",
+              "name": "Preparación de visitas (SDV/SDR readiness)"
+            },
+            {
+              "id": "ejec_qc",
+              "name": "Ejecución de actividades de Control de Calidad"
+            },
+            {
+              "id": "resp_hallazgos",
+              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+            }
+          ]
+        }
+      ]
+    }
   ],
-  super_admin: [
+  "crc": [
     {
-      id: "sys_admin",
-      name: "System Administration",
-      tasks: [
+      "id": "startup_reg",
+      "name": "01. START-UP & REGULATORY",
+      "tasks": [
         {
-          id: "user_mgt",
-          name: "User Management",
-          subTasks: [{ id: "um_prov", name: "Account provisioning" }],
-        },
-      ],
+          "id": "gest_reg_dossier",
+          "name": "Gestión Regulatoria y Dossier",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "sometimiento_inicial",
+              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+            },
+            {
+              "id": "act_isf",
+              "name": "Actualización y foliación del Investigator Site File (ISF)"
+            },
+            {
+              "id": "gest_cta",
+              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+            }
+          ]
+        }
+      ]
     },
+    {
+      "id": "recruitment_retention",
+      "name": "02. RECRUITMENT & RETENTION",
+      "tasks": [
+        {
+          "id": "ejec_reclutamiento",
+          "name": "Ejecución de Reclutamiento",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "pre_screening_logs",
+              "name": "Ejecución de Pre-screening y logs"
+            },
+            {
+              "id": "gest_bd_pacientes",
+              "name": "Gestión de bases de datos de pacientes potenciales"
+            }
+          ]
+        },
+        {
+          "id": "estrategias_retencion",
+          "name": "Estrategias de Retención",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "coord_logistica",
+              "name": "Coordinación de logística y transporte para sujetos"
+            },
+            {
+              "id": "llamadas_seguimiento",
+              "name": "Llamadas de recordatorio y seguimiento de visitas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conduct",
+      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "tasks": [
+        {
+          "id": "gest_datos_ecrf",
+          "name": "Gestión de Datos eCRF",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "transcripcion_fuente",
+              "name": "Transcripción de fuente a eCRF"
+            },
+            {
+              "id": "carga_labs",
+              "name": "Carga de resultados de laboratorios y procedimientos"
+            },
+            {
+              "id": "registro_logs",
+              "name": "Registro y actualización de logs de CM/EAs"
+            }
+          ]
+        },
+        {
+          "id": "resolucion_discrepancias",
+          "name": "Resolución de Discrepancias",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "resp_tecnica_queries",
+              "name": "Respuesta técnica a Queries"
+            },
+            {
+              "id": "ejec_correcciones",
+              "name": "Ejecución de correcciones en sistema EDC y fuente"
+            },
+            {
+              "id": "gest_firmas_inv",
+              "name": "Gestión de firmas del Investigador (Sign-off)"
+            }
+          ]
+        },
+        {
+          "id": "control_visitas",
+          "name": "Control de Visitas de Sujetos",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "prog_visitas",
+              "name": "Programación de visitas en ventana y registro"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "safety_pv",
+      "name": "04. SEGURIDAD Y FARMACOVIGILANCIA",
+      "tasks": [
+        {
+          "id": "reporte_seguridad",
+          "name": "Reporte de Seguridad",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "notif_saes",
+              "name": "Notificación inicial y seguimiento de SAEs"
+            },
+            {
+              "id": "recoleccion_fuentes",
+              "name": "Recolección y anonimización de fuentes médicas"
+            },
+            {
+              "id": "eval_medica",
+              "name": "Evaluación médica de causalidad y severidad"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qa_closeout",
+      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "tasks": [
+        {
+          "id": "soporte_auditoria",
+          "name": "Soporte a Auditoría y Monitorización",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "prep_visitas",
+              "name": "Preparación de visitas (SDV/SDR readiness)"
+            },
+            {
+              "id": "ejec_qc",
+              "name": "Ejecución de actividades de Control de Calidad"
+            },
+            {
+              "id": "resp_hallazgos",
+              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+            }
+          ]
+        }
+      ]
+    }
   ],
+  "cra": [
+    {
+      "id": "site_visits",
+      "name": "Site Monitoring Visits",
+      "tasks": [
+        {
+          "id": "ssv",
+          "name": "Site Selection Visit (SSV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "ssv_fac",
+              "name": "Facility assessment"
+            },
+            {
+              "id": "ssv_pi",
+              "name": "PI qualification review"
+            }
+          ]
+        },
+        {
+          "id": "siv",
+          "name": "Site Initiation Visit (SIV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "siv_train",
+              "name": "Protocol training"
+            },
+            {
+              "id": "siv_ip",
+              "name": "IP handling review"
+            }
+          ]
+        },
+        {
+          "id": "rmv",
+          "name": "Routine Monitoring Visit (RMV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "rmv_sdv",
+              "name": "SDV/SDR"
+            },
+            {
+              "id": "rmv_ip",
+              "name": "IP accountability"
+            }
+          ]
+        },
+        {
+          "id": "cov",
+          "name": "Close-Out Visit (COV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cov_ip",
+              "name": "Final IP reconciliation"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "remote_mgt",
+      "name": "Remote Monitoring & Management",
+      "tasks": [
+        {
+          "id": "central_mon",
+          "name": "Centralized Monitoring",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cm_kri",
+              "name": "KRI review"
+            },
+            {
+              "id": "cm_trend",
+              "name": "Data trending analysis"
+            }
+          ]
+        },
+        {
+          "id": "site_comm",
+          "name": "Site Communication",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "sc_call",
+              "name": "Weekly check-in calls"
+            },
+            {
+              "id": "sc_email",
+              "name": "Email correspondence"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qa_closeout",
+      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "tasks": [
+        {
+          "id": "soporte_auditoria",
+          "name": "Soporte a Auditoría y Monitorización",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "prep_visitas",
+              "name": "Preparación de visitas (SDV/SDR readiness)"
+            },
+            {
+              "id": "ejec_qc",
+              "name": "Ejecución de actividades de Control de Calidad"
+            },
+            {
+              "id": "resp_hallazgos",
+              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "cta": [
+    {
+      "id": "tmf_mgt",
+      "name": "Trial Master File (TMF)",
+      "tasks": [
+        {
+          "id": "doc_proc",
+          "name": "Document Processing",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "dp_up",
+              "name": "Uploading to eTMF"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "manager": [
+    {
+      "id": "startup_reg",
+      "name": "01. START-UP & REGULATORY",
+      "tasks": [
+        {
+          "id": "gest_reg_dossier",
+          "name": "Gestión Regulatoria y Dossier",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "sometimiento_inicial",
+              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+            },
+            {
+              "id": "act_isf",
+              "name": "Actualización y foliación del Investigator Site File (ISF)"
+            },
+            {
+              "id": "gest_cta",
+              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recruitment_retention",
+      "name": "02. RECRUITMENT & RETENTION",
+      "tasks": [
+        {
+          "id": "ejec_reclutamiento",
+          "name": "Ejecución de Reclutamiento",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "pre_screening_logs",
+              "name": "Ejecución de Pre-screening y logs"
+            },
+            {
+              "id": "gest_bd_pacientes",
+              "name": "Gestión de bases de datos de pacientes potenciales"
+            }
+          ]
+        },
+        {
+          "id": "estrategias_retencion",
+          "name": "Estrategias de Retención",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "coord_logistica",
+              "name": "Coordinación de logística y transporte para sujetos"
+            },
+            {
+              "id": "llamadas_seguimiento",
+              "name": "Llamadas de recordatorio y seguimiento de visitas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conduct",
+      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "tasks": [
+        {
+          "id": "gest_datos_ecrf",
+          "name": "Gestión de Datos eCRF",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "transcripcion_fuente",
+              "name": "Transcripción de fuente a eCRF"
+            },
+            {
+              "id": "carga_labs",
+              "name": "Carga de resultados de laboratorios y procedimientos"
+            },
+            {
+              "id": "registro_logs",
+              "name": "Registro y actualización de logs de CM/EAs"
+            }
+          ]
+        },
+        {
+          "id": "resolucion_discrepancias",
+          "name": "Resolución de Discrepancias",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "resp_tecnica_queries",
+              "name": "Respuesta técnica a Queries"
+            },
+            {
+              "id": "ejec_correcciones",
+              "name": "Ejecución de correcciones en sistema EDC y fuente"
+            },
+            {
+              "id": "gest_firmas_inv",
+              "name": "Gestión de firmas del Investigador (Sign-off)"
+            }
+          ]
+        },
+        {
+          "id": "control_visitas",
+          "name": "Control de Visitas de Sujetos",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "prog_visitas",
+              "name": "Programación de visitas en ventana y registro"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "safety_pv",
+      "name": "04. SEGURIDAD Y FARMACOVIGILANCIA",
+      "tasks": [
+        {
+          "id": "reporte_seguridad",
+          "name": "Reporte de Seguridad",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "notif_saes",
+              "name": "Notificación inicial y seguimiento de SAEs"
+            },
+            {
+              "id": "recoleccion_fuentes",
+              "name": "Recolección y anonimización de fuentes médicas"
+            },
+            {
+              "id": "eval_medica",
+              "name": "Evaluación médica de causalidad y severidad"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qa_closeout",
+      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "tasks": [
+        {
+          "id": "soporte_auditoria",
+          "name": "Soporte a Auditoría y Monitorización",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "prep_visitas",
+              "name": "Preparación de visitas (SDV/SDR readiness)"
+            },
+            {
+              "id": "ejec_qc",
+              "name": "Ejecución de actividades de Control de Calidad"
+            },
+            {
+              "id": "resp_hallazgos",
+              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "site_visits",
+      "name": "Site Monitoring Visits",
+      "tasks": [
+        {
+          "id": "ssv",
+          "name": "Site Selection Visit (SSV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "ssv_fac",
+              "name": "Facility assessment"
+            },
+            {
+              "id": "ssv_pi",
+              "name": "PI qualification review"
+            }
+          ]
+        },
+        {
+          "id": "siv",
+          "name": "Site Initiation Visit (SIV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "siv_train",
+              "name": "Protocol training"
+            },
+            {
+              "id": "siv_ip",
+              "name": "IP handling review"
+            }
+          ]
+        },
+        {
+          "id": "rmv",
+          "name": "Routine Monitoring Visit (RMV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "rmv_sdv",
+              "name": "SDV/SDR"
+            },
+            {
+              "id": "rmv_ip",
+              "name": "IP accountability"
+            }
+          ]
+        },
+        {
+          "id": "cov",
+          "name": "Close-Out Visit (COV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cov_ip",
+              "name": "Final IP reconciliation"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "remote_mgt",
+      "name": "Remote Monitoring & Management",
+      "tasks": [
+        {
+          "id": "central_mon",
+          "name": "Centralized Monitoring",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cm_kri",
+              "name": "KRI review"
+            },
+            {
+              "id": "cm_trend",
+              "name": "Data trending analysis"
+            }
+          ]
+        },
+        {
+          "id": "site_comm",
+          "name": "Site Communication",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "sc_call",
+              "name": "Weekly check-in calls"
+            },
+            {
+              "id": "sc_email",
+              "name": "Email correspondence"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tmf_mgt",
+      "name": "Trial Master File (TMF)",
+      "tasks": [
+        {
+          "id": "doc_proc",
+          "name": "Document Processing",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "dp_up",
+              "name": "Uploading to eTMF"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "super_admin": [
+    {
+      "id": "startup_reg",
+      "name": "01. START-UP & REGULATORY",
+      "tasks": [
+        {
+          "id": "gest_reg_dossier",
+          "name": "Gestión Regulatoria y Dossier",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "sometimiento_inicial",
+              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+            },
+            {
+              "id": "act_isf",
+              "name": "Actualización y foliación del Investigator Site File (ISF)"
+            },
+            {
+              "id": "gest_cta",
+              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "recruitment_retention",
+      "name": "02. RECRUITMENT & RETENTION",
+      "tasks": [
+        {
+          "id": "ejec_reclutamiento",
+          "name": "Ejecución de Reclutamiento",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "pre_screening_logs",
+              "name": "Ejecución de Pre-screening y logs"
+            },
+            {
+              "id": "gest_bd_pacientes",
+              "name": "Gestión de bases de datos de pacientes potenciales"
+            }
+          ]
+        },
+        {
+          "id": "estrategias_retencion",
+          "name": "Estrategias de Retención",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "coord_logistica",
+              "name": "Coordinación de logística y transporte para sujetos"
+            },
+            {
+              "id": "llamadas_seguimiento",
+              "name": "Llamadas de recordatorio y seguimiento de visitas"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conduct",
+      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "tasks": [
+        {
+          "id": "gest_datos_ecrf",
+          "name": "Gestión de Datos eCRF",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "transcripcion_fuente",
+              "name": "Transcripción de fuente a eCRF"
+            },
+            {
+              "id": "carga_labs",
+              "name": "Carga de resultados de laboratorios y procedimientos"
+            },
+            {
+              "id": "registro_logs",
+              "name": "Registro y actualización de logs de CM/EAs"
+            }
+          ]
+        },
+        {
+          "id": "resolucion_discrepancias",
+          "name": "Resolución de Discrepancias",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "resp_tecnica_queries",
+              "name": "Respuesta técnica a Queries"
+            },
+            {
+              "id": "ejec_correcciones",
+              "name": "Ejecución de correcciones en sistema EDC y fuente"
+            },
+            {
+              "id": "gest_firmas_inv",
+              "name": "Gestión de firmas del Investigador (Sign-off)"
+            }
+          ]
+        },
+        {
+          "id": "control_visitas",
+          "name": "Control de Visitas de Sujetos",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "prog_visitas",
+              "name": "Programación de visitas en ventana y registro"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "safety_pv",
+      "name": "04. SEGURIDAD Y FARMACOVIGILANCIA",
+      "tasks": [
+        {
+          "id": "reporte_seguridad",
+          "name": "Reporte de Seguridad",
+          "roleContext": "site_led",
+          "subTasks": [
+            {
+              "id": "notif_saes",
+              "name": "Notificación inicial y seguimiento de SAEs"
+            },
+            {
+              "id": "recoleccion_fuentes",
+              "name": "Recolección y anonimización de fuentes médicas"
+            },
+            {
+              "id": "eval_medica",
+              "name": "Evaluación médica de causalidad y severidad"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qa_closeout",
+      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "tasks": [
+        {
+          "id": "soporte_auditoria",
+          "name": "Soporte a Auditoría y Monitorización",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "prep_visitas",
+              "name": "Preparación de visitas (SDV/SDR readiness)"
+            },
+            {
+              "id": "ejec_qc",
+              "name": "Ejecución de actividades de Control de Calidad"
+            },
+            {
+              "id": "resp_hallazgos",
+              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "site_visits",
+      "name": "Site Monitoring Visits",
+      "tasks": [
+        {
+          "id": "ssv",
+          "name": "Site Selection Visit (SSV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "ssv_fac",
+              "name": "Facility assessment"
+            },
+            {
+              "id": "ssv_pi",
+              "name": "PI qualification review"
+            }
+          ]
+        },
+        {
+          "id": "siv",
+          "name": "Site Initiation Visit (SIV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "siv_train",
+              "name": "Protocol training"
+            },
+            {
+              "id": "siv_ip",
+              "name": "IP handling review"
+            }
+          ]
+        },
+        {
+          "id": "rmv",
+          "name": "Routine Monitoring Visit (RMV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "rmv_sdv",
+              "name": "SDV/SDR"
+            },
+            {
+              "id": "rmv_ip",
+              "name": "IP accountability"
+            }
+          ]
+        },
+        {
+          "id": "cov",
+          "name": "Close-Out Visit (COV)",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cov_ip",
+              "name": "Final IP reconciliation"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "remote_mgt",
+      "name": "Remote Monitoring & Management",
+      "tasks": [
+        {
+          "id": "central_mon",
+          "name": "Centralized Monitoring",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "cm_kri",
+              "name": "KRI review"
+            },
+            {
+              "id": "cm_trend",
+              "name": "Data trending analysis"
+            }
+          ]
+        },
+        {
+          "id": "site_comm",
+          "name": "Site Communication",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "sc_call",
+              "name": "Weekly check-in calls"
+            },
+            {
+              "id": "sc_email",
+              "name": "Email correspondence"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tmf_mgt",
+      "name": "Trial Master File (TMF)",
+      "tasks": [
+        {
+          "id": "doc_proc",
+          "name": "Document Processing",
+          "roleContext": "cro_led",
+          "subTasks": [
+            {
+              "id": "dp_up",
+              "name": "Uploading to eTMF"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sys_admin",
+      "name": "System Administration",
+      "tasks": [
+        {
+          "id": "user_mgt",
+          "name": "User Management",
+          "roleContext": "shared",
+          "subTasks": [
+            {
+              "id": "um_prov",
+              "name": "Account provisioning"
+            }
+          ]
+        }
+      ]
+    }
+  ]
 };
 
 export const ROLE_PERMISSIONS: Record<UserRole, { canViewAllLogs: boolean }> = {
