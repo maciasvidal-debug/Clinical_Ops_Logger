@@ -421,14 +421,27 @@ export function LogFormView({
                       {getTaskIcon(task.name)}
                     </div>
                     <div className="flex flex-col mt-0.5">
-                      <span className={`text-sm font-semibold ${isActive ? 'text-indigo-900' : 'text-neutral-700'}`}>
-                        {task.name}
-                      </span>
-                      {task.subTasks && task.subTasks.length > 0 && (
-                        <span className="text-xs text-neutral-500 mt-0.5">
-                          {task.subTasks.length} sub-tasks
+                      <div className="flex items-center gap-2">
+                        <span className={`text-sm font-semibold ${isActive ? 'text-indigo-900' : 'text-neutral-700'}`}>
+                          {task.name}
                         </span>
-                      )}
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        {task.roleContext && (
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                            task.roleContext === 'site_led' ? 'bg-emerald-100 text-emerald-700' :
+                            task.roleContext === 'cro_led' ? 'bg-amber-100 text-amber-700' :
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {task.roleContext === 'site_led' ? 'Site-Led' : task.roleContext === 'cro_led' ? 'CRO-Led' : 'Shared'}
+                          </span>
+                        )}
+                        {task.subTasks && task.subTasks.length > 0 && (
+                          <span className="text-xs text-neutral-500">
+                            {task.subTasks.length} sub-tasks
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </button>
                 );
