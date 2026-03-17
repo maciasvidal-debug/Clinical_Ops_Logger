@@ -13,7 +13,7 @@ ADD COLUMN IF NOT EXISTS priority VARCHAR(20) DEFAULT 'medium' CHECK (priority I
 
 -- 3. Create a view for the Predictive Model (Duration Estimation)
 -- This view calculates the average duration per user and category/activity.
-CREATE OR REPLACE VIEW public.vw_user_task_duration_stats AS
+CREATE OR REPLACE VIEW public.vw_user_task_duration_stats WITH (security_invoker = true) AS
 SELECT
     user_id,
     category,
@@ -32,7 +32,7 @@ GROUP BY
 
 -- 4. Create a view for the Explanatory Model (Importance Weights / Priority Alignment)
 -- This view aggregates time spent by priority level.
-CREATE OR REPLACE VIEW public.vw_user_priority_alignment AS
+CREATE OR REPLACE VIEW public.vw_user_priority_alignment WITH (security_invoker = true) AS
 SELECT
     user_id,
     priority,
