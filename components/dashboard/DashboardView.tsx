@@ -6,7 +6,8 @@ import {
   LogEntry,
   UserProfile,
   Project,
-  Protocol
+  Protocol,
+  Todo
 } from "@/lib/types";
 import {
   format,
@@ -43,7 +44,7 @@ export function DashboardView({
 }: DashboardViewProps) {
   const { t } = useTranslation();
   const { todos, updateTodo } = useAppStore();
-  const pendingTodos = todos.filter((t: any) => t.status === "pending" && t.user_id === profile?.id);
+  const pendingTodos = todos.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
   const today = new Date();
   
   const todayLogs = logs.filter((log) =>
@@ -250,7 +251,7 @@ export function DashboardView({
             <h2 className="text-lg font-semibold">Continuar trabajando en...</h2>
           </div>
           <div className="grid gap-3">
-            {pendingTodos.map((todo: any) => (
+            {pendingTodos.map((todo: Todo) => (
               <div
                 key={todo.id}
                 className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/80 rounded-xl border border-amber-100/50 shadow-sm hover:bg-white transition-colors"
