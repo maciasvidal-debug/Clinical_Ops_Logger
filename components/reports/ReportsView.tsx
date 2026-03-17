@@ -49,20 +49,30 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
   }, [logs, permissions, profile.id]);
 
   const projectData = useMemo(() => {
-    const data: Record<string, number> = {};
-    visibleLogs.forEach((log) => {
-      const projectName =
-        projects.find((p) => p.id === log.project_id)?.name ||
-        log.project_id ||
-        "Unknown";
-      data[projectName] = (data[projectName] || 0) + log.duration_minutes;
-    });
-    return Object.entries(data)
-      .map(([name, minutes]) => ({
+    const projectMap = new Map<string, string>();
+    for (let i = 0; i < projects.length; i++) {
+      if (projects[i].id) {
+        projectMap.set(projects[i].id, projects[i].name);
+      }
+    }
+
+    const data = new Map<string, number>();
+    for (let i = 0; i < visibleLogs.length; i++) {
+      const log = visibleLogs[i];
+      const projectId = log.project_id || "";
+      const projectName = projectMap.get(projectId) || projectId || "Unknown";
+      const current = data.get(projectName) || 0;
+      data.set(projectName, current + log.duration_minutes);
+    }
+
+    const result = [];
+    for (const [name, minutes] of data.entries()) {
+      result.push({
         name,
         hours: Number((minutes / 60).toFixed(1)),
-      }))
-      .sort((a, b) => b.hours - a.hours);
+      });
+    }
+    return result.sort((a, b) => b.hours - a.hours);
   }, [visibleLogs, projects]);
 
   const activityData = useMemo(() => {
