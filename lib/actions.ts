@@ -5,7 +5,7 @@ import { DbActivityCategory, Todo } from "./types";
 
 import { getGeminiClient } from "./gemini";
 import { Type } from "@google/genai";
-import { ROLE_HIERARCHY, UserRole, Project, Protocol, LogEntry } from "./types";
+import { ROLE_HIERARCHY, UserRole, Project, Protocol, LogEntry, TaskDurationStats, PriorityAlignmentStats } from "./types";
 import { dictionaries } from "./i18n/dictionaries";
 
 export type ActionResponse<T> =
@@ -288,6 +288,118 @@ export async function updateLogEntryStatus(
         error instanceof Error
           ? error.message
           : "Failed to update log entry status",
+    };
+  }
+}
+
+// --- AI Models Actions ---
+
+/**
+ * Gets the average historical duration for a specific user, category, and activity.
+ */
+export async function getPredictedDuration(
+  categoryId: string,
+  taskId: string
+): Promise<{ success: boolean; data?: TaskDurationStats; error?: string }> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { data, error } = await supabase.rpc("get_user_duration_stats", {
+      p_category: categoryId,
+      p_activity: taskId,
+    });
+
+    if (error) throw error;
+
+    if (data && data.length > 0) {
+      return { success: true, data: data[0] as TaskDurationStats };
+    }
+
+    return { success: true, data: undefined }; // Not enough data yet
+  } catch (error: unknown) {
+    console.error("Error fetching predicted duration:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to predict duration",
+    };
+  }
+}
+
+/**
+ * Gets the actual time spent across priority levels.
+ */
+export async function getPriorityAlignment(): Promise<{ success: boolean; data?: PriorityAlignmentStats[]; error?: string }> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error("Not authenticated");
+
+    const { data, error } = await supabase.rpc("get_user_priority_alignment");
+
+    if (error) throw error;
+    return { success: true, data: data as PriorityAlignmentStats[] };
+  } catch (error: unknown) {
+    console.error("Error fetching priority alignment:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch priority alignment",
+    };
+  }
+}
+
+/**
+ * Uses Gemini to generate a human-readable insight based on mathematical data for importance weights.
+ */
+export async function generatePriorityInsight(
+  stats: PriorityAlignmentStats[],
+  language: "en" | "es" = "en"
+): Promise<{ success: boolean; data?: string; error?: string }> {
+  try {
+    if (!stats || stats.length === 0) {
+      return { success: true, data: undefined };
+    }
+
+    const genai = getGeminiClient();
+    if (!genai) {
+      console.warn("Gemini client not initialized");
+      return { success: false, error: "AI client not initialized" };
+    }
+
+    const systemInstruction = language === "es"
+      ? "Eres un coach de productividad empático. Analiza los datos matemáticos que te entregan sobre el tiempo invertido frente a los niveles de prioridad de un usuario. Dame un solo párrafo corto, amigable, que sea un diagnóstico útil (ej. 'Gastas mucho tiempo en prioridad baja'). Mantén un tono alentador y profesional. NO uses formato markdown complejo."
+      : "You are an empathetic productivity coach. Analyze the mathematical data provided about a user's time spent versus their priority levels. Give me a single short, friendly paragraph that is a helpful diagnosis (e.g. 'You spend a lot of time on low priority tasks'). Keep an encouraging and professional tone. DO NOT use complex markdown formatting.";
+
+    const prompt = `
+      Data:
+      \${JSON.stringify(stats, null, 2)}
+    `;
+
+    const response = await genai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }],
+        },
+      ],
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: 0.3,
+      },
+    });
+
+    const text = response.text;
+    if (!text) {
+      throw new Error("Empty response from AI");
+    }
+
+    return { success: true, data: text };
+
+  } catch (error: unknown) {
+    console.error("Error generating AI priority insight:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to generate insight",
     };
   }
 }

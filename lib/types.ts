@@ -49,6 +49,8 @@ export interface Todo {
   user_id: string;
   title: string;
   status: "pending" | "completed";
+  priority?: "low" | "medium" | "high" | "critical";
+  estimated_duration_minutes?: number;
   project_id?: string;
   protocol_id?: string;
   site_id?: string;
@@ -116,6 +118,8 @@ export interface LogEntry {
   activity: string;
   sub_task?: string;
   notes: string;
+  todo_id?: string;
+  priority?: "low" | "medium" | "high" | "critical";
   status?: "completed" | "pending";
   synced: boolean;
   created_at: string;
@@ -1279,3 +1283,16 @@ export const ROLE_PERMISSIONS: Record<UserRole, { canViewAllLogs: boolean }> = {
   cta: { canViewAllLogs: false },
   ra: { canViewAllLogs: false },
 };
+
+
+// --- AI & Math Models Telemetry Types ---
+export interface TaskDurationStats {
+  avg_duration_minutes: number;
+  total_tasks: number;
+}
+
+export interface PriorityAlignmentStats {
+  priority: "low" | "medium" | "high" | "critical";
+  total_duration_minutes: number;
+  tasks_count: number;
+}

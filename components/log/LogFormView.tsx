@@ -23,7 +23,7 @@ import {
   Sparkles 
 } from "lucide-react";
 import { toast } from "sonner";
-import { parseNaturalLanguageLog } from "@/lib/actions";
+import { parseNaturalLanguageLog, getPredictedDuration } from "@/lib/actions";
 
 const getTaskIcon = (name: string) => {
   const lower = name.toLowerCase();
@@ -88,6 +88,9 @@ export function LogFormView({
 
   const [notes, setNotes] = useState(initialData?.notes || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+
+
   
   const [aiInput, setAiInput] = useState("");
   const [isParsing, setIsParsing] = useState(false);
