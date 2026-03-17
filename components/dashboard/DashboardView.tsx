@@ -45,23 +45,26 @@ export function DashboardView({
   const { t } = useTranslation();
   const { todos, updateTodo } = useAppStore();
   const pendingTodos = todos.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
-  const today = new Date();
-  
-  const todayLogs = logs.filter((log) =>
-    isSameDay(parseISO(log.date), today),
-  );
-  const todayMinutes = todayLogs.reduce(
-    (acc, log) => acc + log.duration_minutes,
-    0,
-  );
-
-  const thisWeekLogs = logs.filter(
-    (log) => new Date(log.date) >= subDays(today, 7),
-  );
-  const thisWeekMinutes = thisWeekLogs.reduce(
-    (acc, log) => acc + log.duration_minutes,
-    0,
-  );
+  const { todayLogs, todayMinutes, thisWeekLogs, thisWeekMinutes } = useMemo(() => {
+    const today = new Date();
+    const weekAgo = subDays(today, 7);
+    let tMins = 0;
+    let wMins = 0;
+    const tLogs: LogEntry[] = [];
+    const wLogs: LogEntry[] = [];
+    for (const log of logs) {
+      const logDate = new Date(log.date);
+      if (logDate >= weekAgo) {
+        wLogs.push(log);
+        wMins += log.duration_minutes;
+        if (isSameDay(logDate, today)) {
+          tLogs.push(log);
+          tMins += log.duration_minutes;
+        }
+      }
+    }
+    return { todayLogs: tLogs, todayMinutes: tMins, thisWeekLogs: wLogs, thisWeekMinutes: wMins };
+  }, [logs]);
 
 
   const [priorityInsight, setPriorityInsight] = React.useState<string | null>(null);
