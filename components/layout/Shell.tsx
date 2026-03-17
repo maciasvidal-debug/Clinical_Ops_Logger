@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/lib/supabase";
 
-type View = "dashboard" | "log" | "history" | "reports" | "team";
+type View = "dashboard" | "log" | "history" | "reports" | "team" | "settings";
 
 interface ShellProps {
   currentView: string;
@@ -110,6 +110,7 @@ export function Shell({
     { id: "history", label: t.navigation.history, icon: History },
     { id: "reports", label: t.navigation.reports, icon: BarChart3 },
     ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "team" as View, label: t.navigation.team, icon: Users }] : []),
+    ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "settings" as View, label: t.navigation.settings || "Settings", icon: Settings }] : []),
   ];
 
   const handleSignOut = async () => {
@@ -342,7 +343,7 @@ export function Shell({
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 pb-safe z-20">
-        <div className="flex items-center justify-around px-2 py-2">
+        <div className="flex items-center justify-around px-1 py-2 overflow-x-auto hide-scrollbar">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
@@ -361,10 +362,19 @@ export function Shell({
                 )}>
                   <Icon className="w-5 h-5" />
                 </div>
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <span className="text-[10px] font-medium whitespace-nowrap">{item.label}</span>
               </button>
             );
           })}
+          <button
+            onClick={handleSignOut}
+            className="flex flex-col items-center justify-center min-w-[64px] h-14 rounded-xl transition-colors text-neutral-500 hover:text-red-600"
+          >
+            <div className="p-1 rounded-full mb-1 transition-colors bg-transparent">
+              <LogOut className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-medium whitespace-nowrap">{t.navigation.signOut}</span>
+          </button>
         </div>
       </nav>
     </div>

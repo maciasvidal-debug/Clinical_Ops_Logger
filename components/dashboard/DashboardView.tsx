@@ -149,7 +149,7 @@ export function DashboardView({
               <Clock className="w-5 h-5" />
             </div>
             <h3 className="text-sm font-medium text-neutral-600">
-              Today&apos;s Time
+              {t.dashboard.todayLogs}
             </h3>
           </div>
           <p className="text-3xl font-light tracking-tight text-neutral-900">
@@ -231,7 +231,7 @@ export function DashboardView({
           <div className="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50 flex items-center gap-2">
             <PieChart className="w-5 h-5 text-neutral-500" />
             <h3 className="font-semibold text-neutral-900">
-              Time by Category (This Week)
+              {t.reports.timeByCategory}
             </h3>
           </div>
           <div className="p-6 flex-1">
@@ -300,7 +300,7 @@ export function DashboardView({
                   )}
                   <div className="flex items-center gap-2 mt-2">
                     <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-100/50 px-2 py-1 rounded-md">
-                      <Clock className="w-3 h-3" /> Pendiente
+                      <Clock className="w-3 h-3" /> {t.status.pending}
                     </span>
                     <span className="text-xs text-neutral-400">
                       Creado: {format(new Date(todo.created_at), "dd MMM")}
@@ -316,7 +316,7 @@ export function DashboardView({
                     }}
                     className="px-4 py-2 text-sm font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-colors"
                   >
-                    Registrar Tiempo
+                    {t.navigation.log}
                   </button>
                   <button
                     onClick={async () => {

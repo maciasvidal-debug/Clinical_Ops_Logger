@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { useDynamicTranslation } from "@/lib/i18n/utils";
 import { UserProfile } from "@/lib/types";
 import { useAppStore } from "@/lib/store";
 import { Settings, Save, Plus, Trash2, Edit2 } from "lucide-react";
@@ -13,11 +14,12 @@ export function SettingsView({ profile }: SettingsViewProps) {
   const { activityCategories } = useAppStore();
   const [activeTab, setActiveTab] = useState<"activities" | "general">("activities");
   const { t } = useTranslation();
+  const { dt } = useDynamicTranslation();
 
   if (profile.role !== "super_admin" && profile.role !== "manager") {
     return (
       <div className="flex items-center justify-center p-8 bg-neutral-50 rounded-2xl border border-neutral-200">
-        <p className="text-neutral-500">No tienes permisos para ver esta sección.</p>
+        <p className="text-neutral-500">{t.auth.accessDenied}</p>
       </div>
     );
   }
@@ -28,10 +30,10 @@ export function SettingsView({ profile }: SettingsViewProps) {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-neutral-900 flex items-center gap-2">
             <Settings className="w-6 h-6" />
-            Configuración del Sistema
+            {t.settings.title}
           </h2>
           <p className="text-neutral-500">
-            Administra las categorías, actividades y preferencias.
+            {t.settings.subtitle}
           </p>
         </div>
       </header>
@@ -46,7 +48,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
               : "text-neutral-600 hover:text-neutral-900"
           }`}
         >
-          Actividades & Roles
+          {t.settings.activitiesAndRoles}
         </button>
         <button
           onClick={() => setActiveTab("general")}
@@ -56,7 +58,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
               : "text-neutral-600 hover:text-neutral-900"
           }`}
         >
-          Ajustes Generales
+          {t.settings.generalSettings}
         </button>
       </div>
 
@@ -64,11 +66,11 @@ export function SettingsView({ profile }: SettingsViewProps) {
         <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-neutral-900">
-              Categorías de Actividades
+              {t.settings.activityCategories}
             </h3>
             <button className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-sm font-medium transition-colors">
               <Plus className="w-4 h-4" />
-              Nueva Categoría
+              {t.settings.newCategory}
             </button>
           </div>
 
@@ -79,7 +81,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                 className="border border-neutral-200 rounded-xl p-4 hover:border-neutral-300 transition-colors"
               >
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold text-neutral-900">{cat.name}</h4>
+                  <h4 className="font-semibold text-neutral-900">{dt(cat.name)}</h4>
                   <div className="flex items-center gap-2">
                     <button className="p-1.5 text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                       <Edit2 className="w-4 h-4" />
@@ -100,7 +102,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                     </span>
                   ))}
                   <button className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border border-dashed border-neutral-300 text-neutral-500 hover:bg-neutral-50">
-                    <Plus className="w-3 h-3 mr-1" /> Add Role
+                    <Plus className="w-3 h-3 mr-1" /> {t.settings.addRole}
                   </button>
                 </div>
 
@@ -109,10 +111,10 @@ export function SettingsView({ profile }: SettingsViewProps) {
                     <div key={task.id} className="text-sm">
                       <div className="flex items-center justify-between group">
                         <span className="font-medium text-neutral-700">
-                          {task.name}
+                          {dt(task.name)}
                         </span>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                           <button className="text-xs text-indigo-600 hover:underline">Edit</button>
+                           <button className="text-xs text-indigo-600 hover:underline">{t.common.edit}</button>
                         </div>
                       </div>
                       <div className="flex flex-wrap gap-2 mt-1.5">
@@ -121,18 +123,18 @@ export function SettingsView({ profile }: SettingsViewProps) {
                             key={st.id}
                             className="inline-flex items-center px-2 py-1 rounded bg-neutral-50 border border-neutral-200 text-xs text-neutral-600"
                           >
-                            {st.name}
+                            {dt(st.name)}
                           </span>
                         ))}
                         <button className="inline-flex items-center px-2 py-1 rounded text-xs font-medium border border-dashed border-neutral-300 text-neutral-500 hover:bg-neutral-50">
-                          <Plus className="w-3 h-3 mr-1" /> Add Sub-task
+                          <Plus className="w-3 h-3 mr-1" /> {t.settings.addSubTask}
                         </button>
                       </div>
                     </div>
                   ))}
                   <button className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
                     <Plus className="w-3 h-3" />
-                    Nueva Tarea
+                    {t.settings.newTask}
                   </button>
                 </div>
               </div>
@@ -140,7 +142,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
             {activityCategories.length === 0 && (
               <div className="text-center py-8 text-neutral-500">
-                <p>No hay categorías configuradas. Por favor, crea una o corre el seed de base de datos.</p>
+                <p>{t.settings.noCategories}</p>
               </div>
             )}
           </div>
