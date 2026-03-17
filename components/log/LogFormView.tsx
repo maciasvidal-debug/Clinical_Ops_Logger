@@ -124,6 +124,7 @@ export function LogFormView({
   const subTaskId = availableSubTasks.some(s => s.id === selectedSubTaskId)
     ? (selectedSubTaskId as string)
     : (availableSubTasks.length > 0 ? availableSubTasks[0].id : "");
+  const currentSubTask = availableSubTasks.find(s => s.id === subTaskId);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,12 +150,9 @@ export function LogFormView({
       return;
     }
 
-    const categoryName = availableCategories.find(c => c.id === categoryId)?.name || categoryId;
-    const task = availableCategories
-      .find(c => c.id === categoryId)?.tasks
-      .find(t => t.id === activityId);
-    const activityName = task?.name || activityId;
-    const subTaskName = task?.subTasks?.find(s => s.id === subTaskId)?.name;
+    const categoryName = currentCategory?.name || categoryId;
+    const activityName = currentTask?.name || activityId;
+    const subTaskName = currentSubTask?.name;
 
     onAddLog({
       date,
