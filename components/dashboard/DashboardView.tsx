@@ -1,4 +1,4 @@
-import { updateLogEntryStatus, saveTodo } from "@/lib/actions";
+import { updateLogEntryStatus, saveTodo, getPriorityAlignment, generatePriorityInsight } from "@/lib/actions";
 import { useAppStore } from "@/lib/store";
 import React, { useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
@@ -62,6 +62,27 @@ export function DashboardView({
     (acc, log) => acc + log.duration_minutes,
     0,
   );
+
+
+  const [priorityInsight, setPriorityInsight] = React.useState<string | null>(null);
+  const [loadingInsight, setLoadingInsight] = React.useState(false);
+
+  React.useEffect(() => {
+    const fetchInsight = async () => {
+      if (profile?.id) {
+        setLoadingInsight(true);
+        const stats = await getPriorityAlignment();
+        if (stats.success && stats.data) {
+          const insight = await generatePriorityInsight(stats.data, 'es');
+          if (insight.success && insight.data) {
+            setPriorityInsight(insight.data);
+          }
+        }
+        setLoadingInsight(false);
+      }
+    };
+    fetchInsight();
+  }, [profile?.id]);
 
   const openQueriesCount = useMemo(() => {
     return logs.reduce(
@@ -244,6 +265,19 @@ export function DashboardView({
 
 
       {/* Pending To-Dos Widget */}
+
+      {priorityInsight && (
+        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl p-6 shadow-sm mb-6 animate-in fade-in zoom-in duration-300">
+          <div className="flex items-center gap-2 mb-2 text-indigo-800">
+            <Activity className="w-5 h-5" />
+            <h2 className="text-lg font-semibold">Diagnóstico de Productividad</h2>
+          </div>
+          <p className="text-neutral-700 leading-relaxed">
+            {priorityInsight}
+          </p>
+        </div>
+      )}
+
       {pendingTodos.length > 0 && (
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm mb-6">
           <div className="flex items-center gap-2 mb-4 text-amber-800">
