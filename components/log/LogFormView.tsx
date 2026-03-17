@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
 import { 
   LogEntry, 
@@ -57,43 +57,34 @@ export function LogFormView({
   initialData 
 }: LogFormViewProps) {
   const { t, language } = useTranslation();
-  const [date, setDate] = useState(initialData?.date || format(new Date(), "yyyy-MM-dd"));
+    const [date, setDate] = useState(initialData?.date || format(new Date(), "yyyy-MM-dd"));
   const [hours, setHours] = useState(initialData?.duration_minutes ? Math.floor(initialData.duration_minutes / 60).toString() : "1");
   const [minutes, setMinutes] = useState(initialData?.duration_minutes ? (initialData.duration_minutes % 60).toString() : "0");
   
-  const [projectId, setProjectId] = useState(initialData?.project_id || "");
-  const [protocolId, setProtocolId] = useState(initialData?.protocol_id || "");
-  const [siteId, setSiteId] = useState(initialData?.site_id || "");
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(initialData?.project_id ?? null);
+  const projectId = projects.some(p => p.id === selectedProjectId)
+    ? (selectedProjectId as string)
+    : (projects.length > 0 ? projects[0].id : "");
 
   const availableProtocols = useMemo(() => {
     return protocols.filter(p => p.project_id === projectId);
   }, [projectId, protocols]);
 
+  const [selectedProtocolId, setSelectedProtocolId] = useState<string | null>(initialData?.protocol_id ?? null);
+  const protocolId = availableProtocols.some(p => p.id === selectedProtocolId)
+    ? (selectedProtocolId as string)
+    : (availableProtocols.length > 0 ? availableProtocols[0].id : "");
+
   const availableSites = useMemo(() => {
     return sites.filter(s => s.protocol_id === protocolId);
   }, [protocolId, sites]);
 
-  useEffect(() => {
-    if (projects.length > 0 && !projectId) {
-      setProjectId(projects[0].id);
-    }
-  }, [projects, projectId]);
-
-  useEffect(() => {
-    if (availableProtocols.length > 0 && !availableProtocols.find(p => p.id === protocolId)) {
-      setProtocolId(availableProtocols[0].id);
-    } else if (availableProtocols.length === 0) {
-      setProtocolId("");
-    }
-  }, [availableProtocols, protocolId]);
-
-  useEffect(() => {
-    if (availableSites.length > 0 && !availableSites.find(s => s.id === siteId)) {
-      setSiteId(availableSites[0].id);
-    } else if (availableSites.length === 0) {
-      setSiteId("");
-    }
-  }, [availableSites, siteId]);
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(initialData?.site_id ?? null);
+  const siteId = selectedSiteId === ""
+    ? ""
+    : (availableSites.some(s => s.id === selectedSiteId)
+      ? (selectedSiteId as string)
+      : (availableSites.length > 0 ? availableSites[0].id : ""));
 
   const [notes, setNotes] = useState(initialData?.notes || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -110,30 +101,26 @@ export function LogFormView({
   const initialTask = initialCategory?.tasks.find(t => t.name === initialData?.activity);
   const initialSubTask = initialTask?.subTasks?.find(s => s.name === initialData?.sub_task);
 
-  const [categoryId, setCategoryId] = useState<string>(initialCategory?.id || "");
-  const [activityId, setActivityId] = useState<string>(initialTask?.id || "");
-  const [subTaskId, setSubTaskId] = useState<string>(initialSubTask?.id || "");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(initialCategory?.id ?? null);
+  const categoryId = availableCategories.some(c => c.id === selectedCategoryId)
+    ? (selectedCategoryId as string)
+    : (availableCategories.length > 0 ? availableCategories[0].id : "");
 
-  useEffect(() => {
-    if (availableCategories.length > 0 && !categoryId) {
-      setCategoryId(availableCategories[0].id);
-    }
-  }, [availableCategories, categoryId]);
+  const currentCategory = availableCategories.find(c => c.id === categoryId);
+  const availableTasks = currentCategory?.tasks || [];
 
-  useEffect(() => {
-    const category = availableCategories.find(c => c.id === categoryId);
-    if (category && category.tasks.length > 0 && !category.tasks.find(t => t.id === activityId)) {
-      setActivityId(category.tasks[0].id);
-    }
-  }, [categoryId, availableCategories, activityId]);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(initialTask?.id ?? null);
+  const activityId = availableTasks.some(t => t.id === selectedActivityId)
+    ? (selectedActivityId as string)
+    : (availableTasks.length > 0 ? availableTasks[0].id : "");
 
-  useEffect(() => {
-    const category = availableCategories.find(c => c.id === categoryId);
-    const task = category?.tasks.find(t => t.id === activityId);
-    if (task && task.subTasks && task.subTasks.length > 0 && !task.subTasks.find(s => s.id === subTaskId)) {
-      setSubTaskId(task.subTasks[0].id);
-    }
-  }, [activityId, categoryId, availableCategories, subTaskId]);
+  const currentTask = availableTasks.find(t => t.id === activityId);
+  const availableSubTasks = currentTask?.subTasks || [];
+
+  const [selectedSubTaskId, setSelectedSubTaskId] = useState<string | null>(initialSubTask?.id ?? null);
+  const subTaskId = availableSubTasks.some(s => s.id === selectedSubTaskId)
+    ? (selectedSubTaskId as string)
+    : (availableSubTasks.length > 0 ? availableSubTasks[0].id : "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +172,6 @@ export function LogFormView({
     }, 500);
   };
 
-  const currentCategory = availableCategories.find(c => c.id === categoryId);
 
   const handleAIParsing = async () => {
     if (!aiInput.trim() || !profile) return;
@@ -204,20 +190,20 @@ export function LogFormView({
           setHours(Math.floor(data.duration_minutes / 60).toString());
           setMinutes((data.duration_minutes % 60).toString());
         }
-        if (data.project_id) setProjectId(data.project_id);
-        if (data.protocol_id) setProtocolId(data.protocol_id);
+        if (data.project_id) setSelectedProjectId(data.project_id);
+        if (data.protocol_id) setSelectedProtocolId(data.protocol_id);
         
         if (data.category) {
           const cat = availableCategories.find(c => c.name.toLowerCase() === data.category?.toLowerCase());
           if (cat) {
-            setCategoryId(cat.id);
+            setSelectedCategoryId(cat.id);
             if (data.activity) {
               const act = cat.tasks.find(t => t.name.toLowerCase() === data.activity?.toLowerCase());
               if (act) {
-                setActivityId(act.id);
+                setSelectedActivityId(act.id);
                 if (data.sub_task) {
                   const sub = act.subTasks?.find(s => s.name.toLowerCase() === data.sub_task?.toLowerCase());
-                  if (sub) setSubTaskId(sub.id);
+                  if (sub) setSelectedSubTaskId(sub.id);
                 }
               }
             }
@@ -333,7 +319,7 @@ export function LogFormView({
             <label className="text-sm font-medium text-neutral-700">{t.logForm.project}</label>
             <select 
               value={projectId}
-              onChange={e => setProjectId(e.target.value)}
+              onChange={e => setSelectedProjectId(e.target.value)}
               className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none appearance-none"
               disabled={projects.length === 0}
             >
@@ -351,7 +337,7 @@ export function LogFormView({
             <label className="text-sm font-medium text-neutral-700">{t.logForm.protocol}</label>
             <select 
               value={protocolId}
-              onChange={e => setProtocolId(e.target.value)}
+              onChange={e => setSelectedProtocolId(e.target.value)}
               className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none appearance-none"
               disabled={availableProtocols.length === 0}
             >
@@ -369,7 +355,7 @@ export function LogFormView({
             <label className="text-sm font-medium text-neutral-700">{t.logForm.siteOptional}</label>
             <select 
               value={siteId}
-              onChange={e => setSiteId(e.target.value)}
+              onChange={e => setSelectedSiteId(e.target.value)}
               className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none appearance-none"
               disabled={availableSites.length === 0}
             >
@@ -386,7 +372,7 @@ export function LogFormView({
           <label className="text-sm font-medium text-neutral-700">{t.logForm.category}</label>
           <select 
             value={categoryId}
-            onChange={e => setCategoryId(e.target.value)}
+            onChange={e => setSelectedCategoryId(e.target.value)}
             className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none appearance-none"
           >
             {availableCategories.length === 0 ? (
@@ -410,7 +396,7 @@ export function LogFormView({
                   <button
                     key={task.id}
                     type="button"
-                    onClick={() => setActivityId(task.id)}
+                    onClick={() => setSelectedActivityId(task.id)}
                     className={`p-4 rounded-xl border-2 transition-all duration-200 text-left flex items-start gap-3 ${
                       isActive 
                         ? "border-indigo-500 bg-indigo-50/50 shadow-sm ring-1 ring-indigo-500" 
@@ -464,7 +450,7 @@ export function LogFormView({
                   <button
                     key={subTask.id}
                     type="button"
-                    onClick={() => setSubTaskId(subTask.id)}
+                    onClick={() => setSelectedSubTaskId(subTask.id)}
                     className={`px-4 py-3 text-sm font-medium rounded-xl border-2 transition-all duration-200 text-left flex items-center gap-3 ${
                       isActive 
                         ? "border-emerald-500 bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-500" 
