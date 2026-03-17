@@ -302,24 +302,26 @@ export function useAppStore() {
   };
 
   const updateAssignments = async (userId: string, projectIds: string[], protocolIds: string[]) => {
-    // This is a bit complex as we need to delete old and insert new
-    // For simplicity in this demo, we'll just do it sequentially
-    
-    // Project assignments
-    await supabase.from("user_project_assignments").delete().eq("user_id", userId);
-    if (projectIds.length > 0) {
-      await supabase.from("user_project_assignments").insert(
-        projectIds.map(pid => ({ user_id: userId, project_id: pid }))
-      );
-    }
+    // Perform project and protocol assignment updates in parallel to reduce network latency
+    const updateProjects = async () => {
+      await supabase.from("user_project_assignments").delete().eq("user_id", userId);
+      if (projectIds.length > 0) {
+        await supabase.from("user_project_assignments").insert(
+          projectIds.map(pid => ({ user_id: userId, project_id: pid }))
+        );
+      }
+    };
 
-    // Protocol assignments
-    await supabase.from("user_protocol_assignments").delete().eq("user_id", userId);
-    if (protocolIds.length > 0) {
-      await supabase.from("user_protocol_assignments").insert(
-        protocolIds.map(pid => ({ user_id: userId, protocol_id: pid }))
-      );
-    }
+    const updateProtocols = async () => {
+      await supabase.from("user_protocol_assignments").delete().eq("user_id", userId);
+      if (protocolIds.length > 0) {
+        await supabase.from("user_protocol_assignments").insert(
+          protocolIds.map(pid => ({ user_id: userId, protocol_id: pid }))
+        );
+      }
+    };
+
+    await Promise.all([updateProjects(), updateProtocols()]);
 
     // Refresh local state
     if (user && profile) fetchAppData(user.id, profile.role);
