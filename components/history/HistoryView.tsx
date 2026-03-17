@@ -232,7 +232,7 @@ export function HistoryView({
                                           }}
                                           className="text-xs font-medium text-indigo-600 hover:text-indigo-700"
                                         >
-                                          Reply to Query
+                                          {t.history.reply}
                                         </button>
                                       )}
                                     </div>

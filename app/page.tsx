@@ -13,6 +13,7 @@ import { useAppStore } from "@/lib/store";
 import { LogEntry } from "@/lib/types";
 import { Toaster } from "sonner";
 import { format } from "date-fns";
+import { useTranslation } from "@/lib/i18n";
 
 
 import { SettingsView } from "@/components/settings/SettingsView";
@@ -26,6 +27,7 @@ import { SettingsView } from "@/components/settings/SettingsView";
 export type View = "dashboard" | "log" | "history" | "reports" | "team" | "settings";
 
 export default function App() {
+  const { t } = useTranslation();
   const [currentView, setCurrentView] = useState<View>("dashboard");
   const [logFormInitialData, setLogFormInitialData] =
     useState<Partial<LogEntry> | null>(null);
@@ -85,8 +87,8 @@ export default function App() {
 
       const pendingTodos = todos?.filter((t: any) => t.status === "pending" && t.user_id === profile.id);
       if (pendingTodos.length > 0 && Notification.permission === "granted") {
-        new Notification("Tareas Pendientes", {
-          body: `Tienes ${pendingTodos.length} tareas pendientes. Haz clic para continuarlas.`,
+        new Notification(t.shell.notifications || "Notifications", {
+          body: `${pendingTodos.length} pending tasks. Click to continue.`,
           icon: "/favicon.ico",
         });
       }
@@ -120,7 +122,7 @@ export default function App() {
     checkReminders();
     const interval = setInterval(checkReminders, 60 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [logs, user, profile, notifications, todos]);
+  }, [logs, user, profile, notifications, todos, t.shell.notifications]);
 
   const handleRepeatLog = (log: LogEntry) => {
     setLogFormInitialData(log);
@@ -161,7 +163,7 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 text-neutral-400">
         <div className="flex flex-col items-center gap-4">
           <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-medium">Loading SiteFlow...</p>
+          <p className="text-sm font-medium">{t.common.loading}</p>
         </div>
       </div>
     );
@@ -189,13 +191,13 @@ export default function App() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
         <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-red-100 text-center">
-          <h1 className="text-xl font-bold text-red-600 mb-2">Access Denied</h1>
-          <p className="text-neutral-600 mb-6">Your account request has been rejected. Please contact your administrator.</p>
+          <h1 className="text-xl font-bold text-red-600 mb-2">{t.auth.accessDenied}</h1>
+          <p className="text-neutral-600 mb-6">{t.auth.accountRejected}</p>
           <button 
             onClick={signOut} 
             className="text-indigo-600 font-medium"
           >
-            Sign Out
+            {t.navigation.signOut}
           </button>
         </div>
       </div>

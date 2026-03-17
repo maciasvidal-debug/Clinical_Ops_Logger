@@ -258,7 +258,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
             Reports
           </h2>
           <p className="text-neutral-500">
-            Analyze time distribution across studies and activities.
+            {t.reports.subtitle}
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
@@ -268,7 +268,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
             className="flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-neutral-50 border border-neutral-200 text-neutral-700 disabled:text-neutral-400 disabled:bg-neutral-50 rounded-xl font-medium transition-colors shadow-sm whitespace-nowrap"
           >
             <Printer className="w-4 h-4" />
-            Export Timesheet (PDF)
+            {t.reports.export}
           </button>
           <button
             onClick={handleGenerateAIReport}
