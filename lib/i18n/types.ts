@@ -69,6 +69,8 @@ export interface Dictionary {
     addSubTask: string;
     newTask: string;
     noCategories: string;
+    underConstruction: string;
+    generalSettingsDesc: string;
   };
   legal: { termsTitle: string; privacyTitle: string; termsContent: string; privacyContent: string; };
 }

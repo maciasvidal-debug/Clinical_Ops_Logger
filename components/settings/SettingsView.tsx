@@ -3,7 +3,7 @@ import { useTranslation } from "@/lib/i18n";
 import { useDynamicTranslation } from "@/lib/i18n/utils";
 import { UserProfile } from "@/lib/types";
 import { useAppStore } from "@/lib/store";
-import { Settings, Save, Plus, Trash2, Edit2 } from "lucide-react";
+import { Settings, Save, Plus, Trash2, Edit2 , Wrench } from "lucide-react";
 import { toast } from "sonner";
 
 interface SettingsViewProps {
@@ -148,6 +148,20 @@ export function SettingsView({ profile }: SettingsViewProps) {
           </div>
         </div>
       )}
+      {activeTab === "general" && (
+        <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-12 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
+            <Wrench className="w-8 h-8 text-neutral-400" />
+          </div>
+          <h3 className="text-xl font-bold text-neutral-900 mb-2">
+            {t.settings.underConstruction}
+          </h3>
+          <p className="text-neutral-500 max-w-md">
+            {t.settings.generalSettingsDesc}
+          </p>
+        </div>
+      )}
+
     </div>
   );
 }

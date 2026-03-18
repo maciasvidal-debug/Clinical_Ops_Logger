@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Language } from './types';
 import { dictionaries } from './dictionaries';
+import { getTranslationProxy } from './proxy';
 import { encryptData, decryptData } from '../crypto';
 
 interface I18nContextProps {
@@ -17,7 +18,7 @@ const LANGUAGE_KEY = 'siteflow_language_pref';
 const I18nContext = createContext<I18nContextProps>({
   language: defaultLanguage,
   setLanguage: () => {},
-  t: dictionaries[defaultLanguage],
+  t: getTranslationProxy(defaultLanguage),
 });
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -60,7 +61,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const t = dictionaries[language];
+  const t = getTranslationProxy(language);
 
   if (!isLoaded) {
     return <>{children}</>;
