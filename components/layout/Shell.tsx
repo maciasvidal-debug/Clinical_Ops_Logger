@@ -110,7 +110,7 @@ export function Shell({
     { id: "history", label: t.navigation.history, icon: History },
     { id: "reports", label: t.navigation.reports, icon: BarChart3 },
     ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "team" as View, label: t.navigation.team, icon: Users }] : []),
-    ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "settings" as View, label: t.navigation.settings || "Settings", icon: Settings }] : []),
+    ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "settings" as View, label: t.navigation.settings, icon: Settings }] : []),
   ];
 
   const handleSignOut = async () => {
@@ -210,7 +210,7 @@ export function Shell({
                 <button 
                   onClick={onStopTimer}
                   className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-colors text-xs font-medium shadow-sm"
-                  title="Stop Timer & Log"
+                  title={t.shell.stopLog}
                 >
                   <Square className="w-3 h-3 fill-current" />
                   <span>{t.shell.stopLog}</span>
@@ -254,9 +254,7 @@ export function Shell({
                         <button 
                           onClick={() => profile && onClearNotifications?.(profile.id)}
                           className="text-xs text-neutral-500 hover:text-indigo-600 font-medium"
-                        >
-                          Clear all
-                        </button>
+                        >{t.shell.clearAll}</button>
                       )}
                     </div>
                     <div className="max-h-[400px] overflow-y-auto">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { I18nProvider } from "@/lib/i18n";
+import { HtmlLang } from "@/components/layout/HtmlLang";
 import "./globals.css"; // Global styles
 
 export const metadata: Metadata = {
@@ -17,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning>
-        <I18nProvider>{children}</I18nProvider>
+        <I18nProvider>
+          <HtmlLang />
+          {children}
+        </I18nProvider>
         <SpeedInsights />
         <Analytics />
       </body>

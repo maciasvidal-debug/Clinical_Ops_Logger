@@ -1,3 +1,4 @@
+import { useTranslation } from '@/lib/i18n';
 import React, { useEffect, useRef } from "react";
 import { X } from "lucide-react";
 
@@ -9,6 +10,7 @@ interface LegalModalProps {
 }
 
 export function LegalModal({ isOpen, onClose, title, content }: LegalModalProps) {
+  const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Close when pressing Escape key
@@ -60,7 +62,7 @@ export function LegalModal({ isOpen, onClose, title, content }: LegalModalProps)
           <button
             onClick={onClose}
             className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-200/50 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            aria-label="Close modal"
+            aria-label={t.common.close}
           >
             <X className="w-5 h-5" />
           </button>
@@ -76,9 +78,7 @@ export function LegalModal({ isOpen, onClose, title, content }: LegalModalProps)
           <button
             onClick={onClose}
             className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            Close
-          </button>
+          >{t.common.close}</button>
         </div>
       </div>
     </div>

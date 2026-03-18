@@ -352,7 +352,7 @@ export async function getPriorityAlignment(): Promise<{ success: boolean; data?:
  */
 export async function generatePriorityInsight(
   stats: PriorityAlignmentStats[],
-  language: "en" | "es" = "en"
+  language: "en" | "es" | "pt" = "en"
 ): Promise<{ success: boolean; data?: string; error?: string }> {
   try {
     if (!stats || stats.length === 0) {

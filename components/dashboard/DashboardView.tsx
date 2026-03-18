@@ -43,7 +43,7 @@ export function DashboardView({
   profile,
   onRepeatLog,
 }: DashboardViewProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { dt } = useDynamicTranslation();
   const { todos, updateTodo } = useAppStore();
   const pendingTodos = todos.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
@@ -75,7 +75,7 @@ export function DashboardView({
         setLoadingInsight(true);
         const stats = await getPriorityAlignment();
         if (stats.success && stats.data) {
-          const insight = await generatePriorityInsight(stats.data, 'es');
+          const insight = await generatePriorityInsight(stats.data, language);
           if (insight.success && insight.data) {
             setPriorityInsight(insight.data);
           }
@@ -84,7 +84,8 @@ export function DashboardView({
       }
     };
     fetchInsight();
-  }, [profile?.id]);
+
+  }, []);
 
   const openQueriesCount = useMemo(() => {
     return logs.reduce(
@@ -134,9 +135,7 @@ export function DashboardView({
   return (
     <div className="space-y-6">
       <header>
-        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">
-          Dashboard
-        </h2>
+        <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.navigation.dashboard}</h2>
         <p className="text-neutral-500">{t.dashboard.overview}</p>
       </header>
 
@@ -323,7 +322,7 @@ export function DashboardView({
                       if(res.success) updateTodo(todo.id, { status: 'completed' });
                     }}
                     className="p-2 text-neutral-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                    title="Mark as completed"
+                    title={t.common.confirm}
                   >
                     <CheckCircle2 className="w-5 h-5" />
                   </button>
@@ -344,9 +343,7 @@ export function DashboardView({
             <button
               onClick={() => onNavigate("history")}
               className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              View all
-            </button>
+            >{t.dashboard.viewAll}</button>
           </div>
           <div className="p-0 flex-1 overflow-y-auto max-h-[300px]">
             <div className="divide-y divide-neutral-100">
@@ -358,7 +355,7 @@ export function DashboardView({
                 logs.slice(0, 5).map((log) => {
                   const activityName = log.sub_task
                     ? `${log.activity} › ${log.sub_task}`
-                    : log.activity || "Unknown Activity";
+                    : log.activity || t.common.error;
                   return (
                     <div
                       key={log.id}
@@ -390,7 +387,7 @@ export function DashboardView({
                       <button
                         onClick={() => onRepeatLog?.(log)}
                         className="p-2 text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors shrink-0"
-                        title="Repeat this activity"
+                        title={t.dashboard.repeatRecent}
                       >
                         <Copy className="w-4 h-4" />
                       </button>
