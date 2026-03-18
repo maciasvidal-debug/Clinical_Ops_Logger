@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { useDynamicTranslation } from "@/lib/i18n/utils";
 import { 
   LogEntry, 
   UserProfile, 
@@ -41,6 +42,7 @@ export function HistoryView({
   onReplyToQuery 
 }: HistoryViewProps) {
   const { t } = useTranslation();
+  const { dt } = useDynamicTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [projectFilter, setProjectFilter] = useState("ALL");
   const [activeQueryLogId, setActiveQueryLogId] = useState<string | null>(null);
@@ -143,7 +145,7 @@ export function HistoryView({
           ) : (
             <div className="divide-y divide-neutral-100">
               {filteredLogs.map(log => {
-                const activityName = log.sub_task ? `${log.activity} › ${log.sub_task}` : (log.activity || "Unknown Activity");
+                const activityName = log.sub_task ? `${dt(log.activity)} › ${dt(log.sub_task)}` : (log.activity ? dt(log.activity) : dt("Unknown Activity"));
                 const isManager = profile?.role === "manager" || profile?.role === "super_admin";
                 const isOwner = log.user_id === profile?.id;
                 

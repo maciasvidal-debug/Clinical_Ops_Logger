@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { useDynamicTranslation } from "@/lib/i18n/utils";
 import { 
   LogEntry, 
   UserProfile, 
@@ -422,12 +423,12 @@ export function LogFormView({
                             task.roleContext === 'cro_led' ? 'bg-amber-100 text-amber-700' :
                             'bg-blue-100 text-blue-700'
                           }`}>
-                            {task.roleContext === 'site_led' ? 'Site-Led' : task.roleContext === 'cro_led' ? 'CRO-Led' : 'Shared'}
+                            {task.roleContext === 'site_led' ? t.logForm.siteLed : task.roleContext === 'cro_led' ? t.logForm.croLed : t.logForm.shared}
                           </span>
                         )}
                         {task.subTasks && task.subTasks.length > 0 && (
                           <span className="text-xs text-neutral-500">
-                            {task.subTasks.length} sub-tasks
+                            {task.subTasks.length} {t.logForm.subTasks}
                           </span>
                         )}
                       </div>
@@ -444,7 +445,7 @@ export function LogFormView({
           <div className="space-y-3 mt-6 p-5 bg-neutral-50 rounded-2xl border border-neutral-100">
             <label className="text-sm font-semibold text-neutral-900 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              Select Sub-Task
+              {t.logForm.selectSubTask}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               {currentCategory.tasks.find(t => t.id === activityId)?.subTasks?.map(subTask => {
@@ -495,7 +496,7 @@ export function LogFormView({
             ) : (
               <CheckCircle2 className="w-5 h-5" />
             )}
-            {isSubmitting ? "Saving..." : "Save Activity"}
+            {isSubmitting ? t.common.loading : t.logForm.submit}
           </button>
         </div>
       </form>
