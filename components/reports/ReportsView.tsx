@@ -306,7 +306,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
         <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 p-6 rounded-2xl shadow-sm">
           <div className="flex items-center gap-2 mb-4 text-indigo-800">
             <Sparkles className="w-5 h-5" />
-            <h3 className="font-semibold text-lg">AI Weekly Insights</h3>
+            <h3 className="font-semibold text-lg">{t.reports.aiWeeklyInsights}</h3>
           </div>
           <div className="prose prose-indigo prose-sm max-w-none">
             <Markdown>{aiReport}</Markdown>

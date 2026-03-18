@@ -272,7 +272,7 @@ export function DashboardView({
         <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl p-6 shadow-sm mb-6 animate-in fade-in zoom-in duration-300">
           <div className="flex items-center gap-2 mb-2 text-indigo-800">
             <Activity className="w-5 h-5" />
-            <h2 className="text-lg font-semibold">Diagnóstico de Productividad</h2>
+            <h2 className="text-lg font-semibold">{dt("productivityDiagnosis")}</h2>
           </div>
           <p className="text-neutral-700 leading-relaxed">
             {priorityInsight}
@@ -284,7 +284,7 @@ export function DashboardView({
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm mb-6">
           <div className="flex items-center gap-2 mb-4 text-amber-800">
             <ListTodo className="w-5 h-5" />
-            <h2 className="text-lg font-semibold">Continuar trabajando en...</h2>
+            <h2 className="text-lg font-semibold">{dt("keepWorkingOn")}</h2>
           </div>
           <div className="grid gap-3">
             {pendingTodos.map((todo: Todo) => (
@@ -302,7 +302,7 @@ export function DashboardView({
                       <Clock className="w-3 h-3" /> {t.status.pending}
                     </span>
                     <span className="text-xs text-neutral-400">
-                      Creado: {format(new Date(todo.created_at), "dd MMM")}
+                      {dt("created")} {format(new Date(todo.created_at), "dd MMM")}
                     </span>
                   </div>
                 </div>

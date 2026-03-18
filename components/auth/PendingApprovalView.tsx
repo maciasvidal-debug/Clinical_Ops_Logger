@@ -27,7 +27,7 @@ export function PendingApprovalView({ email }: { email: string }) {
             </div>
           </div>
           <h1 className="text-2xl font-bold tracking-tight">{t.auth.pendingApproval}</h1>
-          <p className="text-amber-50 text-sm mt-1">SiteFlow Clinical Ops Logger</p>
+          <p className="text-amber-50 text-sm mt-1">{t.shell.appSubtitle}</p>
         </div>
 
         <div className="p-8 space-y-6">

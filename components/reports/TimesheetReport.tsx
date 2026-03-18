@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { LogEntry, Project, UserProfile } from "@/lib/types";
 import { format, parseISO, startOfWeek, endOfWeek } from "date-fns";
 import Markdown from "react-markdown";
+import { useTranslation } from "@/lib/i18n/context";
 
 interface TimesheetReportProps {
   logs: LogEntry[];
@@ -18,6 +19,7 @@ export function TimesheetReport({
   aiReport,
   onClose,
 }: TimesheetReportProps) {
+  const { t } = useTranslation();
   const groupedData = useMemo(() => {
     const sortedLogs = [...logs].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
@@ -147,14 +149,14 @@ export function TimesheetReport({
               <div className="uppercase mt-1 font-semibold">{profile.first_name} {profile.last_name}</div>
             </div>
             <div className="text-center flex-1 px-4">
-              <h1 className="text-2xl font-bold mb-1">Informe de hoja de horas</h1>
-              <div className="text-sm font-semibold">SiteFlow App</div>
+              <h1 className="text-2xl font-bold mb-1">{t.reports.timesheetReport}</h1>
+              <div className="text-sm font-semibold">{t.shell.appName}</div>
             </div>
-            <div className="text-xs text-right text-neutral-600">Page: 1 of 1</div>
+            <div className="text-xs text-right text-neutral-600">{t.reports.page}: 1 of 1</div>
           </div>
 
           <div className="text-xs mb-4 pb-2 font-medium text-neutral-800">
-            Filters: Fecha de inicio: {logs.length > 0 ? format(parseISO(logs[0].date), "dd-MM-yy") : "N/A"}, Recurso: {profile.id.substring(0, 5)}, Descripción: All Activities
+            {t.reports.filters}: {t.common.start_date} {logs.length > 0 ? format(parseISO(logs[0].date), "dd-MM-yy") : "N/A"}, Recurso: {profile.id.substring(0, 5)}, {t.reports.description}: {t.reports.allActivities}
           </div>
 
           {/* Data Table Container */}
@@ -162,17 +164,17 @@ export function TimesheetReport({
             <table className="w-full text-xs text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="border-b-2 border-black text-neutral-900">
-                  <th className="py-2 pr-2 font-bold whitespace-nowrap">Recurso</th>
-                  <th className="py-2 pr-2 font-bold whitespace-nowrap">Nombre periodo</th>
-                  <th className="py-2 pr-2 font-bold whitespace-nowrap">Fecha</th>
-                  <th className="py-2 pr-2 font-bold whitespace-nowrap">Nº Proyecto</th>
-                  <th className="py-2 pr-2 font-bold whitespace-nowrap">Descripción proyecto</th>
-                  <th className="py-2 pr-2 font-bold whitespace-nowrap">Nº de Tarea</th>
-                  <th className="py-2 pr-2 font-bold min-w-[150px]">Descripción de la tarea</th>
-                  <th className="py-2 pr-2 font-bold min-w-[200px]">Details</th>
-                  <th className="py-2 pr-2 font-bold text-center whitespace-nowrap">Estado</th>
-                  <th className="py-2 pr-2 font-bold text-right whitespace-nowrap">Cantidad regular</th>
-                  <th className="py-2 font-bold text-right whitespace-nowrap">TOTAL</th>
+                  <th className="py-2 pr-2 font-bold whitespace-nowrap">{t.reports.resource}</th>
+                  <th className="py-2 pr-2 font-bold whitespace-nowrap">{t.reports.periodName}</th>
+                  <th className="py-2 pr-2 font-bold whitespace-nowrap">{t.reports.date}</th>
+                  <th className="py-2 pr-2 font-bold whitespace-nowrap">{t.reports.projectNum}</th>
+                  <th className="py-2 pr-2 font-bold whitespace-nowrap">{t.reports.projectDesc}</th>
+                  <th className="py-2 pr-2 font-bold whitespace-nowrap">{t.reports.taskNum}</th>
+                  <th className="py-2 pr-2 font-bold min-w-[150px]">{t.reports.taskDesc}</th>
+                  <th className="py-2 pr-2 font-bold min-w-[200px]">{t.reports.details}</th>
+                  <th className="py-2 pr-2 font-bold text-center whitespace-nowrap">{t.reports.status}</th>
+                  <th className="py-2 pr-2 font-bold text-right whitespace-nowrap">{t.reports.regularAmount}</th>
+                  <th className="py-2 font-bold text-right whitespace-nowrap">{t.reports.total}</th>
                 </tr>
               </thead>
               <tbody>
@@ -220,7 +222,7 @@ export function TimesheetReport({
                                   <td className="py-1.5 pr-4 break-words text-neutral-600 max-w-[250px] whitespace-normal">
                                     {log.notes || "-"}
                                   </td>
-                                  <td className="py-1.5 text-center whitespace-nowrap text-neutral-500">Publicado</td>
+                                  <td className="py-1.5 text-center whitespace-nowrap text-neutral-500">{t.status.published}</td>
                                   <td className="py-1.5 text-right font-mono">
                                     {(log.duration_minutes / 60).toFixed(1).replace('.', ',')}
                                   </td>
@@ -234,7 +236,7 @@ export function TimesheetReport({
                             {/* Daily Total Row */}
                             <tr className="border-b border-neutral-300">
                               <td colSpan={8}></td>
-                              <td className="py-1.5 text-right font-bold whitespace-nowrap">MM/dd/yyyy Total</td>
+                              <td className="py-1.5 text-right font-bold whitespace-nowrap">MM/dd/yyyy {t.reports.total}</td>
                               <td className="py-1.5 text-right font-bold font-mono">{day.dayTotal.toFixed(1).replace('.', ',')}</td>
                               <td className="py-1.5 text-right font-bold font-mono">{day.dayTotal.toFixed(1).replace('.', ',')}</td>
                             </tr>
@@ -273,7 +275,7 @@ export function TimesheetReport({
             <div className="mt-8 pt-6 border-t border-neutral-200 break-inside-avoid">
               <div className="flex items-center gap-2 mb-3 text-neutral-800">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                <h2 className="text-sm font-bold uppercase tracking-wider">AI Insights & Activity Summary</h2>
+                <h2 className="text-sm font-bold uppercase tracking-wider">{t.reports.aiInsightsSummary}</h2>
               </div>
               <div className="prose prose-xs max-w-none text-neutral-700">
                 <Markdown>{aiReport}</Markdown>
