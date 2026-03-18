@@ -186,20 +186,20 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "gest_reg_dossier",
-          "name": "Gestión Regulatoria y Dossier",
+          "name": "Regulatory Management and Dossier",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "sometimiento_inicial",
-              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+              "name": "Initial Submission to Ethics Committees (CEC/IRB)"
             },
             {
               "id": "act_isf",
-              "name": "Actualización y foliación del Investigator Site File (ISF)"
+              "name": "Investigator Site File (ISF) Update and Pagination"
             },
             {
               "id": "gest_cta",
-              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+              "name": "Clinical Trial Agreement (CTA) Signature Management"
             }
           ]
         }
@@ -213,16 +213,16 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "ejec_reclutamiento",
-          "name": "Ejecución de Reclutamiento",
+          "name": "Recruitment Execution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "pre_screening_logs",
-              "name": "Ejecución de Pre-screening y logs"
+              "name": "Pre-screening Execution and Logs"
             },
             {
               "id": "gest_bd_pacientes",
-              "name": "Gestión de bases de datos de pacientes potenciales"
+              "name": "Potential Patient Database Management"
             }
           ]
         }
@@ -230,24 +230,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "qa_closeout",
-      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "name": "05. QUALITY, COMPLIANCE & CLOSE-OUT",
       "tasks": [
         {
           "id": "soporte_auditoria",
-          "name": "Soporte a Auditoría y Monitorización",
+          "name": "Audit and Monitoring Support",
           "roleContext": "shared",
           "subTasks": [
             {
               "id": "prep_visitas",
-              "name": "Preparación de visitas (SDV/SDR readiness)"
+              "name": "Visit Preparation (SDV/SDR readiness)"
             },
             {
               "id": "ejec_qc",
-              "name": "Ejecución de actividades de Control de Calidad"
+              "name": "Quality Control Activities Execution"
             },
             {
               "id": "resp_hallazgos",
-              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+              "name": "Follow-up Letter (FUL) Findings Response"
             }
           ]
         }
@@ -261,16 +261,16 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "estrategias_retencion",
-          "name": "Estrategias de Retención",
+          "name": "Retention Strategies",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "coord_logistica",
-              "name": "Coordinación de logística y transporte para sujetos"
+              "name": "Logistics and Transport Coordination for Subjects"
             },
             {
               "id": "llamadas_seguimiento",
-              "name": "Llamadas de recordatorio y seguimiento de visitas"
+              "name": "Reminder Calls and Visit Follow-up"
             }
           ]
         }
@@ -278,16 +278,16 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "conduct",
-      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "name": "03. CONDUCT & MONITORING",
       "tasks": [
         {
           "id": "control_visitas",
-          "name": "Control de Visitas de Sujetos",
+          "name": "Subject Visit Control",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "prog_visitas",
-              "name": "Programación de visitas en ventana y registro"
+              "name": "In-window Visit Scheduling and Registration"
             }
           ]
         }
@@ -295,24 +295,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "qa_closeout",
-      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "name": "05. QUALITY, COMPLIANCE & CLOSE-OUT",
       "tasks": [
         {
           "id": "soporte_auditoria",
-          "name": "Soporte a Auditoría y Monitorización",
+          "name": "Audit and Monitoring Support",
           "roleContext": "shared",
           "subTasks": [
             {
               "id": "prep_visitas",
-              "name": "Preparación de visitas (SDV/SDR readiness)"
+              "name": "Visit Preparation (SDV/SDR readiness)"
             },
             {
               "id": "ejec_qc",
-              "name": "Ejecución de actividades de Control de Calidad"
+              "name": "Quality Control Activities Execution"
             },
             {
               "id": "resp_hallazgos",
-              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+              "name": "Follow-up Letter (FUL) Findings Response"
             }
           ]
         }
@@ -322,43 +322,43 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
   "data_entry": [
     {
       "id": "conduct",
-      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "name": "03. CONDUCT & MONITORING",
       "tasks": [
         {
           "id": "gest_datos_ecrf",
-          "name": "Gestión de Datos eCRF",
+          "name": "eCRF Data Management",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "transcripcion_fuente",
-              "name": "Transcripción de fuente a eCRF"
+              "name": "Source to eCRF Transcription"
             },
             {
               "id": "carga_labs",
-              "name": "Carga de resultados de laboratorios y procedimientos"
+              "name": "Laboratory and Procedure Results Upload"
             },
             {
               "id": "registro_logs",
-              "name": "Registro y actualización de logs de CM/EAs"
+              "name": "AE/SAE Logs Registration and Update"
             }
           ]
         },
         {
           "id": "resolucion_discrepancias",
-          "name": "Resolución de Discrepancias",
+          "name": "Query Resolution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "resp_tecnica_queries",
-              "name": "Respuesta técnica a Queries"
+              "name": "Technical Response to Queries"
             },
             {
               "id": "ejec_correcciones",
-              "name": "Ejecución de correcciones en sistema EDC y fuente"
+              "name": "Corrections Execution in EDC and Source"
             },
             {
               "id": "gest_firmas_inv",
-              "name": "Gestión de firmas del Investigador (Sign-off)"
+              "name": "Investigator Sign-off Management"
             }
           ]
         }
@@ -366,24 +366,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "qa_closeout",
-      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "name": "05. QUALITY, COMPLIANCE & CLOSE-OUT",
       "tasks": [
         {
           "id": "soporte_auditoria",
-          "name": "Soporte a Auditoría y Monitorización",
+          "name": "Audit and Monitoring Support",
           "roleContext": "shared",
           "subTasks": [
             {
               "id": "prep_visitas",
-              "name": "Preparación de visitas (SDV/SDR readiness)"
+              "name": "Visit Preparation (SDV/SDR readiness)"
             },
             {
               "id": "ejec_qc",
-              "name": "Ejecución de actividades de Control de Calidad"
+              "name": "Quality Control Activities Execution"
             },
             {
               "id": "resp_hallazgos",
-              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+              "name": "Follow-up Letter (FUL) Findings Response"
             }
           ]
         }
@@ -397,20 +397,20 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "gest_reg_dossier",
-          "name": "Gestión Regulatoria y Dossier",
+          "name": "Regulatory Management and Dossier",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "sometimiento_inicial",
-              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+              "name": "Initial Submission to Ethics Committees (CEC/IRB)"
             },
             {
               "id": "act_isf",
-              "name": "Actualización y foliación del Investigator Site File (ISF)"
+              "name": "Investigator Site File (ISF) Update and Pagination"
             },
             {
               "id": "gest_cta",
-              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+              "name": "Clinical Trial Agreement (CTA) Signature Management"
             }
           ]
         }
@@ -422,31 +422,31 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "ejec_reclutamiento",
-          "name": "Ejecución de Reclutamiento",
+          "name": "Recruitment Execution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "pre_screening_logs",
-              "name": "Ejecución de Pre-screening y logs"
+              "name": "Pre-screening Execution and Logs"
             },
             {
               "id": "gest_bd_pacientes",
-              "name": "Gestión de bases de datos de pacientes potenciales"
+              "name": "Potential Patient Database Management"
             }
           ]
         },
         {
           "id": "estrategias_retencion",
-          "name": "Estrategias de Retención",
+          "name": "Retention Strategies",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "coord_logistica",
-              "name": "Coordinación de logística y transporte para sujetos"
+              "name": "Logistics and Transport Coordination for Subjects"
             },
             {
               "id": "llamadas_seguimiento",
-              "name": "Llamadas de recordatorio y seguimiento de visitas"
+              "name": "Reminder Calls and Visit Follow-up"
             }
           ]
         }
@@ -454,54 +454,54 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "conduct",
-      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "name": "03. CONDUCT & MONITORING",
       "tasks": [
         {
           "id": "gest_datos_ecrf",
-          "name": "Gestión de Datos eCRF",
+          "name": "eCRF Data Management",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "transcripcion_fuente",
-              "name": "Transcripción de fuente a eCRF"
+              "name": "Source to eCRF Transcription"
             },
             {
               "id": "carga_labs",
-              "name": "Carga de resultados de laboratorios y procedimientos"
+              "name": "Laboratory and Procedure Results Upload"
             },
             {
               "id": "registro_logs",
-              "name": "Registro y actualización de logs de CM/EAs"
+              "name": "AE/SAE Logs Registration and Update"
             }
           ]
         },
         {
           "id": "resolucion_discrepancias",
-          "name": "Resolución de Discrepancias",
+          "name": "Query Resolution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "resp_tecnica_queries",
-              "name": "Respuesta técnica a Queries"
+              "name": "Technical Response to Queries"
             },
             {
               "id": "ejec_correcciones",
-              "name": "Ejecución de correcciones en sistema EDC y fuente"
+              "name": "Corrections Execution in EDC and Source"
             },
             {
               "id": "gest_firmas_inv",
-              "name": "Gestión de firmas del Investigador (Sign-off)"
+              "name": "Investigator Sign-off Management"
             }
           ]
         },
         {
           "id": "control_visitas",
-          "name": "Control de Visitas de Sujetos",
+          "name": "Subject Visit Control",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "prog_visitas",
-              "name": "Programación de visitas en ventana y registro"
+              "name": "In-window Visit Scheduling and Registration"
             }
           ]
         }
@@ -509,24 +509,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "safety_pv",
-      "name": "04. SEGURIDAD Y FARMACOVIGILANCIA",
+      "name": "04. SAFETY & PHARMACOVIGILANCE",
       "tasks": [
         {
           "id": "reporte_seguridad",
-          "name": "Reporte de Seguridad",
+          "name": "Safety Reporting",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "notif_saes",
-              "name": "Notificación inicial y seguimiento de SAEs"
+              "name": "SAE Initial Notification and Follow-up"
             },
             {
               "id": "recoleccion_fuentes",
-              "name": "Recolección y anonimización de fuentes médicas"
+              "name": "Medical Source Collection and Anonymization"
             },
             {
               "id": "eval_medica",
-              "name": "Evaluación médica de causalidad y severidad"
+              "name": "Medical Assessment of Causality and Severity"
             }
           ]
         }
@@ -534,24 +534,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "qa_closeout",
-      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "name": "05. QUALITY, COMPLIANCE & CLOSE-OUT",
       "tasks": [
         {
           "id": "soporte_auditoria",
-          "name": "Soporte a Auditoría y Monitorización",
+          "name": "Audit and Monitoring Support",
           "roleContext": "shared",
           "subTasks": [
             {
               "id": "prep_visitas",
-              "name": "Preparación de visitas (SDV/SDR readiness)"
+              "name": "Visit Preparation (SDV/SDR readiness)"
             },
             {
               "id": "ejec_qc",
-              "name": "Ejecución de actividades de Control de Calidad"
+              "name": "Quality Control Activities Execution"
             },
             {
               "id": "resp_hallazgos",
-              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+              "name": "Follow-up Letter (FUL) Findings Response"
             }
           ]
         }
@@ -570,11 +570,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "ssv_fac",
-              "name": "Facility assessment"
+              "name": "Facility Assessment"
             },
             {
               "id": "ssv_pi",
-              "name": "PI qualification review"
+              "name": "PI Qualification Review"
             }
           ]
         },
@@ -585,11 +585,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "siv_train",
-              "name": "Protocol training"
+              "name": "Protocol Training"
             },
             {
               "id": "siv_ip",
-              "name": "IP handling review"
+              "name": "IP Handling Review"
             }
           ]
         }
@@ -597,7 +597,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "conduct",
-      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "name": "03. CONDUCT & MONITORING",
       "tasks": [
         {
           "id": "rmv",
@@ -610,7 +610,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
             },
             {
               "id": "rmv_ip",
-              "name": "IP accountability"
+              "name": "IP Accountability"
             }
           ]
         },
@@ -621,11 +621,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "cm_kri",
-              "name": "KRI review"
+              "name": "KRI Review"
             },
             {
               "id": "cm_trend",
-              "name": "Data trending analysis"
+              "name": "Data Trending Analysis"
             }
           ]
         },
@@ -636,11 +636,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "sc_call",
-              "name": "Weekly check-in calls"
+              "name": "Weekly Check-in Calls"
             },
             {
               "id": "sc_email",
-              "name": "Email correspondence"
+              "name": "Email Correspondence"
             }
           ]
         }
@@ -648,24 +648,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "qa_closeout",
-      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "name": "05. QUALITY, COMPLIANCE & CLOSE-OUT",
       "tasks": [
         {
           "id": "soporte_auditoria",
-          "name": "Soporte a Auditoría y Monitorización",
+          "name": "Audit and Monitoring Support",
           "roleContext": "shared",
           "subTasks": [
             {
               "id": "prep_visitas",
-              "name": "Preparación de visitas (SDV/SDR readiness)"
+              "name": "Visit Preparation (SDV/SDR readiness)"
             },
             {
               "id": "ejec_qc",
-              "name": "Ejecución de actividades de Control de Calidad"
+              "name": "Quality Control Activities Execution"
             },
             {
               "id": "resp_hallazgos",
-              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+              "name": "Follow-up Letter (FUL) Findings Response"
             }
           ]
         },
@@ -676,7 +676,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "cov_ip",
-              "name": "Final IP reconciliation"
+              "name": "Final IP Reconciliation"
             }
           ]
         }
@@ -703,7 +703,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "conduct",
-      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "name": "03. CONDUCT & MONITORING",
       "tasks": [
         {
           "id": "site_comm",
@@ -712,11 +712,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "sc_call",
-              "name": "Weekly check-in calls"
+              "name": "Weekly Check-in Calls"
             },
             {
               "id": "sc_email",
-              "name": "Email correspondence"
+              "name": "Email Correspondence"
             }
           ]
         }
@@ -730,20 +730,20 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "gest_reg_dossier",
-          "name": "Gestión Regulatoria y Dossier",
+          "name": "Regulatory Management and Dossier",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "sometimiento_inicial",
-              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+              "name": "Initial Submission to Ethics Committees (CEC/IRB)"
             },
             {
               "id": "act_isf",
-              "name": "Actualización y foliación del Investigator Site File (ISF)"
+              "name": "Investigator Site File (ISF) Update and Pagination"
             },
             {
               "id": "gest_cta",
-              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+              "name": "Clinical Trial Agreement (CTA) Signature Management"
             }
           ]
         },
@@ -754,11 +754,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "ssv_fac",
-              "name": "Facility assessment"
+              "name": "Facility Assessment"
             },
             {
               "id": "ssv_pi",
-              "name": "PI qualification review"
+              "name": "PI Qualification Review"
             }
           ]
         },
@@ -769,11 +769,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "siv_train",
-              "name": "Protocol training"
+              "name": "Protocol Training"
             },
             {
               "id": "siv_ip",
-              "name": "IP handling review"
+              "name": "IP Handling Review"
             }
           ]
         },
@@ -796,31 +796,31 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "ejec_reclutamiento",
-          "name": "Ejecución de Reclutamiento",
+          "name": "Recruitment Execution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "pre_screening_logs",
-              "name": "Ejecución de Pre-screening y logs"
+              "name": "Pre-screening Execution and Logs"
             },
             {
               "id": "gest_bd_pacientes",
-              "name": "Gestión de bases de datos de pacientes potenciales"
+              "name": "Potential Patient Database Management"
             }
           ]
         },
         {
           "id": "estrategias_retencion",
-          "name": "Estrategias de Retención",
+          "name": "Retention Strategies",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "coord_logistica",
-              "name": "Coordinación de logística y transporte para sujetos"
+              "name": "Logistics and Transport Coordination for Subjects"
             },
             {
               "id": "llamadas_seguimiento",
-              "name": "Llamadas de recordatorio y seguimiento de visitas"
+              "name": "Reminder Calls and Visit Follow-up"
             }
           ]
         }
@@ -828,54 +828,54 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "conduct",
-      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "name": "03. CONDUCT & MONITORING",
       "tasks": [
         {
           "id": "gest_datos_ecrf",
-          "name": "Gestión de Datos eCRF",
+          "name": "eCRF Data Management",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "transcripcion_fuente",
-              "name": "Transcripción de fuente a eCRF"
+              "name": "Source to eCRF Transcription"
             },
             {
               "id": "carga_labs",
-              "name": "Carga de resultados de laboratorios y procedimientos"
+              "name": "Laboratory and Procedure Results Upload"
             },
             {
               "id": "registro_logs",
-              "name": "Registro y actualización de logs de CM/EAs"
+              "name": "AE/SAE Logs Registration and Update"
             }
           ]
         },
         {
           "id": "resolucion_discrepancias",
-          "name": "Resolución de Discrepancias",
+          "name": "Query Resolution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "resp_tecnica_queries",
-              "name": "Respuesta técnica a Queries"
+              "name": "Technical Response to Queries"
             },
             {
               "id": "ejec_correcciones",
-              "name": "Ejecución de correcciones en sistema EDC y fuente"
+              "name": "Corrections Execution in EDC and Source"
             },
             {
               "id": "gest_firmas_inv",
-              "name": "Gestión de firmas del Investigador (Sign-off)"
+              "name": "Investigator Sign-off Management"
             }
           ]
         },
         {
           "id": "control_visitas",
-          "name": "Control de Visitas de Sujetos",
+          "name": "Subject Visit Control",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "prog_visitas",
-              "name": "Programación de visitas en ventana y registro"
+              "name": "In-window Visit Scheduling and Registration"
             }
           ]
         },
@@ -890,7 +890,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
             },
             {
               "id": "rmv_ip",
-              "name": "IP accountability"
+              "name": "IP Accountability"
             }
           ]
         },
@@ -901,11 +901,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "cm_kri",
-              "name": "KRI review"
+              "name": "KRI Review"
             },
             {
               "id": "cm_trend",
-              "name": "Data trending analysis"
+              "name": "Data Trending Analysis"
             }
           ]
         },
@@ -916,11 +916,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "sc_call",
-              "name": "Weekly check-in calls"
+              "name": "Weekly Check-in Calls"
             },
             {
               "id": "sc_email",
-              "name": "Email correspondence"
+              "name": "Email Correspondence"
             }
           ]
         }
@@ -928,24 +928,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "safety_pv",
-      "name": "04. SEGURIDAD Y FARMACOVIGILANCIA",
+      "name": "04. SAFETY & PHARMACOVIGILANCE",
       "tasks": [
         {
           "id": "reporte_seguridad",
-          "name": "Reporte de Seguridad",
+          "name": "Safety Reporting",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "notif_saes",
-              "name": "Notificación inicial y seguimiento de SAEs"
+              "name": "SAE Initial Notification and Follow-up"
             },
             {
               "id": "recoleccion_fuentes",
-              "name": "Recolección y anonimización de fuentes médicas"
+              "name": "Medical Source Collection and Anonymization"
             },
             {
               "id": "eval_medica",
-              "name": "Evaluación médica de causalidad y severidad"
+              "name": "Medical Assessment of Causality and Severity"
             }
           ]
         }
@@ -953,24 +953,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "qa_closeout",
-      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "name": "05. QUALITY, COMPLIANCE & CLOSE-OUT",
       "tasks": [
         {
           "id": "soporte_auditoria",
-          "name": "Soporte a Auditoría y Monitorización",
+          "name": "Audit and Monitoring Support",
           "roleContext": "shared",
           "subTasks": [
             {
               "id": "prep_visitas",
-              "name": "Preparación de visitas (SDV/SDR readiness)"
+              "name": "Visit Preparation (SDV/SDR readiness)"
             },
             {
               "id": "ejec_qc",
-              "name": "Ejecución de actividades de Control de Calidad"
+              "name": "Quality Control Activities Execution"
             },
             {
               "id": "resp_hallazgos",
-              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+              "name": "Follow-up Letter (FUL) Findings Response"
             }
           ]
         },
@@ -981,7 +981,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "cov_ip",
-              "name": "Final IP reconciliation"
+              "name": "Final IP Reconciliation"
             }
           ]
         }
@@ -995,20 +995,20 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "gest_reg_dossier",
-          "name": "Gestión Regulatoria y Dossier",
+          "name": "Regulatory Management and Dossier",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "sometimiento_inicial",
-              "name": "Sometimiento inicial a Comités de Ética (CEC/IRB)"
+              "name": "Initial Submission to Ethics Committees (CEC/IRB)"
             },
             {
               "id": "act_isf",
-              "name": "Actualización y foliación del Investigator Site File (ISF)"
+              "name": "Investigator Site File (ISF) Update and Pagination"
             },
             {
               "id": "gest_cta",
-              "name": "Gestión de firmas de Clinical Trial Agreement (CTA)"
+              "name": "Clinical Trial Agreement (CTA) Signature Management"
             }
           ]
         },
@@ -1019,11 +1019,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "ssv_fac",
-              "name": "Facility assessment"
+              "name": "Facility Assessment"
             },
             {
               "id": "ssv_pi",
-              "name": "PI qualification review"
+              "name": "PI Qualification Review"
             }
           ]
         },
@@ -1034,11 +1034,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "siv_train",
-              "name": "Protocol training"
+              "name": "Protocol Training"
             },
             {
               "id": "siv_ip",
-              "name": "IP handling review"
+              "name": "IP Handling Review"
             }
           ]
         },
@@ -1061,31 +1061,31 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
       "tasks": [
         {
           "id": "ejec_reclutamiento",
-          "name": "Ejecución de Reclutamiento",
+          "name": "Recruitment Execution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "pre_screening_logs",
-              "name": "Ejecución de Pre-screening y logs"
+              "name": "Pre-screening Execution and Logs"
             },
             {
               "id": "gest_bd_pacientes",
-              "name": "Gestión de bases de datos de pacientes potenciales"
+              "name": "Potential Patient Database Management"
             }
           ]
         },
         {
           "id": "estrategias_retencion",
-          "name": "Estrategias de Retención",
+          "name": "Retention Strategies",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "coord_logistica",
-              "name": "Coordinación de logística y transporte para sujetos"
+              "name": "Logistics and Transport Coordination for Subjects"
             },
             {
               "id": "llamadas_seguimiento",
-              "name": "Llamadas de recordatorio y seguimiento de visitas"
+              "name": "Reminder Calls and Visit Follow-up"
             }
           ]
         }
@@ -1093,54 +1093,54 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "conduct",
-      "name": "03. EJECUCIÓN Y MONITORIZACIÓN (CONDUCT)",
+      "name": "03. CONDUCT & MONITORING",
       "tasks": [
         {
           "id": "gest_datos_ecrf",
-          "name": "Gestión de Datos eCRF",
+          "name": "eCRF Data Management",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "transcripcion_fuente",
-              "name": "Transcripción de fuente a eCRF"
+              "name": "Source to eCRF Transcription"
             },
             {
               "id": "carga_labs",
-              "name": "Carga de resultados de laboratorios y procedimientos"
+              "name": "Laboratory and Procedure Results Upload"
             },
             {
               "id": "registro_logs",
-              "name": "Registro y actualización de logs de CM/EAs"
+              "name": "AE/SAE Logs Registration and Update"
             }
           ]
         },
         {
           "id": "resolucion_discrepancias",
-          "name": "Resolución de Discrepancias",
+          "name": "Query Resolution",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "resp_tecnica_queries",
-              "name": "Respuesta técnica a Queries"
+              "name": "Technical Response to Queries"
             },
             {
               "id": "ejec_correcciones",
-              "name": "Ejecución de correcciones en sistema EDC y fuente"
+              "name": "Corrections Execution in EDC and Source"
             },
             {
               "id": "gest_firmas_inv",
-              "name": "Gestión de firmas del Investigador (Sign-off)"
+              "name": "Investigator Sign-off Management"
             }
           ]
         },
         {
           "id": "control_visitas",
-          "name": "Control de Visitas de Sujetos",
+          "name": "Subject Visit Control",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "prog_visitas",
-              "name": "Programación de visitas en ventana y registro"
+              "name": "In-window Visit Scheduling and Registration"
             }
           ]
         },
@@ -1155,7 +1155,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
             },
             {
               "id": "rmv_ip",
-              "name": "IP accountability"
+              "name": "IP Accountability"
             }
           ]
         },
@@ -1166,11 +1166,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "cm_kri",
-              "name": "KRI review"
+              "name": "KRI Review"
             },
             {
               "id": "cm_trend",
-              "name": "Data trending analysis"
+              "name": "Data Trending Analysis"
             }
           ]
         },
@@ -1181,11 +1181,11 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "sc_call",
-              "name": "Weekly check-in calls"
+              "name": "Weekly Check-in Calls"
             },
             {
               "id": "sc_email",
-              "name": "Email correspondence"
+              "name": "Email Correspondence"
             }
           ]
         }
@@ -1193,24 +1193,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "safety_pv",
-      "name": "04. SEGURIDAD Y FARMACOVIGILANCIA",
+      "name": "04. SAFETY & PHARMACOVIGILANCE",
       "tasks": [
         {
           "id": "reporte_seguridad",
-          "name": "Reporte de Seguridad",
+          "name": "Safety Reporting",
           "roleContext": "site_led",
           "subTasks": [
             {
               "id": "notif_saes",
-              "name": "Notificación inicial y seguimiento de SAEs"
+              "name": "SAE Initial Notification and Follow-up"
             },
             {
               "id": "recoleccion_fuentes",
-              "name": "Recolección y anonimización de fuentes médicas"
+              "name": "Medical Source Collection and Anonymization"
             },
             {
               "id": "eval_medica",
-              "name": "Evaluación médica de causalidad y severidad"
+              "name": "Medical Assessment of Causality and Severity"
             }
           ]
         }
@@ -1218,24 +1218,24 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
     },
     {
       "id": "qa_closeout",
-      "name": "05. CALIDAD, CUMPLIMIENTO Y CIERRE",
+      "name": "05. QUALITY, COMPLIANCE & CLOSE-OUT",
       "tasks": [
         {
           "id": "soporte_auditoria",
-          "name": "Soporte a Auditoría y Monitorización",
+          "name": "Audit and Monitoring Support",
           "roleContext": "shared",
           "subTasks": [
             {
               "id": "prep_visitas",
-              "name": "Preparación de visitas (SDV/SDR readiness)"
+              "name": "Visit Preparation (SDV/SDR readiness)"
             },
             {
               "id": "ejec_qc",
-              "name": "Ejecución de actividades de Control de Calidad"
+              "name": "Quality Control Activities Execution"
             },
             {
               "id": "resp_hallazgos",
-              "name": "Respuesta a hallazgos de cartas de seguimiento (FUL)"
+              "name": "Follow-up Letter (FUL) Findings Response"
             }
           ]
         },
@@ -1246,7 +1246,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "cov_ip",
-              "name": "Final IP reconciliation"
+              "name": "Final IP Reconciliation"
             }
           ]
         }
@@ -1263,7 +1263,7 @@ export const ROLE_HIERARCHY: Record<string, ActivityCategory[]> = {
           "subTasks": [
             {
               "id": "um_prov",
-              "name": "Account provisioning"
+              "name": "Account Provisioning"
             }
           ]
         }

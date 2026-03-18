@@ -382,7 +382,7 @@ export function LogFormView({
               <option value="">{t.logForm.noCategoriesAvailable}</option>
             ) : (
               availableCategories.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
+                <option key={c.id} value={c.id}>{dt(c.name)}</option>
               ))
             )}
           </select>
@@ -412,7 +412,7 @@ export function LogFormView({
                     <div className="flex flex-col mt-0.5">
                       <div className="flex items-center gap-2">
                         <span className={`text-sm font-semibold ${isActive ? 'text-indigo-900' : 'text-neutral-700'}`}>
-                          {task.name}
+                          {dt(task.name)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 mt-1">
@@ -463,7 +463,7 @@ export function LogFormView({
                     <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${isActive ? 'border-emerald-500 bg-emerald-500' : 'border-neutral-300'}`}>
                       {isActive && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
                     </div>
-                    <span className="leading-tight">{subTask.name}</span>
+                    <span className="leading-tight">{dt(subTask.name)}</span>
                   </button>
                 );
               })}
