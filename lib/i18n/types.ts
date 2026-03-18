@@ -36,6 +36,8 @@ export interface Dictionary {
     queryResolvedDesc: string;
     timerStartedTitle: string;
     timerStartedDesc: string;
+    exportSuccessTitle: string;
+    exportSuccessDesc: string;
     statusUpdatedTitle: string;
     statusUpdatedDesc: string;
     notificationsClearedTitle: string;
@@ -49,14 +51,18 @@ export interface Dictionary {
   navigation: { dashboard: string; log: string; history: string; reports: string; team: string;
     settings: string; signOut: string; newEntry: string; };
   auth: { signIn: string; signUp: string; createAccount: string; haveAccount: string; noAccount: string; firstName: string; lastName: string; roleTitle: string; termsPrefix: string; termsLink: string; termsAnd: string; privacyLink: string; signOut: string; sendOtp: string; verifyOtp: string; otpCode: string; useOtp: string; usePassword: string; checkEmailForOtp: string; otpPlaceholder: string; email: string; password: string; accessDenied: string; pendingApproval: string; contactAdmin: string;
-    accountRejected: string; selectRole: string; };
+    accountRejected: string; selectRole: string;
+    acceptTermsError: string;
+    acceptTermsLabel: string; };
   roles: { super_admin: string; manager: string; crc: string; cra: string; data_entry: string; recruitment_specialist: string; retention_specialist: string; cta: string; ra: string; staff: string; };
   status: { active: string; pending: string; rejected: string; published: string; };
   dashboard: { overview: string; todayLogs: string; thisWeekLogs: string; openQueries: string; actions: string; logNewActivity: string; viewHistory: string; noDataThisWeek: string; quickLog: string; repeatRecent: string; activityDistribution: string; recentEntries: string; viewAll: string; noRecentEntries: string; time: string; entries: string; teamManagement: string; reviewTeamHistory: string; productivityDiagnosis: string; keepWorkingOn: string; productivityTitle: string; continueWorkingOn: string; };
   shell: { appName: string; appSubtitle: string; smartTimer: string; stopLog: string; notifications: string; markAllRead: string; clearAll: string; noNotifications: string; };
   logForm: { title: string; subtitle: string; aiSmartLogging: string; aiDescription: string; aiPlaceholder: string; aiButton: string; date: string; duration: string; project: string; protocol: string; siteOptional: string; category: string; specificActivity: string; task: string; notesOptional: string; notesPlaceholder: string; submit: string; selectProject: string; selectProtocol: string; selectSite: string; hours: string; minutes: string; aiSuccess: string; aiError: string; aiInputTooLong: string; siteLed: string; croLed: string; shared: string; selectSubTask: string; subTasks: string; noCategoriesAvailable: string; parsing: string; };
   history: { title: string; subtitle: string; searchPlaceholder: string; allProjects: string; allProtocols: string; date: string; duration: string; project: string; category: string; activity: string; noLogs: string; openQuery: string; askQuestion: string; question: string; reply: string; yourReply: string; sendReply: string; typeYourResponse: string; enterYourQuery: string; };
-  reports: { title: string; subtitle: string; timeByProject: string; timeByCategory: string; noData: string; export: string; generateInsights: string; aiWeeklyInsights: string; timesheetReport: string; page: string; resource: string; periodName: string; date: string; projectNum: string; projectDesc: string; taskNum: string; taskDesc: string; details: string; status: string; regularAmount: string; total: string; allActivities: string; filters: string; description: string; aiInsightsSummary: string; analyzingData: string; failedAiReport: string; aiInsightsTitle: string; kpiTrends: string; patientFunnel: string; queryManagement: string; safetyReporting: string; siteSupportHours: string; hoursPerProject: string; timeByActivityType: string; topSubTasks: string; totalHoursPerRole: string;
+  reports: { title: string; subtitle: string; timeByProject: string; timeByCategory: string; noData: string; export: string;
+    exportJson: string;
+     generateInsights: string; aiWeeklyInsights: string; timesheetReport: string; page: string; resource: string; periodName: string; date: string; projectNum: string; projectDesc: string; taskNum: string; taskDesc: string; details: string; status: string; regularAmount: string; total: string; allActivities: string; filters: string; description: string; aiInsightsSummary: string; analyzingData: string; failedAiReport: string; aiInsightsTitle: string; kpiTrends: string; patientFunnel: string; queryManagement: string; safetyReporting: string; siteSupportHours: string; hoursPerProject: string; timeByActivityType: string; topSubTasks: string; totalHoursPerRole: string;
     funnelConsented: string;
     funnelScreenFailed: string;
     funnelScreened: string;
@@ -80,6 +86,8 @@ export interface Dictionary {
     noCategories: string;
     underConstruction: string;
     generalSettingsDesc: string;
+    exportMyData: string;
+    exportMyDataDesc: string;
   };
   legal: { termsTitle: string; privacyTitle: string; termsContent: string; privacyContent: string; };
   notifications: {

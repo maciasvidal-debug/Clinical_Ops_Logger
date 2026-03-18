@@ -22,6 +22,7 @@ export function AuthView() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<UserRole>("cra");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Legal modal state
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
@@ -29,6 +30,11 @@ export function AuthView() {
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLogin && !acceptedTerms) {
+      toast.error(t.toasts.errorTitle, { description: t.auth.acceptTermsError });
+      return;
+    }
     setLoading(true);
 
     try {
@@ -58,7 +64,9 @@ export function AuthView() {
             data: {
               first_name: firstName,
               last_name: lastName,
-              role: role
+              role: role,
+              terms_accepted_at: new Date().toISOString(),
+              terms_version: "2026-03-18"
             }
           }
         });
@@ -220,6 +228,30 @@ export function AuthView() {
                     className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                     placeholder="••••••••"
                   />
+                </div>
+              </div>
+            )}
+
+
+            {!isLogin && (
+              <div className="flex items-start mb-4">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="w-4 h-4 text-indigo-600 bg-neutral-50 border-neutral-300 rounded focus:ring-indigo-500 cursor-pointer"
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <label htmlFor="terms" className="font-medium text-neutral-700 cursor-pointer">
+                    {t.auth.acceptTermsLabel}
+                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                      {t.auth.termsLink}
+                    </a>
+                    {t.auth.termsAnd}{t.auth.privacyLink}
+                  </label>
                 </div>
               </div>
             )}

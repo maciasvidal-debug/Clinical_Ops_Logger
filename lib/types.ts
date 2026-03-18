@@ -19,6 +19,8 @@ export interface DbActivitySubtask {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  terms_accepted_at?: string;
+  terms_version?: string;
 }
 
 export interface DbActivityTask {
