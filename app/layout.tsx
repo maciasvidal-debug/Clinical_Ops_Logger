@@ -3,6 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { I18nProvider } from "@/lib/i18n";
 import { HtmlLang } from "@/components/layout/HtmlLang";
+import { ServiceWorkerRegistry } from "@/components/pwa/ServiceWorkerRegistry";
 import "./globals.css"; // Global styles
 
 
@@ -37,6 +38,7 @@ export default function RootLayout({
       <body suppressHydrationWarning>
         <I18nProvider>
           <HtmlLang />
+          <ServiceWorkerRegistry />
           {children}
         </I18nProvider>
         <SpeedInsights />
