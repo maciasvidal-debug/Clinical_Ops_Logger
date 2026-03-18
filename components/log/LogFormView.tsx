@@ -381,7 +381,7 @@ export function LogFormView({
             className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none appearance-none"
           >
             {availableCategories.length === 0 ? (
-              <option value="">No categories available</option>
+              <option value="">{t.logForm.noCategoriesAvailable}</option>
             ) : (
               availableCategories.map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>

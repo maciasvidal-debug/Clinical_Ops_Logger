@@ -158,14 +158,14 @@ export function AuthView() {
                     onChange={(e) => setRole(e.target.value as UserRole)}
                     className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
                   >
-                    <option value="cra">CRA</option>
-                    <option value="crc">CRC</option>
-                    <option value="data_entry">Data Entry</option>
-                    <option value="recruitment_specialist">Recruitment Specialist</option>
-                    <option value="retention_specialist">Retention Specialist</option>
-                    <option value="cta">CTA</option>
-                    <option value="ra">RA</option>
-                    <option value="manager">Manager</option>
+                    <option value="cra">{t.roles.cra}</option>
+                    <option value="crc">{t.roles.crc}</option>
+                    <option value="data_entry">{t.roles.data_entry}</option>
+                    <option value="recruitment_specialist">{t.roles.recruitment_specialist}</option>
+                    <option value="retention_specialist">{t.roles.retention_specialist}</option>
+                    <option value="cta">{t.roles.cta}</option>
+                    <option value="ra">{t.roles.ra}</option>
+                    <option value="manager">{t.roles.manager}</option>
                   </select>
                 </div>
               </div>
@@ -243,7 +243,7 @@ export function AuthView() {
             <div className="mt-4 flex flex-col space-y-2">
               <div className="relative flex items-center py-2">
                 <div className="flex-grow border-t border-neutral-200"></div>
-                <span className="flex-shrink-0 mx-4 text-neutral-400 text-xs uppercase">OR</span>
+                <span className="flex-shrink-0 mx-4 text-neutral-400 text-xs uppercase">{t.common.or}</span>
                 <div className="flex-grow border-t border-neutral-200"></div>
               </div>
 

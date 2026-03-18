@@ -184,7 +184,7 @@ export function HistoryView({
                                     <div className="absolute left-2 top-4 bottom-[-16px] w-px bg-amber-200" />
                                   )}
                                   <div>
-                                    <span className="font-semibold text-neutral-900">Manager</span>
+                                    <span className="font-semibold text-neutral-900">{t.roles.manager}</span>
                                     <span className="text-neutral-500 ml-2 text-xs">{format(parseISO(query.question_date), "MMM d, yyyy HH:mm")}</span>
                                     <p className="text-neutral-700 mt-1">{query.question}</p>
                                   </div>
@@ -194,7 +194,7 @@ export function HistoryView({
                                   <div className="ml-6 mt-3 flex items-start gap-2 bg-white p-3 rounded-lg border border-neutral-100 relative">
                                     <CheckCircle2 className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0 relative z-10 bg-white" />
                                     <div>
-                                      <span className="font-semibold text-neutral-900">Staff</span>
+                                      <span className="font-semibold text-neutral-900">{t.roles.staff}</span>
                                       <span className="text-neutral-500 ml-2 text-xs">{query.response_date && format(parseISO(query.response_date), "MMM d, yyyy HH:mm")}</span>
                                       <p className="text-neutral-700 mt-1">{query.staff_response}</p>
                                     </div>
