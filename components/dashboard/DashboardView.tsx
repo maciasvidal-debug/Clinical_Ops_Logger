@@ -2,6 +2,7 @@ import { updateLogEntryStatus, saveTodo, getPriorityAlignment, generatePriorityI
 import { useAppStore } from "@/lib/store";
 import React, { useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
+import { useDynamicTranslation } from "@/lib/i18n/utils";
 import {
   LogEntry,
   UserProfile,
@@ -43,6 +44,7 @@ export function DashboardView({
   onRepeatLog,
 }: DashboardViewProps) {
   const { t } = useTranslation();
+  const { dt } = useDynamicTranslation();
   const { todos, updateTodo } = useAppStore();
   const pendingTodos = todos.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
   const today = new Date();
@@ -238,7 +240,7 @@ export function DashboardView({
                   <div key={name}>
                     <div className="flex justify-between text-sm mb-1">
                       <span className="font-medium text-neutral-700">
-                        {name}
+                        {dt(name)}
                       </span>
                       <span className="text-neutral-500">
                         {formatHours(mins)}
@@ -377,7 +379,7 @@ export function DashboardView({
                         <p className="text-xs text-neutral-500 truncate mb-1">
                           {log.user_profiles?.first_name} {log.user_profiles?.last_name} •{" "}
                           {log.project_id} • {log.protocol_id}
-                          {log.category && ` • ${log.category}`}
+                          {log.category && ` • ${dt(log.category)}`}
                         </p>
                         {log.notes && (
                           <p className="text-xs text-neutral-400 line-clamp-1">
