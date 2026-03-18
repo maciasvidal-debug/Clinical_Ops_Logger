@@ -8,6 +8,7 @@ import { useTranslation } from "@/lib/i18n";
 import { LanguageSelector } from "@/components/layout/LanguageSelector";
 import { UserRole } from "@/lib/types";
 import { LegalModal } from "./LegalModal";
+import { TermsAndPrivacyContent } from "@/components/legal/TermsAndPrivacyContent";
 
 type LoginMode = "password" | "otp_request" | "otp_verify";
 
@@ -95,12 +96,12 @@ export function AuthView() {
     if (legalModalType === "terms") {
       return {
         title: t.legal.termsTitle,
-        content: t.legal.termsContent
+        content: <TermsAndPrivacyContent />
       };
     }
     return {
       title: t.legal.privacyTitle,
-      content: t.legal.privacyContent
+      content: <TermsAndPrivacyContent />
     };
   };
 
@@ -247,11 +248,24 @@ export function AuthView() {
                 <div className="ml-3 text-sm">
                   <label htmlFor="terms" className="font-medium text-neutral-700 cursor-pointer">
                     {t.auth.acceptTermsLabel}
-                    <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
-                      {t.auth.termsLink}
-                    </a>
-                    {t.auth.termsAnd}{t.auth.privacyLink}
                   </label>
+                  <span className="font-medium text-neutral-700">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); openLegalModal("terms"); }}
+                      className="text-indigo-600 hover:underline outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                    >
+                      {t.auth.termsLink}
+                    </button>
+                    {t.auth.termsAnd}
+                    <button
+                      type="button"
+                      onClick={(e) => { e.preventDefault(); openLegalModal("privacy"); }}
+                      className="text-indigo-600 hover:underline outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+                    >
+                      {t.auth.privacyLink}
+                    </button>
+                  </span>
                 </div>
               </div>
             )}

@@ -6,7 +6,7 @@ interface LegalModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  content: string;
+  content: React.ReactNode;
 }
 
 export function LegalModal({ isOpen, onClose, title, content }: LegalModalProps) {
@@ -70,7 +70,7 @@ export function LegalModal({ isOpen, onClose, title, content }: LegalModalProps)
 
         <div className="p-6 overflow-y-auto">
           <div className="prose prose-neutral max-w-none prose-p:leading-relaxed prose-p:text-neutral-600">
-            <p>{content}</p>
+            {content}
           </div>
         </div>
 
