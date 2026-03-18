@@ -240,7 +240,7 @@ export function LogFormView({
           <h3 className="text-sm font-semibold text-indigo-900">{t.logForm.aiSmartLogging}</h3>
         </div>
         <p className="text-xs text-indigo-700/80 mb-4">
-          Describe what you did in natural language, and let AI fill out the form for you.
+          {t.logForm.aiDescription}
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <input 
@@ -248,7 +248,7 @@ export function LogFormView({
             value={aiInput}
             onChange={e => setAiInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleAIParsing()}
-            placeholder='e.g., "Spent 2 hours doing remote monitoring for site 01 on protocol 101"'
+            placeholder={t.logForm.aiPlaceholder}
             className="flex-1 px-4 py-2.5 bg-white border border-indigo-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-sm shadow-sm"
           />
           <button
@@ -265,7 +265,7 @@ export function LogFormView({
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                Auto-Fill
+                {t.logForm.aiButton}
               </>
             )}
           </button>
@@ -328,7 +328,7 @@ export function LogFormView({
               disabled={projects.length === 0}
             >
               {projects.length === 0 ? (
-                <option value="">No Projects Assigned</option>
+                <option value="">{t.logForm.selectProject}</option>
               ) : (
                 projects.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -346,7 +346,7 @@ export function LogFormView({
               disabled={availableProtocols.length === 0}
             >
               {availableProtocols.length === 0 ? (
-                <option value="">No Protocols</option>
+                <option value="">{t.logForm.selectProtocol}</option>
               ) : (
                 availableProtocols.map(p => (
                   <option key={p.id} value={p.id}>{p.name}</option>
@@ -363,7 +363,7 @@ export function LogFormView({
               className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-shadow outline-none appearance-none"
               disabled={availableSites.length === 0}
             >
-              <option value="">N/A or General</option>
+              <option value="">{t.logForm.selectSite}</option>
               {availableSites.map(s => (
                 <option key={s.id} value={s.id}>{s.name} ({s.country})</option>
               ))}
