@@ -78,8 +78,8 @@ export default function App() {
             l.date === format(new Date(), "yyyy-MM-dd"),
         );
         if (todayLogs.length === 0 && new Date().getHours() >= 16) {
-          new Notification("Time Tracking Reminder", {
-            body: "You haven't logged any activities today. Don't forget to update your timesheet!",
+          new Notification(t.notifications.reminderTitle, {
+            body: t.notifications.reminderBody,
             icon: "/favicon.ico",
           });
         }
@@ -88,7 +88,7 @@ export default function App() {
       const pendingTodos = todos?.filter((t: any) => t.status === "pending" && t.user_id === profile.id);
       if (pendingTodos.length > 0 && Notification.permission === "granted") {
         new Notification(t.shell.notifications || "Notifications", {
-          body: `${pendingTodos.length} pending tasks. Click to continue.`,
+          body: `${pendingTodos.length} ${t.notifications.pendingTasksBody}`,
           icon: "/favicon.ico",
         });
       }
@@ -122,7 +122,7 @@ export default function App() {
     checkReminders();
     const interval = setInterval(checkReminders, 60 * 60 * 1000);
     return () => clearInterval(interval);
-  }, [logs, user, profile, notifications, todos, t.shell.notifications]);
+  }, []);
 
   const handleRepeatLog = (log: LogEntry) => {
     setLogFormInitialData(log);

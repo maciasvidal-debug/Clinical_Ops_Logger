@@ -80,7 +80,7 @@ export function HistoryView({
       return;
     }
     
-    if (confirm("Are you sure you want to delete this entry?")) {
+    if (confirm(t.common.deleteConfirm)) {
       onDeleteLog(id);
       toast.success(t.toasts.deleteSuccessTitle, { description: t.toasts.deleteSuccessDesc });
     }
@@ -113,7 +113,7 @@ export function HistoryView({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
           <input 
             type="text"
-            placeholder="{t.history.searchPlaceholder}"
+            placeholder={t.history.searchPlaceholder}
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-white border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-sm"
@@ -207,7 +207,7 @@ export function HistoryView({
                                           <textarea
                                             value={replyText}
                                             onChange={e => setReplyText(e.target.value)}
-                                            placeholder="Type your response..."
+                                            placeholder={t.history.typeYourResponse}
                                             className="flex-1 text-sm px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
                                             rows={2}
                                           />
@@ -215,15 +215,11 @@ export function HistoryView({
                                             <button
                                               onClick={() => handleReply(log.id, query.id)}
                                               className="px-3 py-1 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700"
-                                            >
-                                              Reply
-                                            </button>
+                                            >{t.history.sendReply}</button>
                                             <button
                                               onClick={() => setActiveReplyQueryId(null)}
                                               className="px-3 py-1 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-md hover:bg-neutral-200"
-                                            >
-                                              Cancel
-                                            </button>
+                                            >{t.common.cancel}</button>
                                           </div>
                                         </div>
                                       ) : (
@@ -251,7 +247,7 @@ export function HistoryView({
                             <textarea
                               value={queryText}
                               onChange={e => setQueryText(e.target.value)}
-                              placeholder="Enter your query..."
+                              placeholder={t.history.enterYourQuery}
                               className="flex-1 text-sm px-3 py-2 border border-neutral-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none resize-none"
                               rows={2}
                             />
@@ -259,15 +255,11 @@ export function HistoryView({
                               <button
                                 onClick={() => handleAddQuery(log.id)}
                                 className="px-3 py-1 bg-amber-500 text-white text-xs font-medium rounded-md hover:bg-amber-600"
-                              >
-                                Submit
-                              </button>
+                              >{t.common.confirm}</button>
                               <button
                                 onClick={() => setActiveQueryLogId(null)}
                                 className="px-3 py-1 bg-neutral-100 text-neutral-600 text-xs font-medium rounded-md hover:bg-neutral-200"
-                              >
-                                Cancel
-                              </button>
+                              >{t.common.cancel}</button>
                             </div>
                           </div>
                         )}
@@ -281,7 +273,7 @@ export function HistoryView({
                               setQueryText("");
                             }}
                             className="p-2 text-neutral-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                            title="Add Query"
+                            title={t.history.openQuery}
                           >
                             <MessageSquarePlus className="w-4 h-4" />
                           </button>
@@ -290,7 +282,7 @@ export function HistoryView({
                           <button
                             onClick={() => handleDelete(log.id, log.user_id)}
                             className="p-2 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                            title="Delete entry"
+                            title={t.common.delete}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

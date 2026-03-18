@@ -128,15 +128,15 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
   const patientFunnelData = useMemo(() => {
     return [
       {
-        name: "Consented",
+        name: t.reports.funnelConsented,
         count: kpiData.counts["Consent visit completed"] || 0,
       },
       {
-        name: "Screen Failed",
+        name: t.reports.funnelScreenFailed,
         count: kpiData.counts["Participant screenfailed"] || 0,
       },
       {
-        name: "Randomized",
+        name: t.reports.funnelRandomized,
         count: kpiData.counts["Participant Randomized/Enrolled"] || 0,
       },
       {
@@ -150,7 +150,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
           (kpiData.counts["Participant withdrew consent"] || 0),
       },
     ];
-  }, [kpiData]);
+  }, [kpiData, t.reports]);
 
   const queryData = useMemo(() => {
     return [
@@ -162,12 +162,12 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
         ),
       },
       {
-        name: "Resolved",
+        name: t.reports.queryResolved,
         count: kpiData.counts["Query resolved/closed"] || 0,
         hours: Number((kpiData.hours["Query resolved/closed"] || 0).toFixed(1)),
       },
     ];
-  }, [kpiData]);
+  }, [kpiData, t.reports]);
 
   const safetyData = useMemo(() => {
     return [
@@ -255,9 +255,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
     <div className="space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-neutral-900">
-            Reports
-          </h2>
+          <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.reports.title}</h2>
           <p className="text-neutral-500">
             {t.reports.subtitle}
           </p>
@@ -281,7 +279,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
             ) : (
               <Sparkles className="w-4 h-4" />
             )}
-            {isGeneratingAI ? "Analyzing Data..." : "{t.reports.generateInsights}"}
+            {isGeneratingAI ? t.reports.analyzingData : t.reports.generateInsights}
           </button>
         </div>
       </header>
@@ -298,7 +296,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
       {aiError && (
         <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm">
-          Failed to generate AI report: {aiError}
+          {t.reports.failedAiReport}: {aiError}
         </div>
       )}
 
@@ -323,9 +321,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
           {/* KPI Trends Over Time */}
           {trendData.length > 0 && (
             <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm lg:col-span-2">
-              <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-                KPI Trends Over Time (Counts)
-              </h3>
+              <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.kpiTrends}</h3>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart
@@ -399,9 +395,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
           {/* Patient Funnel */}
           <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-              Patient Funnel (Counts)
-            </h3>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.patientFunnel}</h3>
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -442,11 +436,9 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
             </div>
           </div>
 
-          {/* Query Management */}
+          {/* {t.reports.queryManagement} */}
           <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-              Query Management
-            </h3>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.queryManagement}</h3>
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart
@@ -513,9 +505,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
           {/* Safety Reporting */}
           <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-              Safety Reporting (Counts)
-            </h3>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.safetyReporting}</h3>
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -559,9 +549,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
           {/* Site Support Hours */}
           <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-              Site Support (Hours)
-            </h3>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.siteSupportHours}</h3>
             <div className="h-[250px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -604,9 +592,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
           {/* Project Chart */}
           <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-              Hours per Project
-            </h3>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.hoursPerProject}</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
@@ -645,9 +631,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
           {/* Activity Chart */}
           <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-              Time by Activity Type (Hours)
-            </h3>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.timeByActivityType}</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -696,9 +680,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
           {/* Sub-Task Chart */}
           {subTaskData.length > 0 && (
             <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm lg:col-span-2">
-              <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-                Top Sub-Tasks (Hours)
-              </h3>
+              <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.topSubTasks}</h3>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
@@ -742,9 +724,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
           {/* Role Chart */}
           <div className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm lg:col-span-2">
-            <h3 className="text-sm font-semibold text-neutral-900 mb-6">
-              Total Hours per Role
-            </h3>
+            <h3 className="text-sm font-semibold text-neutral-900 mb-6">{t.reports.totalHoursPerRole}</h3>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart

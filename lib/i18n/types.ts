@@ -44,7 +44,7 @@ export interface Dictionary {
     assignmentsSuccessDesc: string;
   };
   common: {
-    loading: string; save: string; cancel: string; delete: string; edit: string; close: string; success: string; error: string; yes: string; no: string; confirm: string; refresh: string; email: string; or: string; created: string; published: string; start_date: string;
+    loading: string; save: string; cancel: string; delete: string; edit: string; close: string; success: string; error: string; yes: string; no: string; confirm: string; refresh: string; email: string; or: string; created: string; published: string; start_date: string; deleteConfirm: string;
   };
   navigation: { dashboard: string; log: string; history: string; reports: string; team: string;
     settings: string; signOut: string; newEntry: string; };
@@ -52,11 +52,20 @@ export interface Dictionary {
     accountRejected: string; selectRole: string; };
   roles: { super_admin: string; manager: string; crc: string; cra: string; data_entry: string; recruitment_specialist: string; retention_specialist: string; cta: string; ra: string; staff: string; };
   status: { active: string; pending: string; rejected: string; published: string; };
-  dashboard: { overview: string; todayLogs: string; thisWeekLogs: string; openQueries: string; actions: string; logNewActivity: string; viewHistory: string; noDataThisWeek: string; quickLog: string; repeatRecent: string; activityDistribution: string; recentEntries: string; viewAll: string; noRecentEntries: string; time: string; entries: string; teamManagement: string; reviewTeamHistory: string; productivityDiagnosis: string; keepWorkingOn: string; };
+  dashboard: { overview: string; todayLogs: string; thisWeekLogs: string; openQueries: string; actions: string; logNewActivity: string; viewHistory: string; noDataThisWeek: string; quickLog: string; repeatRecent: string; activityDistribution: string; recentEntries: string; viewAll: string; noRecentEntries: string; time: string; entries: string; teamManagement: string; reviewTeamHistory: string; productivityDiagnosis: string; keepWorkingOn: string; productivityTitle: string; continueWorkingOn: string; };
   shell: { appName: string; appSubtitle: string; smartTimer: string; stopLog: string; notifications: string; markAllRead: string; clearAll: string; noNotifications: string; };
-  logForm: { title: string; subtitle: string; aiSmartLogging: string; aiDescription: string; aiPlaceholder: string; aiButton: string; date: string; duration: string; project: string; protocol: string; siteOptional: string; category: string; specificActivity: string; task: string; notesOptional: string; notesPlaceholder: string; submit: string; selectProject: string; selectProtocol: string; selectSite: string; hours: string; minutes: string; aiSuccess: string; aiError: string; aiInputTooLong: string; siteLed: string; croLed: string; shared: string; selectSubTask: string; subTasks: string; noCategoriesAvailable: string; };
-  history: { title: string; subtitle: string; searchPlaceholder: string; allProjects: string; allProtocols: string; date: string; duration: string; project: string; category: string; activity: string; noLogs: string; openQuery: string; askQuestion: string; question: string; reply: string; yourReply: string; sendReply: string; };
-  reports: { title: string; subtitle: string; timeByProject: string; timeByCategory: string; noData: string; export: string; generateInsights: string; aiWeeklyInsights: string; timesheetReport: string; page: string; resource: string; periodName: string; date: string; projectNum: string; projectDesc: string; taskNum: string; taskDesc: string; details: string; status: string; regularAmount: string; total: string; allActivities: string; filters: string; description: string; aiInsightsSummary: string; };
+  logForm: { title: string; subtitle: string; aiSmartLogging: string; aiDescription: string; aiPlaceholder: string; aiButton: string; date: string; duration: string; project: string; protocol: string; siteOptional: string; category: string; specificActivity: string; task: string; notesOptional: string; notesPlaceholder: string; submit: string; selectProject: string; selectProtocol: string; selectSite: string; hours: string; minutes: string; aiSuccess: string; aiError: string; aiInputTooLong: string; siteLed: string; croLed: string; shared: string; selectSubTask: string; subTasks: string; noCategoriesAvailable: string; parsing: string; };
+  history: { title: string; subtitle: string; searchPlaceholder: string; allProjects: string; allProtocols: string; date: string; duration: string; project: string; category: string; activity: string; noLogs: string; openQuery: string; askQuestion: string; question: string; reply: string; yourReply: string; sendReply: string; typeYourResponse: string; enterYourQuery: string; };
+  reports: { title: string; subtitle: string; timeByProject: string; timeByCategory: string; noData: string; export: string; generateInsights: string; aiWeeklyInsights: string; timesheetReport: string; page: string; resource: string; periodName: string; date: string; projectNum: string; projectDesc: string; taskNum: string; taskDesc: string; details: string; status: string; regularAmount: string; total: string; allActivities: string; filters: string; description: string; aiInsightsSummary: string; analyzingData: string; failedAiReport: string; aiInsightsTitle: string; kpiTrends: string; patientFunnel: string; queryManagement: string; safetyReporting: string; siteSupportHours: string; hoursPerProject: string; timeByActivityType: string; topSubTasks: string; totalHoursPerRole: string;
+    funnelConsented: string;
+    funnelScreenFailed: string;
+    funnelScreened: string;
+    funnelRandomized: string;
+    queryGenerated: string;
+    queryResolved: string;
+    safetySAE: string;
+    safetyPD: string;
+ };
   team: { title: string; subtitle: string; users: string; projects: string; protocols: string; name: string; role: string; status: string; actions: string; approve: string; reject: string; teamMembers: string; noTeamMembers: string; ifStaffAssigned: string; refreshTeamData: string; profileSuffix: string; saveAssignments: string; assignmentsSuccess: string; projectProtocolAssignments: string; selectProtocolsFor: string; };
   settings: {
     title: string;
@@ -73,4 +82,34 @@ export interface Dictionary {
     generalSettingsDesc: string;
   };
   legal: { termsTitle: string; privacyTitle: string; termsContent: string; privacyContent: string; };
+  notifications: {
+    reminderTitle: string;
+    reminderBody: string;
+    pendingTasksBody: string;
+  };
+  timesheet: {
+    reportTitle: string;
+    appLabel: string;
+    filtersLabel: string;
+    colResource: string;
+    colPeriod: string;
+    colDate: string;
+    colProjectNum: string;
+    colProjectDesc: string;
+    colTaskNum: string;
+    colTaskDesc: string;
+    colDetails: string;
+    colStatus: string;
+    colQty: string;
+    colTotal: string;
+    statusPublished: string;
+    previewTitle: string;
+    previewSubtitle: string;
+    closePreview: string;
+    printSavePdf: string;
+    pageSuffix: string;
+    noData: string;
+    aiInsights: string;
+  };
+
 }

@@ -32,12 +32,8 @@ export function PendingApprovalView({ email }: { email: string }) {
 
         <div className="p-8 space-y-6">
           <div className="space-y-2">
-            <p className="text-neutral-600">
-              Your account (<span className="font-medium text-neutral-900">{email}</span>) has been created successfully.
-            </p>
-            <p className="text-neutral-500 text-sm">
-              A manager needs to approve your access before you can start logging activities. You will be notified once your account is activated.
-            </p>
+            <p className="text-neutral-600">{t.toasts.signupSuccessDesc}</p>
+            <p className="text-neutral-500 text-sm">{t.auth.contactAdmin}</p>
           </div>
 
           <div className="pt-4">
@@ -45,9 +41,7 @@ export function PendingApprovalView({ email }: { email: string }) {
               onClick={handleSignOut}
               className="flex items-center justify-center gap-2 w-full px-4 py-2.5 border border-neutral-200 text-neutral-600 hover:bg-neutral-50 rounded-xl font-medium transition-colors"
             >
-              <LogOut className="w-4 h-4" />
-              Sign Out
-            </button>
+              <LogOut className="w-4 h-4" />{t.navigation.signOut}</button>
           </div>
         </div>
       </div>

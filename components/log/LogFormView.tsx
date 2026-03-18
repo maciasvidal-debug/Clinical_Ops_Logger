@@ -260,9 +260,7 @@ export function LogFormView({
           >
             {isParsing ? (
               <>
-                <Clock className="w-4 h-4 animate-spin" />
-                Parsing...
-              </>
+                <Clock className="w-4 h-4 animate-spin" />{t.logForm.parsing}</>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
