@@ -281,7 +281,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
             ) : (
               <Sparkles className="w-4 h-4" />
             )}
-            {isGeneratingAI ? "Analyzing Data..." : "Generate AI Insights"}
+            {isGeneratingAI ? "Analyzing Data..." : "{t.reports.generateInsights}"}
           </button>
         </div>
       </header>
@@ -316,7 +316,7 @@ export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
 
       {visibleLogs.length === 0 ? (
         <div className="bg-white p-8 rounded-2xl border border-neutral-200 shadow-sm text-center text-neutral-500">
-          Not enough data to generate reports. Log some activities first.
+          {t.reports.noData}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

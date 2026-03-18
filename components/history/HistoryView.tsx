@@ -104,7 +104,7 @@ export function HistoryView({
     <div className="space-y-6 h-full flex flex-col">
       <header className="shrink-0">
         <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.navigation.history}</h2>
-        <p className="text-neutral-500">View and manage past activities.</p>
+        <p className="text-neutral-500">{t.history.subtitle}</p>
       </header>
 
       {/* Filters */}
@@ -113,7 +113,7 @@ export function HistoryView({
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
           <input 
             type="text"
-            placeholder="Search activities, categories, or notes..."
+            placeholder="{t.history.searchPlaceholder}"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-white border border-neutral-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none shadow-sm"
@@ -140,7 +140,7 @@ export function HistoryView({
           {filteredLogs.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-neutral-500 p-8">
               <Clock className="w-12 h-12 text-neutral-200 mb-4" />
-              <p>No activities found.</p>
+              <p>{t.history.noLogs}</p>
             </div>
           ) : (
             <div className="divide-y divide-neutral-100">

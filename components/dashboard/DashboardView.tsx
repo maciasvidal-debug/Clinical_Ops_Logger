@@ -155,7 +155,7 @@ export function DashboardView({
             {formatHours(todayMinutes)}
           </p>
           <p className="text-xs text-neutral-500 mt-1">
-            {todayLogs.length} entries
+            {todayLogs.length} {t.dashboard.entries}
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export function DashboardView({
             {formatHours(thisWeekMinutes)}
           </p>
           <p className="text-xs text-neutral-500 mt-1">
-            {thisWeekLogs.length} entries
+            {thisWeekLogs.length} {t.dashboard.entries}
           </p>
         </div>
 
@@ -196,27 +196,27 @@ export function DashboardView({
               className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-3 active:scale-[0.98]"
             >
               <Activity className="w-5 h-5" />
-              Log New Activity
+              {t.dashboard.logNewActivity}
             </button>
             <button
               onClick={() => onNavigate("history")}
               className="w-full py-3.5 text-indigo-600 hover:bg-indigo-50 rounded-2xl font-semibold transition-all duration-200 border border-transparent hover:border-indigo-100 flex items-center justify-center gap-2"
             >
               <Clock className="w-4 h-4" />
-              View My History
+              {t.dashboard.viewHistory}
             </button>
             
             {isManager && (
               <div className="pt-5 mt-5 border-t border-neutral-100 w-full flex flex-col items-center">
                 <p className="text-[10px] text-neutral-400 mb-3 uppercase tracking-[0.2em] font-bold">
-                  Team Management
+                  {t.dashboard.teamManagement}
                 </p>
                 <button
                   onClick={() => onNavigate("history")}
                   className="w-full py-4 px-6 bg-neutral-900 hover:bg-neutral-800 text-white rounded-2xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-3 active:scale-[0.98]"
                 >
                   <BarChart3 className="w-5 h-5 text-indigo-400" />
-                  Review Team History
+                  {t.dashboard.reviewTeamHistory}
                 </button>
               </div>
             )}
@@ -259,7 +259,7 @@ export function DashboardView({
               </div>
             ) : (
               <p className="text-sm text-neutral-500 text-center py-4">
-                No data for this week yet.
+                {t.dashboard.noDataThisWeek}
               </p>
             )}
           </div>
@@ -352,7 +352,7 @@ export function DashboardView({
             <div className="divide-y divide-neutral-100">
               {logs.length === 0 ? (
                 <div className="p-8 text-center text-neutral-500">
-                  No activities logged yet.
+                  {t.dashboard.noRecentEntries}
                 </div>
               ) : (
                 logs.slice(0, 5).map((log) => {

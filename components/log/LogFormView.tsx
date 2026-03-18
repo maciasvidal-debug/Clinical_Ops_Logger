@@ -58,6 +58,7 @@ export function LogFormView({
   initialData 
 }: LogFormViewProps) {
   const { t, language } = useTranslation();
+  const { dt } = useDynamicTranslation();
     const [date, setDate] = useState(initialData?.date || format(new Date(), "yyyy-MM-dd"));
   const [hours, setHours] = useState(initialData?.duration_minutes ? Math.floor(initialData.duration_minutes / 60).toString() : "1");
   const [minutes, setMinutes] = useState(initialData?.duration_minutes ? (initialData.duration_minutes % 60).toString() : "0");
@@ -331,7 +332,7 @@ export function LogFormView({
                 <option value="">{t.logForm.selectProject}</option>
               ) : (
                 projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
+                  <option key={p.id} value={p.id}>{dt(p.name)}</option>
                 ))
               )}
             </select>
@@ -349,7 +350,7 @@ export function LogFormView({
                 <option value="">{t.logForm.selectProtocol}</option>
               ) : (
                 availableProtocols.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
+                  <option key={p.id} value={p.id}>{dt(p.name)}</option>
                 ))
               )}
             </select>

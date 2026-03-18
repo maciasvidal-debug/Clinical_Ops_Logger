@@ -1,14 +1,8 @@
-import { useTranslation } from './index';
+const fs = require('fs');
 
-export function useDynamicTranslation() {
-  const { language } = useTranslation();
+let content = fs.readFileSync('lib/i18n/utils.ts', 'utf8');
 
-  const translateDynamic = (text: string | undefined | null): string => {
-    if (!text) return '';
-    const normalized = text.toLowerCase().trim();
-
-    // Map known English terms to Spanish
-    const enToEs: Record<string, string> = {
+const newEnToEs = `
       'site management': 'Gestión del Sitio',
       'document review': 'Revisión de Documentos',
       'patient visit': 'Visita de Paciente',
@@ -40,10 +34,9 @@ export function useDynamicTranslation() {
       // DB Mock Projects
       'just in-time (jit)': 'Just in-Time (JIT)',
       'oncology phase iii (prc)': 'Oncología Fase III (PRC)'
-    };
+`;
 
-    // Map known Spanish terms to English
-    const esToEn: Record<string, string> = {
+const newEsToEn = `
       'gestión del sitio': 'Site Management',
       'revisión de documentos': 'Document Review',
       'visita de paciente': 'Patient Visit',
@@ -73,44 +66,16 @@ export function useDynamicTranslation() {
       'gestión de firmas de clinical trial agreement (cta)': 'Clinical Trial Agreement (CTA) Signature Management',
       // DB Mock Projects
       'oncología fase iii (prc)': 'Oncology Phase III (PRC)'
-    };
+`;
 
-    // Map known English terms to Portuguese
-    const enToPt: Record<string, string> = {
-      'site management': 'Gestão do Local',
-      'document review': 'Revisão de Documentos',
-      'patient visit': 'Visita de Paciente',
-      'data entry': 'Entrada de Dados',
-      'query resolution': 'Resolução de Consultas',
-      'training': 'Treinamento',
-      'meeting': 'Reunião',
-      'preparation': 'Preparação',
-      'follow up': 'Acompanhamento',
-      'icf review': 'Revisão de ICF',
-      'protocol review': 'Revisão de Protocolo',
-      'source data verification': 'Verificação de Dados Fonte',
-      'travel': 'Viagem',
-      'admin': 'Administração',
-      'monitoring visit': 'Visita de Monitoramento',
-      'site initiation visit': 'Visita de Iniciação do Local (SIV)',
-      'close-out visit': 'Visita de Encerramento',
-      'other': 'Outro'
-    };
+content = content.replace(
+  /'site management': 'Gestión del Sitio',[\s\S]*?'other': 'Otro'/m,
+  newEnToEs.trim()
+);
 
-    if (language === 'es') {
-      return enToEs[normalized] || text;
-    } else if (language === 'en') {
-      return esToEn[normalized] || text;
-    } else if (language === 'pt') {
-      // First try English to PT, if not found, it might be in Spanish so try ES to EN to PT
-      if (enToPt[normalized]) return enToPt[normalized];
-      const asEn = esToEn[normalized];
-      if (asEn && enToPt[asEn.toLowerCase()]) return enToPt[asEn.toLowerCase()];
-      return text;
-    }
+content = content.replace(
+  /'gestión del sitio': 'Site Management',[\s\S]*?'otro': 'Other'/m,
+  newEsToEn.trim()
+);
 
-    return text;
-  };
-
-  return { dt: translateDynamic };
-}
+fs.writeFileSync('lib/i18n/utils.ts', content);
