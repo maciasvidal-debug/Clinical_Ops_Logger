@@ -70,6 +70,21 @@ export function useAppStore() {
   }, []);
 
   // Load profile data
+
+  const fetchRegions = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("regions")
+        .select("*")
+        .order("name", { ascending: true });
+      if (error) throw error;
+      if (data) setRegions(data);
+    } catch (error: unknown) {
+      logError(error, "fetch_regions");
+    }
+  }, []);
+
+
   const fetchProfile = useCallback(async (userId: string) => {
     const { data, error } = await supabase
       .from("user_profiles")
@@ -373,6 +388,9 @@ export function useAppStore() {
     setProtocols,
     setSites,
 
+
+    regions,
+    fetchRegions,
     sites,
     notifications,
     profiles,
