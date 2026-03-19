@@ -87,27 +87,49 @@ export interface UserProfile {
 }
 
 export interface Project {
-  id: string; // text in DB
+  id: string;
   name: string;
   created_at: string;
 }
 
 export interface Protocol {
-  id: string; // text in DB
+  id: string;
   project_id: string;
   name: string;
   created_at: string;
 }
 
 export interface Site {
-  id: string; // text in DB
+  id: string;
   protocol_id: string;
   name: string;
+  address?: string;
+  city?: string;
   country: string;
+  region_id?: string;
   created_at: string;
+  regions?: Region;
+}
+
+
+export interface Region {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserRegion {
+  user_id: string;
+  region_id: string;
+  created_at: string;
+  // Joined fields for UI
+  regions?: Region;
 }
 
 export interface LogEntry {
+
   id: string;
   user_id: string;
   date: string;

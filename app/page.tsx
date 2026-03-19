@@ -268,6 +268,7 @@ export default function App() {
         )}
         {currentView === "team" && (profile?.role === "manager" || profile?.role === "super_admin") && (
           <TeamView
+            currentUserProfile={profile}
             profiles={profiles}
             projects={projects}
             protocols={protocols}
