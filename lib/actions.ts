@@ -186,7 +186,7 @@ export async function getActivitiesConfig(): Promise<{
         )
       `,
       )
-      .order("name");
+      .eq('is_active', true).order("name");
 
     if (error) throw error;
     return {
