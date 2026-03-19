@@ -64,7 +64,7 @@ export function DeleteAccountModal({ profile, isOpen, onClose, onSuccess }: Dele
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
         <div className="p-6 border-b border-neutral-100 flex items-center justify-between bg-red-50/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
@@ -82,7 +82,7 @@ export function DeleteAccountModal({ profile, isOpen, onClose, onSuccess }: Dele
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 overflow-y-auto flex-1">
           <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-sm text-red-800 space-y-2">
             <p><strong>{t.settings.warning || "Advertencia"}:</strong> {t.settings.deleteAccountWarning1 || "Esta acción es irreversible y revocará tu acceso permanentemente."}</p>
             <p>{t.settings.deleteAccountWarning2 || "Tus datos personales serán anonimizados, pero tus registros de horas y actividades se mantendrán de forma estadística para el sistema."}</p>

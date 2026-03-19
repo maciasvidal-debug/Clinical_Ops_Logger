@@ -175,18 +175,6 @@ export function SettingsView({ profile }: SettingsViewProps) {
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-12 flex flex-col items-center justify-center text-center">
-            <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
-              <Wrench className="w-8 h-8 text-neutral-400" />
-            </div>
-            <h3 className="text-xl font-bold text-neutral-900 mb-2">
-              {t.settings.underConstruction}
-            </h3>
-            <p className="text-neutral-500 max-w-md">
-              {t.settings.generalSettingsDesc}
-            </p>
-          </div>
-
 
           {/* Danger Zone */}
           <div className="bg-red-50/30 rounded-2xl border border-red-200 shadow-sm p-6 mt-8">
