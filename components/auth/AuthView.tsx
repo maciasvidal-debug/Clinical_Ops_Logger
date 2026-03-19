@@ -108,16 +108,16 @@ export function AuthView() {
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center p-4">
-      <div className="absolute top-4 right-4 z-40">
-        <LanguageSelector />
-      </div>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden relative z-10"
       >
-        <div className="bg-indigo-600 p-8 text-white text-center">
+        <div className="bg-indigo-600 p-8 text-white text-center relative">
+          <div className="absolute top-4 right-4 z-40">
+            <LanguageSelector variant="inverse" />
+          </div>
           <div className="flex justify-center">
             <img
               src="/logo-full.png"
