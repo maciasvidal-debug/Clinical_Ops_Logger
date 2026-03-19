@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 
 interface TeamViewProps {
+  currentUserProfile?: UserProfile;
   profiles: UserProfile[];
   projects: Project[];
   protocols: Protocol[];
@@ -32,6 +33,7 @@ interface TeamViewProps {
 }
 
 export function TeamView({ 
+  currentUserProfile,
   profiles, 
   projects, 
   protocols, 
@@ -41,7 +43,21 @@ export function TeamView({
   onUpdateUserStatus,
   onRefresh
 }: TeamViewProps) {
+
   const { t } = useTranslation();
+
+  // Filter profiles based on role
+  const visibleProfiles = useMemo(() => {
+    if (!currentUserProfile) return [];
+    if (currentUserProfile.role === "super_admin") {
+      return profiles;
+    }
+    // For managers, only show their team
+    return profiles.filter(p => p.manager_id === currentUserProfile.id || p.id === currentUserProfile.id);
+  }, [profiles, currentUserProfile]);
+
+  // Use visibleProfiles instead of profiles for rendering logic
+
   const staffUsers = useMemo(() => 
     profiles.filter(u => u.role !== "manager" && u.role !== "super_admin"),
     [profiles]

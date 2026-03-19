@@ -1,7 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "@/lib/i18n";
 import { useDynamicTranslation } from "@/lib/i18n/utils";
-import { LogEntry, Project, UserProfile, ROLE_PERMISSIONS } from "@/lib/types";
+import { LogEntry, Project, UserProfile, ROLE_PERMISSIONS, Region, Site } from "@/lib/types";
+import { useAppStore } from "@/lib/store";
 import { generateAIReport } from "@/lib/actions";
 import Markdown from "react-markdown";
 import { Sparkles, Loader2, Printer } from "lucide-react";
@@ -40,6 +41,7 @@ const COLORS = [
 ];
 
 export function ReportsView({ logs, profile, projects }: ReportsViewProps) {
+  const { regions, sites } = useAppStore();
   const { t, language } = useTranslation();
   const permissions = ROLE_PERMISSIONS[profile.role];
 

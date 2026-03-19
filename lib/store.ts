@@ -368,6 +368,11 @@ export function useAppStore() {
     logs, 
     projects,
     protocols,
+
+    setProjects,
+    setProtocols,
+    setSites,
+
     sites,
     notifications,
     profiles,

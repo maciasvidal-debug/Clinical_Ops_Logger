@@ -359,7 +359,18 @@ export function SettingsView({ profile }: SettingsViewProps) {
           </div>
         </div>
       )}
-            {(activeTab === "general" || (activeTab === "activities" && profile.role !== "super_admin" && profile.role !== "manager")) && (
+
+        {activeTab === "structure" && profile.role === "super_admin" && (
+          <div className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Structure Management</h3>
+              <p className="text-gray-500">Create new Projects, Protocols, and Sites using the Wizard.</p>
+            </div>
+            <StructureWizard onComplete={() => setActiveTab("structure")} />
+          </div>
+        )}
+
+        {(activeTab === "general" || (activeTab === "activities" && profile.role !== "super_admin" && profile.role !== "manager")) && (
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6">
             <h3 className="text-lg font-bold text-neutral-900 mb-2">
