@@ -46,6 +46,21 @@ interface ShellProps {
   onClearNotifications?: (userId: string) => void;
 }
 
+function formatButtonText(text: string) {
+  const parts = text.split(' ');
+  if (parts.length >= 2) {
+    return (
+      <>
+        {parts[0]}
+        <br className="sm:hidden" />
+        <span className="hidden sm:inline"> </span>
+        {parts.slice(1).join(' ')}
+      </>
+    );
+  }
+  return <>{text}</>;
+}
+
 export function Shell({ 
   currentView, 
   onViewChange, 
@@ -198,27 +213,31 @@ export function Shell({
           <div className="flex items-center gap-3">
             {/* Active Timer Widget */}
             {activeTimer?.startTime ? (
-              <div className="flex items-center bg-indigo-50 border border-indigo-200 rounded-full pl-4 pr-1.5 py-1.5 shadow-sm">
-                <div className="flex items-center gap-2 mr-3">
-                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-indigo-800 font-mono font-semibold text-sm">{elapsedTime}</span>
+              <div className="flex items-center bg-indigo-50/90 backdrop-blur-sm border border-indigo-200 rounded-full pl-3 sm:pl-4 pr-1 sm:pr-1.5 py-1 sm:py-1.5 shadow-sm">
+                <div className="flex items-center gap-1.5 sm:gap-2 mr-2 sm:mr-3">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="text-indigo-800 font-mono font-semibold text-xs sm:text-sm">{elapsedTime}</span>
                 </div>
                 <button 
                   onClick={onStopTimer}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-colors text-xs font-medium shadow-sm"
+                  className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition-all text-[10px] leading-tight sm:text-xs font-medium shadow-sm hover:shadow"
                   title={t.shell.stopLog}
                 >
                   <Square className="w-3 h-3 fill-current" />
-                  <span>{t.shell.stopLog}</span>
+                  <span className="text-left text-center sm:text-left">{formatButtonText(t.shell.stopLog)}</span>
                 </button>
               </div>
             ) : (
               <button 
                 onClick={onStartTimer}
-                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-full text-sm font-medium transition-colors border border-neutral-200 shadow-sm"
+                className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-white/95 backdrop-blur-md hover:bg-neutral-50 text-neutral-700 rounded-full transition-all border border-neutral-200/80 shadow-sm hover:shadow-md"
               >
-                <Play className="w-4 h-4 fill-current text-green-600" />
-                <span className="inline">{t.shell.smartTimer}</span>
+                <div className="flex items-center justify-center w-6 h-6 sm:w-5 sm:h-5 rounded-full bg-green-50">
+                  <Play className="w-5 h-5 sm:w-4 sm:h-4 fill-current text-green-600" />
+                </div>
+                <span className="text-center sm:text-left text-[10px] leading-tight sm:text-sm font-semibold sm:font-medium">
+                  {formatButtonText(t.shell.smartTimer)}
+                </span>
               </button>
             )}
 
