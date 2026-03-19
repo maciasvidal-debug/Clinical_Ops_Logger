@@ -191,12 +191,8 @@ export function Shell({
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Top Header / Timer Bar */}
         <header className="bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between z-10 shrink-0">
-          <div className="flex items-center gap-2 md:hidden">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600">
-              <Activity className="w-5 h-5" />
-              <span className="sr-only">{t.shell.appName}</span>
-            </div>
-            <h1 className="text-lg font-bold tracking-tight text-indigo-900">{t.shell.appName}</h1>
+          <div className="flex items-center md:hidden h-8">
+            <img src="/logo-icon.png" alt="SiteFlow Logo" className="h-full object-contain" />
           </div>
           
           <div className="flex items-center gap-3">
