@@ -10,7 +10,9 @@ import {
   UserStatus,
   LogQuery,
   UserProjectAssignment,
-  UserProtocolAssignment
+  UserProtocolAssignment,
+  Region,
+  UserRegion
 } from "./types";
 import { toast } from "sonner";
 import { supabase } from "./supabase";
@@ -29,6 +31,7 @@ export function useAppStore() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);

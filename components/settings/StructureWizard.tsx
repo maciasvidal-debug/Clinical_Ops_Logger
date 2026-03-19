@@ -180,18 +180,18 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
         <p className="text-indigo-700/70 text-sm mt-1">Configure Projects, Protocols, and Sites.</p>
 
         <div className="flex items-center mt-6">
-          <div className={\`flex items-center \${step >= 1 ? 'text-indigo-600' : 'text-gray-400'}\`}>
-            <div className={\`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 1 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}\`}>1</div>
+          <div className={`flex items-center \${step >= 1 ? 'text-indigo-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 1 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}`}>1</div>
             <span className="ml-2 text-sm font-medium">Project</span>
           </div>
-          <div className={\`flex-1 h-px mx-4 \${step >= 2 ? 'bg-indigo-600' : 'bg-gray-300'}\`}></div>
-          <div className={\`flex items-center \${step >= 2 ? 'text-indigo-600' : 'text-gray-400'}\`}>
-            <div className={\`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 2 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}\`}>2</div>
+          <div className={`flex-1 h-px mx-4 \${step >= 2 ? 'bg-indigo-600' : 'bg-gray-300'}`}></div>
+          <div className={`flex items-center \${step >= 2 ? 'text-indigo-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 2 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}`}>2</div>
             <span className="ml-2 text-sm font-medium">Protocol</span>
           </div>
-          <div className={\`flex-1 h-px mx-4 \${step >= 3 ? 'bg-indigo-600' : 'bg-gray-300'}\`}></div>
-          <div className={\`flex items-center \${step >= 3 ? 'text-indigo-600' : 'text-gray-400'}\`}>
-            <div className={\`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 3 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}\`}>3</div>
+          <div className={`flex-1 h-px mx-4 \${step >= 3 ? 'bg-indigo-600' : 'bg-gray-300'}`}></div>
+          <div className={`flex items-center \${step >= 3 ? 'text-indigo-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 3 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}`}>3</div>
             <span className="ml-2 text-sm font-medium">Site</span>
           </div>
         </div>
@@ -206,13 +206,13 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
             <div className="flex gap-4">
               <button
                 onClick={() => setIsNewProject(false)}
-                className={\`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${!isNewProject ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}\`}
+                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${!isNewProject ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
               >
                 Existing Project
               </button>
               <button
                 onClick={() => setIsNewProject(true)}
-                className={\`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${isNewProject ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}\`}
+                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${isNewProject ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
               >
                 <Plus size={18} /> New Project
               </button>
@@ -265,14 +265,14 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
             <div className="flex gap-4">
               <button
                 onClick={() => setIsNewProtocol(false)}
-                className={\`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${!isNewProtocol ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}\`}
+                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${!isNewProtocol ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
                 disabled={isNewProject} // Force new protocol if project is new
               >
                 Existing Protocol
               </button>
               <button
                 onClick={() => setIsNewProtocol(true)}
-                className={\`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${isNewProtocol ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}\`}
+                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${isNewProtocol ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
               >
                 <Plus size={18} /> New Protocol
               </button>
@@ -395,14 +395,14 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
                     Geographic Zoning
                   </h4>
                   <p className="text-xs text-gray-500">
-                    {!isMicroZone && siteCountry ? \`Auto-assigned to Continent: \${COUNTRY_TO_REGION[siteCountry] || 'Unknown'}\` : 'Create a specific micro-zone for tailored reporting'}
+                    {!isMicroZone && siteCountry ? `Auto-assigned to Continent: \${COUNTRY_TO_REGION[siteCountry] || 'Unknown'}` : 'Create a specific micro-zone for tailored reporting'}
                   </p>
                 </div>
                 <label className="flex items-center cursor-pointer">
                   <div className="relative">
                     <input type="checkbox" className="sr-only" checked={isMicroZone} onChange={() => setIsMicroZone(!isMicroZone)} />
-                    <div className={\`block w-10 h-6 rounded-full transition-colors \${isMicroZone ? 'bg-indigo-500' : 'bg-gray-300'}\`}></div>
-                    <div className={\`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform \${isMicroZone ? 'transform translate-x-4' : ''}\`}></div>
+                    <div className={`block w-10 h-6 rounded-full transition-colors \${isMicroZone ? 'bg-indigo-500' : 'bg-gray-300'}`}></div>
+                    <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform \${isMicroZone ? 'transform translate-x-4' : ''}`}></div>
                   </div>
                   <span className="ml-3 text-sm font-medium text-gray-700">Micro-zone</span>
                 </label>
