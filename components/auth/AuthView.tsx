@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Activity, Loader2, Mail, Lock, User, Briefcase, KeyRound } from "lucide-react";
@@ -110,15 +111,21 @@ export function AuthView() {
       <div className="absolute top-4 right-4 z-40">
         <LanguageSelector />
       </div>
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden relative z-10"
+      >
         <div className="bg-indigo-600 p-8 text-white text-center">
-          <div className="flex justify-center mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <Activity className="w-8 h-8" />
-            </div>
+          <div className="flex justify-center">
+            <img
+              src="/logo-full.png"
+              alt="SiteFlow"
+              className="h-36 w-auto object-contain"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
           </div>
-          <h1 className="text-2xl font-bold tracking-tight">SiteFlow</h1>
-          <p className="text-indigo-100 text-sm mt-1">{t.shell.appSubtitle}</p>
         </div>
 
         <div className="p-8">
@@ -327,7 +334,7 @@ export function AuthView() {
             </button>
           </div>
         </div>
-      </div>
+      </motion.div>
       
       <p className="mt-8 text-neutral-400 text-xs text-center max-w-xs relative z-10">
         {t.auth.termsPrefix}
