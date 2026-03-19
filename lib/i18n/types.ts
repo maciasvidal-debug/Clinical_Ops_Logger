@@ -87,7 +87,22 @@ export interface Dictionary {
     underConstruction: string;
     generalSettingsDesc: string;
     exportMyData: string;
+
     exportMyDataDesc: string;
+    dangerZone: string;
+    dangerZoneDesc: string;
+    deleteAccountButton: string;
+    deleteAccountTitle: string;
+    warning: string;
+    deleteAccountWarning1: string;
+    deleteAccountWarning2: string;
+    deleteAccountWarning3: string;
+    downloadDataBeforeDelete: string;
+    downloadDataRecommendation: string;
+    typePhraseToConfirm: string;
+    deleteConfirmationPhrase: string;
+    deleteSuccessDesc: string;
+
   };
   legal: { termsTitle: string; privacyTitle: string; termsContent: string; privacyContent: string; };
   notifications: {
