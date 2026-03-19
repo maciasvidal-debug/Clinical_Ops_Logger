@@ -36,6 +36,14 @@ export function useAppStore() {
   const [protocolAssignments, setProtocolAssignments] = useState<UserProtocolAssignment[]>([]);
   const [todos, setTodos] = useState<any[]>([]);
   const [activityCategories, setActivityCategories] = useState<any[]>([]);
+
+  const refreshActivitiesConfig = useCallback(async () => {
+    const res = await getActivitiesConfig();
+    if (res.success && res.data) {
+      setActivityCategories(res.data);
+    }
+  }, []);
+
   const [isLoaded, setIsLoaded] = useState(false);
   const [isOnline, setIsOnline] = useState(() => 
     typeof navigator !== "undefined" ? navigator.onLine : true
@@ -387,6 +395,7 @@ export function useAppStore() {
     updateTodo,
     deleteTodo,
     activityCategories,
-    setActivityCategories
+    setActivityCategories,
+    refreshActivitiesConfig
   };
 }
