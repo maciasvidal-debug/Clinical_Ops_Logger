@@ -10,7 +10,7 @@ const languages: { code: Language; name: string }[] = [
   { code: "pt", name: "Português" },
 ];
 
-export function LanguageSelector() {
+export function LanguageSelector({ variant = 'default' }: { variant?: 'default' | 'inverse' }) {
   const { language, setLanguage } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -29,7 +29,12 @@ export function LanguageSelector() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 p-2 rounded-full hover:bg-neutral-100 transition-colors text-neutral-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+        className={cn(
+          "flex items-center gap-2 p-2 rounded-full transition-colors focus:outline-none",
+          variant === 'inverse'
+            ? "text-white hover:bg-white/20 focus:ring-white/30"
+            : "text-neutral-600 hover:bg-neutral-100 focus:ring-2 focus:ring-indigo-500/20"
+        )}
         aria-label="Select Language"
       >
         <Globe className="w-5 h-5" />
