@@ -6,6 +6,7 @@ import {
   Project, 
   Protocol, 
   Site,
+  Region,
   UserRole,
   UserStatus,
   LogQuery,
@@ -29,6 +30,7 @@ export function useAppStore() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [protocols, setProtocols] = useState<Protocol[]>([]);
+  const [regions, setRegions] = useState<Region[]>([]);
   const [sites, setSites] = useState<Site[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
