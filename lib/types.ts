@@ -111,7 +111,25 @@ export interface Site {
   regions?: Region;
 }
 
+
+export interface Region {
+  id: string;
+  name: string;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserRegion {
+  user_id: string;
+  region_id: string;
+  created_at: string;
+  // Joined fields for UI
+  regions?: Region;
+}
+
 export interface LogEntry {
+
   id: string;
   user_id: string;
   date: string;
