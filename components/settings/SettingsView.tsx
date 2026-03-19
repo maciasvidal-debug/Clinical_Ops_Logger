@@ -33,7 +33,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
   const [modalInputValue, setModalInputValue] = useState("");
 
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"activities" | "general">(profile.role === "super_admin" || profile.role === "manager" ? "activities" : "general");
+  const [activeTab, setActiveTab] = useState<"activities" | "general" | "structure" | "regions">(profile.role === "super_admin" || profile.role === "manager" ? "activities" : "general");
   const { t } = useTranslation();
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
