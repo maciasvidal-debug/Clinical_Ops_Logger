@@ -11,7 +11,9 @@ import {
   UserStatus,
   LogQuery,
   UserProjectAssignment,
-  UserProtocolAssignment
+  UserProtocolAssignment,
+  Region,
+  UserRegion
 } from "./types";
 import { toast } from "sonner";
 import { supabase } from "./supabase";
