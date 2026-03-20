@@ -111,7 +111,10 @@ export function LogFormView({
       .map((cat: any) => ({
         id: cat.id,
         name: cat.name,
-        tasks: (cat.activity_tasks || []).map((t: any) => ({
+        tasks: (cat.activity_tasks || []).filter((t: any) => {
+          if (!t.task_roles || t.task_roles.length === 0) return true;
+          return t.task_roles.some((tr: any) => tr.role === profile.role);
+        }).map((t: any) => ({
           id: t.id,
           name: t.name,
           roleContext: t.role_context,
@@ -120,7 +123,7 @@ export function LogFormView({
             name: st.name
           }))
         }))
-      }));
+      })).filter((cat: any) => cat.tasks.length > 0);
   }, [profile?.role, activityCategories]);
 
   const initialCategory = availableCategories.find(c => c.name === initialData?.category);
@@ -443,7 +446,7 @@ export function LogFormView({
                             task.roleContext === 'cro_led' ? 'bg-amber-100 text-amber-700' :
                             'bg-blue-100 text-blue-700'
                           }`}>
-                            {task.roleContext === 'site_led' ? t.logForm.siteLed : task.roleContext === 'cro_led' ? t.logForm.croLed : t.logForm.shared}
+                            {task.roleContext === 'site_led' ? 'Sitio' : task.roleContext === 'cro_led' ? t.logForm.croLed : t.logForm.shared}
                           </span>
                         )}
                         {task.subTasks && task.subTasks.length > 0 && (
