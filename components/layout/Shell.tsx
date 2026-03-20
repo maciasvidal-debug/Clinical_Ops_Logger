@@ -131,14 +131,14 @@ export function Shell({
     toast.success(t.toasts.logoutSuccessTitle, { description: t.toasts.logoutSuccessDesc });
   };
 
-  const MobileMoreMenu = () => (
+  const renderMobileMoreMenu = () => (
     <AnimatePresence>
       {showMobileMore && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="absolute bottom-full left-0 right-0 mb-2 mx-4 glass-panel border border-neutral-200/50 shadow-2xl z-50 overflow-hidden"
+          className="absolute bottom-full left-0 right-0 mb-2 mx-4 glass-panel border border-neutral-200/50 shadow-2xl z-[100] overflow-hidden pointer-events-auto"
           ref={mobileMoreRef}
         >
           <div className="p-2 space-y-1">
@@ -422,7 +422,7 @@ export function Shell({
 
       {/* Mobile Bottom Nav (Glassmorphism & Simplified) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-safe pt-2 pointer-events-none">
-        <MobileMoreMenu />
+        <div className="pointer-events-auto">{renderMobileMoreMenu()}</div>
         <nav className="glass-panel border border-white/60 mx-auto rounded-3xl mb-4 px-2 py-2 pointer-events-auto flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
           {primaryNavItems.map((item) => {
             const Icon = item.icon;
@@ -435,7 +435,7 @@ export function Shell({
                   setShowMobileMore(false);
                 }}
                 className={cn(
-                  "relative flex flex-col items-center justify-center w-16 py-1 rounded-2xl transition-all duration-300 active:scale-90",
+                  "relative flex flex-col items-center justify-center flex-1 min-w-0 px-1 py-1 rounded-2xl transition-all duration-300 active:scale-90",
                   isActive ? "text-indigo-700" : "text-neutral-500 hover:text-neutral-900"
                 )}
               >
@@ -449,7 +449,7 @@ export function Shell({
                 <div className="relative z-10 p-1 mb-0.5">
                   <Icon className={cn("w-5 h-5 transition-transform duration-300", isActive && "scale-110")} />
                 </div>
-                <span className={cn("relative z-10 text-[10px] whitespace-nowrap transition-all duration-300", isActive ? "font-bold" : "font-medium")}>
+                <span className={cn("relative z-10 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis w-full text-center px-1 transition-all duration-300", isActive ? "font-bold" : "font-medium")}>
                   {item.label}
                 </span>
               </button>
@@ -460,7 +460,7 @@ export function Shell({
              <button
               onClick={() => setShowMobileMore(!showMobileMore)}
               className={cn(
-                "relative flex flex-col items-center justify-center w-16 py-1 rounded-2xl transition-all duration-300 active:scale-90",
+                "relative flex flex-col items-center justify-center flex-1 min-w-0 px-1 py-1 rounded-2xl transition-all duration-300 active:scale-90",
                 showMobileMore ? "text-indigo-700 bg-indigo-50/50" : "text-neutral-500"
               )}
             >
