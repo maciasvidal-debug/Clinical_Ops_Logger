@@ -1,5 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { 
   LayoutDashboard, 
   Clock, 
@@ -191,8 +192,15 @@ export function Shell({
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Top Header / Timer Bar */}
         <header className="bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between z-10 shrink-0">
-          <div className="flex items-center md:hidden h-8">
-            <img src="/logo-icon.png" alt="SiteFlow Logo" className="h-full object-contain" />
+          <div className="flex items-center md:hidden h-8 w-8 relative">
+            <Image
+              src="/logo-icon.png"
+              alt="SiteFlow Logo"
+              fill
+              sizes="32px"
+              className="object-contain"
+              priority
+            />
           </div>
           
           <div className="flex items-center gap-3">

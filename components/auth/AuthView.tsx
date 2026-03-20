@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -118,11 +119,13 @@ export function AuthView() {
           <div className="absolute top-4 right-4 z-40">
             <LanguageSelector variant="inverse" />
           </div>
-          <div className="flex justify-center">
-            <img
+          <div className="flex justify-center relative h-36 w-full">
+            <Image
               src="/logo-full.png"
               alt="SiteFlow"
-              className="h-36 w-auto object-contain"
+              fill
+              priority
+              className="object-contain"
               style={{ filter: 'brightness(0) invert(1)' }}
             />
           </div>

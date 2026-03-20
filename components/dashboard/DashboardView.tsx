@@ -85,7 +85,7 @@ export function DashboardView({
     };
     fetchInsight();
 
-  }, []);
+  }, [profile?.id, language]);
 
   const openQueriesCount = useMemo(() => {
     return logs.reduce(
