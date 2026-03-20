@@ -5,6 +5,7 @@ import { createRegion } from "@/lib/actions_regions";
 import { toast } from "sonner";
 import { Building, MapPin, Plus, CheckCircle, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { useAppStore } from "@/lib/store";
+import { useTranslation } from "@/lib/i18n";
 
 // Helper for mapping countries to regions (continents) initially
 const COUNTRY_TO_REGION: Record<string, string> = {
@@ -38,6 +39,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
   const { projects, protocols, regions, fetchRegions, refreshAppData, user, profile, profiles } = useAppStore();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   // Step 1: Project
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
@@ -191,9 +193,9 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
       <div className="bg-indigo-50 border-b border-indigo-100 p-6">
         <h2 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
           <Building className="text-indigo-600" />
-          Structure Wizard
+          {t.settings.structureTitle}
         </h2>
-        <p className="text-indigo-700/70 text-sm mt-1">Configure Projects, Protocols, and Sites.</p>
+        <p className="text-indigo-700/70 text-sm mt-1">{t.settings.structureSubtitle}</p>
 
         <div className="flex items-center mt-6">
           <div className={`flex items-center \${step >= 1 ? 'text-indigo-600' : 'text-gray-400'}`}>
@@ -342,7 +344,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
         {/* STEP 3: SITE */}
         {step === 3 && (
           <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <h3 className="text-lg font-medium text-gray-900">Site Information</h3>
+            <h3 className="text-lg font-medium text-gray-900">{t.settings.siteInformation}</h3>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -459,8 +461,8 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
           <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
             <div className="bg-indigo-50 rounded-lg p-6 border border-indigo-100 text-center">
               <CheckCircle className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
-              <h3 className="text-xl font-bold text-indigo-900 mb-2">Review & Confirm</h3>
-              <p className="text-indigo-700/80">Please verify the structure details below before saving.</p>
+              <h3 className="text-xl font-bold text-indigo-900 mb-2">{t.settings.reviewAndConfirm}</h3>
+              <p className="text-indigo-700/80">{t.settings.verifyDetails}</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -494,7 +496,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
                     onChange={(e) => setAssignToManager(e.target.checked)}
                     className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                   />
-                  <span className="text-gray-900 font-medium">Assign this site to a Manager?</span>
+                  <span className="text-gray-900 font-medium">{t.settings.assignToManager}</span>
                 </label>
 
                 {assignToManager && (
@@ -504,7 +506,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
                       onChange={(e) => setSelectedManagerId(e.target.value)}
                       className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                     >
-                      <option value="">Select a Manager...</option>
+                      <option value="">{t.settings.selectManager}</option>
                       {profiles.filter(p => p.role === 'manager').map(m => (
                         <option key={m.id} value={m.id}>{(m.first_name ? m.first_name + " " + (m.last_name || "") : m.email)}</option>
                       ))}
@@ -529,7 +531,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
                 className="bg-green-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-green-700 flex items-center gap-2 shadow-sm"
               >
                 {loading ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle size={20} />}
-                {loading ? 'Saving...' : 'Confirm & Save'}
+                {loading ? t.settings.saving : t.settings.confirmAndSave}
               </button>
             </div>
           </div>

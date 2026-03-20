@@ -15,6 +15,7 @@ import { exportUserData } from "@/lib/exportData";
 import { Download, AlertTriangle } from "lucide-react";
 import { DeleteAccountModal } from "./DeleteAccountModal";
 import { StructureWizard } from "./StructureWizard";
+import { CategoryWizard } from "./CategoryWizard";
 
 interface SettingsViewProps {
   profile: UserProfile;
@@ -29,12 +30,13 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
   // State for Create Modals
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryWizardOpen, setIsCategoryWizardOpen] = useState(false);
   const [modalType, setModalType] = useState<"category" | "task" | "subtask" | "role" | null>(null);
   const [modalParentId, setModalParentId] = useState<string | null>(null);
   const [modalInputValue, setModalInputValue] = useState("");
 
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"activities" | "general" | "structure" | "regions">(profile.role === "super_admin" || profile.role === "manager" ? "activities" : "general");
+  const [activeTab, setActiveTab] = useState<"activities" | "general" | "structure">(profile.role === "super_admin" || profile.role === "manager" ? "activities" : "general");
   const { t } = useTranslation();
   const [isExporting, setIsExporting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -180,9 +182,22 @@ export function SettingsView({ profile }: SettingsViewProps) {
         </div>
       </header>
 
+
       {/* Tabs */}
       <div className="flex items-center gap-1 p-1 bg-neutral-100 rounded-xl w-fit">
-                <button
+        {(profile.role === "super_admin" || profile.role === "manager") && (
+          <button
+            onClick={() => setActiveTab("activities")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "activities"
+                ? "bg-white text-neutral-900 shadow-sm"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            {t.settings.activitiesAndRoles}
+          </button>
+        )}
+        <button
           onClick={() => setActiveTab("general")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === "general"
@@ -201,10 +216,11 @@ export function SettingsView({ profile }: SettingsViewProps) {
                 : "text-neutral-600 hover:text-neutral-900"
             }`}
           >
-            Structure
+            {(t.settings as any).structureTitle || "Structure"}
           </button>
         )}
       </div>
+
 
       {(activeTab === "activities" && (profile.role === "super_admin" || profile.role === "manager")) && (
         <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6">
@@ -212,7 +228,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
             <h3 className="text-lg font-bold text-neutral-900">
               {t.settings.activityCategories}
             </h3>
-            <button onClick={() => handleOpenModal("category")} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-sm font-medium transition-colors">
+            <button onClick={() => setIsCategoryWizardOpen(true)} className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-sm font-medium transition-colors">
               <Plus className="w-4 h-4" />
               {t.settings.newCategory}
             </button>
@@ -252,10 +268,10 @@ export function SettingsView({ profile }: SettingsViewProps) {
                         <span className="text-xs font-normal text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200">Categoría</span>
                       </h4>
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                        <button onClick={() => startEditing(cat.id, cat.name)} className="p-1.5 text-neutral-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Categoría">
+                        <button onClick={() => startEditing(cat.id, cat.name)} className="p-1.5 text-neutral-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title={t.settings.editCategory}>
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(cat.id, "category", cat.name)} disabled={isDeleting === cat.id} className="p-1.5 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar Categoría">
+                        <button onClick={() => handleDelete(cat.id, "category", cat.name)} disabled={isDeleting === cat.id} className="p-1.5 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title={t.settings.deleteCategory}>
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -265,7 +281,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
                 <div className="mb-5">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Roles Permitidos</span>
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">{t.settings.allowedRoles}</span>
                     <button onClick={() => handleOpenModal("role", cat.id)} className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white border border-dashed border-neutral-300 text-neutral-500 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-colors" title="Añadir Rol">
                       <Plus className="w-3 h-3" />
                     </button>
@@ -282,7 +298,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                         </button>
                       </span>
                     )) : (
-                      <span className="text-xs text-neutral-400 italic">Ningún rol asignado (visible para todos)</span>
+                      <span className="text-xs text-neutral-400 italic">{t.settings.noRolesAssigned}</span>
                     )}
                   </div>
                 </div>
@@ -292,7 +308,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                     <span className="text-sm font-semibold text-neutral-700">Tareas ({cat.activity_tasks?.length || 0})</span>
                     <button onClick={() => handleOpenModal("task", cat.id)} className="text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1 rounded-md flex items-center gap-1 transition-colors">
                       <Plus className="w-3 h-3" />
-                      Añadir Tarea
+                      {t.settings.newTask}
                     </button>
                   </div>
 
@@ -325,10 +341,10 @@ export function SettingsView({ profile }: SettingsViewProps) {
                               {dt(task.name)}
                             </span>
                             <div className="opacity-0 group-hover/task:opacity-100 transition-opacity flex items-center gap-1">
-                               <button onClick={() => startEditing(task.id, task.name)} className="p-1 text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" title="Editar Tarea">
+                               <button onClick={() => startEditing(task.id, task.name)} className="p-1 text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" title={t.settings.editTask}>
                                  <Edit2 className="w-3.5 h-3.5" />
                                </button>
-                               <button onClick={() => handleDelete(task.id, "task", task.name)} disabled={isDeleting === task.id} className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded" title="Eliminar Tarea">
+                               <button onClick={() => handleDelete(task.id, "task", task.name)} disabled={isDeleting === task.id} className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded" title={t.settings.deleteTask}>
                                  <Trash2 className="w-3.5 h-3.5" />
                                </button>
                             </div>
@@ -371,7 +387,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                             ))}
                             {editingId !== task.id && (
                               <button onClick={() => handleOpenModal("subtask", task.id)} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border border-dashed border-neutral-300 text-neutral-500 hover:bg-white hover:text-indigo-600 hover:border-indigo-300 transition-colors">
-                                <Plus className="w-3 h-3 mr-1" /> Sub-tarea
+                                <Plus className="w-3 h-3 mr-1" /> {t.settings.addSubTaskBtn}
                               </button>
                             )}
                           </div>
@@ -379,7 +395,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                       </div>
                     ))}
                     {(!cat.activity_tasks || cat.activity_tasks.length === 0) && (
-                      <p className="text-xs text-neutral-400 italic py-2">No hay tareas configuradas para esta categoría.</p>
+                      <p className="text-xs text-neutral-400 italic py-2">{t.settings.noTasksConfigured}</p>
                     )}
                   </div>
                 </div>
@@ -399,14 +415,14 @@ export function SettingsView({ profile }: SettingsViewProps) {
         {activeTab === "structure" && profile.role === "super_admin" && (
           <div className="space-y-6">
             <div className="mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Structure Management</h3>
-              <p className="text-gray-500">Create new Projects, Protocols, and Sites using the Wizard.</p>
+              <h3 className="text-xl font-bold text-gray-900">{t.settings.structureTitle}</h3>
+              <p className="text-gray-500">{t.settings.structureSubtitle}</p>
             </div>
             <StructureWizard onComplete={() => setActiveTab("structure")} />
           </div>
         )}
 
-        {(activeTab === "general" || (activeTab === "activities" && profile.role !== "super_admin" && profile.role !== "manager")) && (
+        {activeTab === "general" && (
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6">
             <h3 className="text-lg font-bold text-neutral-900 mb-2">
@@ -461,6 +477,16 @@ export function SettingsView({ profile }: SettingsViewProps) {
       )}
 
 
+      {isCategoryWizardOpen && (
+        <CategoryWizard
+          onComplete={() => {
+            setIsCategoryWizardOpen(false);
+            refreshActivitiesConfig();
+          }}
+          onCancel={() => setIsCategoryWizardOpen(false)}
+        />
+      )}
+
       {/* Modal para Crear Entidades */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
@@ -469,7 +495,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
               <h3 className="text-lg font-bold text-neutral-900">
                 {modalType === "category" && "Nueva Categoría"}
                 {modalType === "task" && "Nueva Tarea"}
-                {modalType === "subtask" && "Nueva Sub-tarea"}
+                {modalType === "subtask" && "Nueva {t.settings.addSubTaskBtn}"}
                 {modalType === "role" && "Añadir Rol (ej. cra, crc, manager)"}
               </h3>
             </div>

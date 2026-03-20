@@ -1,7 +1,21 @@
 import { supabase } from "./supabase";
 import { UserRole, DbActivityCategory, DbActivityTask, DbActivitySubtask } from "./types";
 
+
+function parseSupabaseError(error: any, defaultMsg: string): string {
+  if (!error) return defaultMsg;
+  // 42501 is Postgres Insufficient Privilege
+  if (error.code === '42501' || error.message?.includes('violates row-level security')) {
+    return 'Unauthorized: You do not have permission to perform this action.';
+  }
+  if (error.message === 'Failed to fetch' || error.message?.includes('Network')) {
+    return 'Network error: Please check your connection.';
+  }
+  return error instanceof Error ? error.message : (error.message || defaultMsg);
+}
+
 // --- Categories ---
+
 
 export async function createActivityCategory(name: string): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
@@ -15,7 +29,7 @@ export async function createActivityCategory(name: string): Promise<{ success: b
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error creating category:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to create category" };
+    return { success: false, error: parseSupabaseError(error, "Failed to create category") };
   }
 }
 
@@ -32,7 +46,7 @@ export async function updateActivityCategory(id: string, name: string): Promise<
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error updating category:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to update category" };
+    return { success: false, error: parseSupabaseError(error, "Failed to update category") };
   }
 }
 
@@ -47,7 +61,7 @@ export async function deleteActivityCategory(id: string): Promise<{ success: boo
     return { success: true };
   } catch (error: unknown) {
     console.error("Error deleting category:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to delete category" };
+    return { success: false, error: parseSupabaseError(error, "Failed to delete category") };
   }
 }
 
@@ -65,7 +79,7 @@ export async function createActivityTask(categoryId: string, name: string): Prom
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error creating task:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to create task" };
+    return { success: false, error: parseSupabaseError(error, "Failed to create task") };
   }
 }
 
@@ -82,7 +96,7 @@ export async function updateActivityTask(id: string, name: string): Promise<{ su
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error updating task:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to update task" };
+    return { success: false, error: parseSupabaseError(error, "Failed to update task") };
   }
 }
 
@@ -97,7 +111,7 @@ export async function deleteActivityTask(id: string): Promise<{ success: boolean
     return { success: true };
   } catch (error: unknown) {
     console.error("Error deleting task:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to delete task" };
+    return { success: false, error: parseSupabaseError(error, "Failed to delete task") };
   }
 }
 
@@ -115,7 +129,7 @@ export async function createActivitySubtask(taskId: string, name: string): Promi
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error creating subtask:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to create subtask" };
+    return { success: false, error: parseSupabaseError(error, "Failed to create subtask") };
   }
 }
 
@@ -132,7 +146,7 @@ export async function updateActivitySubtask(id: string, name: string): Promise<{
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error updating subtask:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to update subtask" };
+    return { success: false, error: parseSupabaseError(error, "Failed to update subtask") };
   }
 }
 
@@ -147,7 +161,7 @@ export async function deleteActivitySubtask(id: string): Promise<{ success: bool
     return { success: true };
   } catch (error: unknown) {
     console.error("Error deleting subtask:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to delete subtask" };
+    return { success: false, error: parseSupabaseError(error, "Failed to delete subtask") };
   }
 }
 
@@ -163,7 +177,7 @@ export async function addCategoryRole(categoryId: string, role: UserRole): Promi
     return { success: true };
   } catch (error: unknown) {
     console.error("Error adding role to category:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to add role" };
+    return { success: false, error: parseSupabaseError(error, "Failed to add role") };
   }
 }
 
@@ -178,6 +192,6 @@ export async function removeCategoryRole(categoryId: string, role: UserRole): Pr
     return { success: true };
   } catch (error: unknown) {
     console.error("Error removing role from category:", error);
-    return { success: false, error: error instanceof Error ? error.message : "Failed to remove role" };
+    return { success: false, error: parseSupabaseError(error, "Failed to remove role") };
   }
 }
