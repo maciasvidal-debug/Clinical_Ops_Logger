@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Project, Protocol, Region } from "@/lib/types";
-import { createProject, createProtocol, createSite } from "@/lib/actions_structure";
+import { createProject, createProtocol, createSite, createMicroZone, assignSiteToManager } from "@/lib/actions_structure";
 import { createRegion } from "@/lib/actions_regions";
 import { toast } from "sonner";
 import { Building, MapPin, Plus, CheckCircle, ChevronRight, Loader2, RefreshCw } from "lucide-react";
@@ -35,7 +35,7 @@ interface StructureWizardProps {
 }
 
 export function StructureWizard({ onComplete }: StructureWizardProps) {
-  const { projects, protocols, regions, fetchRegions, refreshAppData, user, profile } = useAppStore();
+  const { projects, protocols, regions, fetchRegions, refreshAppData, user, profile, profiles } = useAppStore();
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [loading, setLoading] = useState(false);
 
@@ -58,8 +58,12 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
   const [siteRegionId, setSiteRegionId] = useState<string>("");
 
   // Micro-zone
+
   const [isMicroZone, setIsMicroZone] = useState(false);
   const [microZoneName, setMicroZoneName] = useState("");
+  const [assignToManager, setAssignToManager] = useState(false);
+  const [selectedManagerId, setSelectedManagerId] = useState("");
+
 
   // Auto-complete continent handler
   const handleCountryChange = (country: string) => {
@@ -115,6 +119,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
     setStep(4);
   };
 
+
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -131,19 +136,16 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
       }
 
       let finalRegionId = siteRegionId;
-      if (isMicroZone) {
-         // Create micro zone
-         const r = await createRegion(microZoneName.trim());
-         finalRegionId = r.id;
-      } else if (finalRegionId.startsWith("auto-create-")) {
+      if (finalRegionId.startsWith("auto-create-")) {
          // Auto create missing continent
          const continentName = finalRegionId.replace("auto-create-", "");
          const r = await createRegion(continentName);
          finalRegionId = r.id;
       }
 
-      await createSite({
-        id: siteNumber.trim(),
+      const newSite = await createSite({
+        id: crypto.randomUUID(),
+        site_number: siteNumber.trim(),
         protocol_id: finalProtocolId,
         name: siteName.trim(),
         address: siteAddress.trim(),
@@ -152,7 +154,20 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
         region_id: finalRegionId || undefined
       });
 
+
+      if (isMicroZone && microZoneName.trim()) {
+         await createMicroZone({
+            site_id: newSite.id,
+            name: microZoneName.trim()
+         });
+      }
+
+      if (assignToManager && selectedManagerId) {
+         await assignSiteToManager(selectedManagerId, newSite.id);
+      }
+
       toast.success("Structure created successfully!");
+
       if (user && profile) {
         await refreshAppData();
         fetchRegions();
@@ -165,6 +180,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
       setLoading(false);
     }
   };
+
 
   // Helper to get protocol list filtered by project
   const availableProtocols = protocols.filter(p => p.project_id === selectedProjectId);
@@ -461,6 +477,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
               <div className="bg-white p-4 border rounded-lg shadow-sm md:col-span-2">
                 <span className="text-xs font-semibold text-gray-500 uppercase">Site</span>
                 <p className="font-bold text-gray-900 text-xl">Site {siteNumber} - {siteName}</p>
+
                 <div className="mt-2 text-sm text-gray-600 grid grid-cols-2 gap-2">
                   <p><strong>Address:</strong> {siteAddress || '-'}</p>
                   <p><strong>City:</strong> {siteCity || '-'}</p>
@@ -468,6 +485,34 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
                   <p><strong>Zone:</strong> {isMicroZone ? microZoneName + ' (Micro-zone)' : COUNTRY_TO_REGION[siteCountry] || 'Auto'}</p>
                 </div>
               </div>
+
+              <div className="bg-white p-4 border rounded-lg shadow-sm md:col-span-2">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={assignToManager}
+                    onChange={(e) => setAssignToManager(e.target.checked)}
+                    className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-gray-900 font-medium">Assign this site to a Manager?</span>
+                </label>
+
+                {assignToManager && (
+                  <div className="mt-4 pl-8">
+                    <select
+                      value={selectedManagerId}
+                      onChange={(e) => setSelectedManagerId(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                    >
+                      <option value="">Select a Manager...</option>
+                      {profiles.filter(p => p.role === 'manager').map(m => (
+                        <option key={m.id} value={m.id}>{(m.first_name ? m.first_name + " " + (m.last_name || "") : m.email)}</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
+
             </div>
 
             <div className="flex justify-between mt-8 pt-4 border-t border-gray-100">

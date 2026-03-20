@@ -99,6 +99,15 @@ export interface Protocol {
   created_at: string;
 }
 
+
+export interface MicroZone {
+  id: string;
+  site_id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Site {
   id: string;
   protocol_id: string;
@@ -109,6 +118,8 @@ export interface Site {
   region_id?: string;
   created_at: string;
   regions?: Region;
+  micro_zones?: MicroZone[];
+  site_number?: string;
 }
 
 
@@ -1319,4 +1330,9 @@ export interface PriorityAlignmentStats {
   priority: "low" | "medium" | "high" | "critical";
   total_duration_minutes: number;
   tasks_count: number;
+}
+
+export interface UserSiteAssignment {
+  user_id: string;
+  site_id: string;
 }
