@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { exportUserData } from "@/lib/exportData";
 import { Download, AlertTriangle } from "lucide-react";
 import { DeleteAccountModal } from "./DeleteAccountModal";
+import { StructureWizard } from "./StructureWizard";
 
 interface SettingsViewProps {
   profile: UserProfile;

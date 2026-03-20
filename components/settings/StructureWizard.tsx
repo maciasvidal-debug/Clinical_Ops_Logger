@@ -154,7 +154,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
 
       toast.success("Structure created successfully!");
       if (user && profile) {
-        await refreshAppData(user.id, profile.role);
+        await refreshAppData();
         fetchRegions();
       }
       onComplete();
