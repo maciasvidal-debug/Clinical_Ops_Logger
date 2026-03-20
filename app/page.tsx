@@ -122,7 +122,17 @@ export default function App() {
     checkReminders();
     const interval = setInterval(checkReminders, 60 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [
+    logs,
+    notifications,
+    profile,
+    t.notifications.pendingTasksBody,
+    t.notifications.reminderBody,
+    t.notifications.reminderTitle,
+    t.shell.notifications,
+    todos,
+    user?.id,
+  ]);
 
   const handleRepeatLog = (log: LogEntry) => {
     setLogFormInitialData(log);
