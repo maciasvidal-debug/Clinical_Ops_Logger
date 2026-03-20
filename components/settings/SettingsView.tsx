@@ -6,7 +6,7 @@ import { useDynamicTranslation } from "@/lib/i18n/utils";
 import { UserProfile, UserRole } from "@/lib/types";
 import { useAppStore } from "@/lib/store";
 import {
-  Settings, Plus, Trash2, Edit2, Check, X,
+  Settings, Plus, Trash2, Edit2, Check, X, Users,
   Download, AlertTriangle, ChevronDown, Layers,
   ClipboardList, Wrench,
 } from "lucide-react";
@@ -29,7 +29,7 @@ interface CategoryWizardState {
   name: string;
   description: string;
   selectedRoles: UserRole[];
-  tasks: { name: string; role_context: "site_led" | "cro_led" | "shared" | null }[];
+  tasks: { name: string; role_context: "site_led" | "cro_led" | "shared" | null; staff_roles: string[] }[];
 }
 
 const ALL_ROLES: { role: UserRole; label: string; desc: string }[] = [
@@ -70,18 +70,24 @@ export function SettingsView({ profile }: SettingsViewProps) {
   const [editRoleContext, setEditRoleContext] = useState<"site_led" | "cro_led" | "shared" | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
+  const [creatingTaskInCat, setCreatingTaskInCat] = useState<string | null>(null);
+  const [newTaskName, setNewTaskName] = useState("");
+  const [newTaskRoleCtx, setNewTaskRoleCtx] = useState<"site_led" | "cro_led" | "shared" | null>(null);
+  const [newTaskStaffRoles, setNewTaskStaffRoles] = useState<string[]>([]);
+
+  const [editStaffRoles, setEditStaffRoles] = useState<string[]>([]);
 
   const [wizardOpen, setWizardOpen]   = useState(false);
   const [wizardStep, setWizardStep]   = useState<WizardStep>(1);
   const [wizardData, setWizardData]   = useState<CategoryWizardState>({
-    name: "", description: "", selectedRoles: [], tasks: [{ name: "", role_context: null }],
+    name: "", description: "", selectedRoles: [], tasks: [{ name: "", role_context: null, staff_roles: [] }],
   });
 
   const [isExporting, setIsExporting]         = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const openWizard = () => {
-    setWizardData({ name: "", description: "", selectedRoles: [], tasks: [{ name: "", role_context: null }] });
+    setWizardData({ name: "", description: "", selectedRoles: [], tasks: [{ name: "", role_context: null, staff_roles: [] }] });
     setWizardStep(1);
     setWizardOpen(true);
   };
@@ -106,7 +112,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
   };
 
   const addWizardTask = () =>
-    setWizardData((prev) => ({ ...prev, tasks: [...prev.tasks, { name: "", role_context: null }] }));
+    setWizardData((prev) => ({ ...prev, tasks: [...prev.tasks, { name: "", role_context: null, staff_roles: [] }] }));
 
   const removeWizardTask = (idx: number) =>
     setWizardData((prev) => ({
@@ -114,14 +120,10 @@ export function SettingsView({ profile }: SettingsViewProps) {
       tasks: prev.tasks.filter((_, i) => i !== idx),
     }));
 
-  const updateWizardTask = (idx: number, val: string, role_context?: "site_led" | "cro_led" | "shared" | null) =>
+  const updateWizardTask = (idx: number, updates: Partial<{ name: string; role_context: "site_led" | "cro_led" | "shared" | null; staff_roles: string[] }>) =>
     setWizardData((prev) => {
       const tasks = [...prev.tasks];
-      if (role_context !== undefined) {
-        tasks[idx] = { ...tasks[idx], role_context };
-      } else {
-        tasks[idx] = { ...tasks[idx], name: val };
-      }
+      tasks[idx] = { ...tasks[idx], ...updates };
       return { ...prev, tasks };
     });
 
@@ -141,7 +143,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
     const validTasks = wizardData.tasks.filter((t) => t.name.trim());
     await Promise.all(
-      validTasks.map((task) => createActivityTask(catId, task.name.trim(), task.role_context))
+      validTasks.map((task) => createActivityTask(catId, task.name.trim(), task.role_context, task.staff_roles))
     );
 
     toast.success("Categoría creada exitosamente", {
@@ -151,10 +153,30 @@ export function SettingsView({ profile }: SettingsViewProps) {
     closeWizard();
   };
 
-  const startEditing = (id: string, currentValue: string, roleContext?: "site_led" | "cro_led" | "shared" | null) => {
+  const startEditing = (id: string, currentValue: string, roleContext?: "site_led" | "cro_led" | "shared" | null, staffRoles: string[] = []) => {
     setEditingId(id);
     setEditValue(currentValue);
     setEditRoleContext(roleContext || null);
+    setEditStaffRoles(staffRoles || []);
+  };
+
+
+  const saveNewTask = async (categoryId: string) => {
+    if (!newTaskName.trim()) {
+      setCreatingTaskInCat(null);
+      return;
+    }
+    const res = await createActivityTask(categoryId, newTaskName, newTaskRoleCtx, newTaskStaffRoles);
+    if (res.success) {
+      toast.success("Tarea añadida");
+      setNewTaskName("");
+      setNewTaskRoleCtx(null);
+      setNewTaskStaffRoles([]);
+      setCreatingTaskInCat(null);
+      await refreshActivitiesConfig();
+    } else {
+      toast.error(res.error || "Error al añadir");
+    }
   };
 
   const cancelEditing = useCallback(() => {
@@ -170,7 +192,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
     if (!editValue.trim()) return cancelEditing();
     let res;
     if (type === "category") res = await updateActivityCategory(id, editValue);
-    else if (type === "task") res = await updateActivityTask(id, editValue, editRoleContext);
+    else if (type === "task") res = await updateActivityTask(id, editValue, editRoleContext, editStaffRoles);
     else res = await updateActivitySubtask(id, editValue);
 
     if (res?.success) {
@@ -384,7 +406,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                     <div className="px-5 py-4 bg-neutral-50 border-t border-neutral-200">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-[13px] font-semibold text-neutral-600">Tareas</span>
-                        <button onClick={() => toast.info("Crear tarea directa no implementado aún")} className="text-[12px] font-medium text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded flex items-center gap-1 transition-colors">
+                        <button onClick={() => setCreatingTaskInCat(cat.id)} className="text-[12px] font-medium text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded flex items-center gap-1 transition-colors">
                           <Plus className="w-3 h-3" /> Añadir Tarea
                         </button>
                       </div>
@@ -398,10 +420,28 @@ export function SettingsView({ profile }: SettingsViewProps) {
                                   <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="px-2 py-1 text-[13px] border border-indigo-300 rounded focus:outline-none w-48 font-medium" autoFocus onKeyDown={(e) => { if (e.key === "Enter") saveEditing(task.id, "task"); if (e.key === "Escape") cancelEditing(); }} />
                                   <select value={editRoleContext || ""} onChange={(e) => setEditRoleContext(e.target.value ? (e.target.value as any) : null)} className="px-2 py-1 text-[12px] border border-neutral-300 rounded focus:outline-none bg-white font-medium text-neutral-600">
                                     <option value="">Sin Rol</option>
-                                    <option value="site_led">Local</option>
+                                    <option value="site_led">Sitio</option>
                                     <option value="cro_led">CRO</option>
                                     <option value="shared">Compartido</option>
                                   </select>
+                                  <div className="relative group/popover">
+                                    <button type="button" className="px-2 py-1 flex items-center gap-1 text-[12px] border border-neutral-300 rounded focus:outline-none bg-white font-medium text-neutral-600 hover:bg-neutral-50">
+                                      <Users className="w-3.5 h-3.5" />
+                                      {editStaffRoles.length === 0 ? "Staff Roles" : `${editStaffRoles.length} roles`}
+                                    </button>
+                                    <div className="absolute top-full mt-1 left-0 w-48 bg-white/95 backdrop-blur-md border border-neutral-200 rounded-lg shadow-lg opacity-0 invisible group-hover/popover:opacity-100 group-hover/popover:visible transition-all z-10 p-2 grid grid-cols-1 gap-0.5">
+                                      {ALL_ROLES.map(({ role, label }) => (
+                                          <label key={role} className="flex items-center gap-2 p-1.5 hover:bg-neutral-50 rounded cursor-pointer">
+                                            <input type="checkbox" checked={editStaffRoles.includes(role)} onChange={(e) => {
+                                              if (e.target.checked) setEditStaffRoles([...editStaffRoles, role]);
+                                              else setEditStaffRoles(editStaffRoles.filter(r => r !== role));
+                                            }} className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500" />
+                                            <span className="text-[12px] font-mono text-neutral-700">{label}</span>
+                                          </label>
+                                      ))}
+                                    </div>
+                                  </div>
+
                                   <button onClick={() => saveEditing(task.id, "task")} className="text-green-600 p-1 hover:bg-green-50 rounded"><Check className="w-3 h-3" /></button>
                                   <button onClick={cancelEditing} className="text-red-600 p-1 hover:bg-red-50 rounded"><X className="w-3 h-3" /></button>
                                 </div>
@@ -414,7 +454,12 @@ export function SettingsView({ profile }: SettingsViewProps) {
                                       task.role_context === 'cro_led' ? 'bg-amber-100 text-amber-700' :
                                       'bg-blue-100 text-blue-700'
                                     }`}>
-                                      {task.role_context === 'site_led' ? 'Local' : task.role_context === 'cro_led' ? 'CRO' : 'Compartido'}
+                                      {task.role_context === 'site_led' ? 'Sitio' : task.role_context === 'cro_led' ? 'CRO' : 'Compartido'}
+                                    </span>
+                                  )}
+                                  {task.task_roles && task.task_roles.length > 0 && (
+                                    <span className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium bg-neutral-100 text-neutral-600 border border-neutral-200">
+                                      <Users className="w-2.5 h-2.5" /> {task.task_roles.length} roles
                                     </span>
                                   )}
                                 </div>
@@ -434,7 +479,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                               </div>
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-opacity">
-                              <button onClick={() => startEditing(task.id, task.name, task.role_context)} className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-md">
+                              <button onClick={() => startEditing(task.id, task.name, task.role_context, task.task_roles?.map((tr: any) => tr.role) || [])} className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-md">
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button onClick={() => handleDelete(task.id, "task", task.name)} className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-md">
@@ -582,10 +627,10 @@ export function SettingsView({ profile }: SettingsViewProps) {
                   <div className="flex flex-col gap-1.5">
                     {wizardData.tasks.map((task, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <input type="text" value={task.name} onChange={(e) => updateWizardTask(i, e.target.value)} className="flex-1 px-3 py-2 bg-white border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" placeholder="Nombre de la tarea" autoFocus={i === wizardData.tasks.length - 1} />
-                        <select value={task.role_context || ""} onChange={(e) => updateWizardTask(i, task.name, e.target.value ? (e.target.value as any) : null)} className="px-3 py-2 bg-white border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 text-neutral-600 font-medium w-32">
+                        <input type="text" value={task.name} onChange={(e) => updateWizardTask(i, { name: e.target.value })} className="flex-1 px-3 py-2 bg-white border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" placeholder="Nombre de la tarea" autoFocus={i === wizardData.tasks.length - 1} />
+                        <select value={task.role_context || ""} onChange={(e) => updateWizardTask(i, { role_context: e.target.value ? (e.target.value as any) : null })} className="px-3 py-2 bg-white border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 text-neutral-600 font-medium w-32">
                           <option value="">Sin Rol</option>
-                          <option value="site_led">Local</option>
+                          <option value="site_led">Sitio</option>
                           <option value="cro_led">CRO</option>
                           <option value="shared">Compartido</option>
                         </select>

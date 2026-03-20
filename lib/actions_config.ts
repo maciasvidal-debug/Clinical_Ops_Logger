@@ -43,6 +43,9 @@ export async function updateActivityCategory(id: string, name: string): Promise<
       .single();
 
     if (error) throw error;
+
+
+
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error updating category:", error);
@@ -67,7 +70,7 @@ export async function deleteActivityCategory(id: string): Promise<{ success: boo
 
 // --- Tasks ---
 
-export async function createActivityTask(categoryId: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function createActivityTask(categoryId: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_tasks")
@@ -76,6 +79,10 @@ export async function createActivityTask(categoryId: string, name: string, role_
       .single();
 
     if (error) throw error;
+    if (staff_roles && staff_roles.length > 0) {
+      const taskRoles = staff_roles.map((r: string) => ({ task_id: data.id, role: r }));
+      await supabase.from("task_roles").insert(taskRoles);
+    }
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error creating task:", error);
@@ -83,7 +90,7 @@ export async function createActivityTask(categoryId: string, name: string, role_
   }
 }
 
-export async function updateActivityTask(id: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function updateActivityTask(id: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_tasks")
@@ -93,6 +100,7 @@ export async function updateActivityTask(id: string, name: string, role_context?
       .single();
 
     if (error) throw error;
+
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error updating task:", error);
@@ -126,6 +134,7 @@ export async function createActivitySubtask(taskId: string, name: string): Promi
       .single();
 
     if (error) throw error;
+
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error creating subtask:", error);
@@ -143,6 +152,7 @@ export async function updateActivitySubtask(id: string, name: string): Promise<{
       .single();
 
     if (error) throw error;
+
     return { success: true, data };
   } catch (error: unknown) {
     console.error("Error updating subtask:", error);
