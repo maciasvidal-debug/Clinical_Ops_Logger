@@ -317,7 +317,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                 <ClipboardList className="w-4 h-4 text-indigo-600" />
                 Categorías de Actividades
               </h3>
-              <p className="text-[13px] text-neutral-500 mt-1 font-mono">
+              <p className="text-[13px] text-neutral-500 mt-1">
                 Jerarquía: Categorías → Tareas → Sub-tareas
               </p>
             </div>
@@ -367,7 +367,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                       ) : (
                         <div className="flex items-center">
                           <span className="text-sm font-bold text-neutral-900">{dt(cat.name)}</span>
-                          <span className="ml-2 text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full font-mono">
+                          <span className="ml-2 text-[11px] font-medium text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full">
                             {cat.activity_tasks?.length ?? 0} tareas
                           </span>
                         </div>
@@ -390,7 +390,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                     <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mr-1">Roles:</span>
                     {cat.category_roles?.length > 0 ? (
                       cat.category_roles.map((cr: any) => (
-                        <span key={cr.role} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold font-mono border ${getRoleBadgeClasses(cr.role)}`}>
+                        <span key={cr.role} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getRoleBadgeClasses(cr.role)}`}>
                           {cr.role}
                         </span>
                       ))
@@ -436,7 +436,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                                               if (e.target.checked) setEditStaffRoles([...editStaffRoles, role]);
                                               else setEditStaffRoles(editStaffRoles.filter(r => r !== role));
                                             }} className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500" />
-                                            <span className="text-[12px] font-mono text-neutral-700">{label}</span>
+                                            <span className="text-[12px] text-neutral-700">{label}</span>
                                           </label>
                                       ))}
                                     </div>
@@ -467,12 +467,12 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
                               <div className="flex flex-wrap gap-1 mt-1.5">
                                 {task.activity_subtasks?.map((st: any) => (
-                                  <span key={st.id} className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-mono bg-neutral-100 border border-neutral-200 text-neutral-600 group/sub">
+                                  <span key={st.id} className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] bg-neutral-100 border border-neutral-200 text-neutral-600 group/sub">
                                     {dt(st.name)}
                                   </span>
                                 ))}
                                 {editingId !== task.id && (
-                                  <button onClick={() => toast.info("Añadir sub-tarea")} className="text-[11px] text-neutral-400 hover:text-indigo-600 font-medium font-mono px-2 py-0.5 border border-dashed border-neutral-300 rounded-full hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+                                  <button onClick={() => toast.info("Añadir sub-tarea")} className="text-[11px] text-neutral-400 hover:text-indigo-600 font-medium px-2 py-0.5 border border-dashed border-neutral-300 rounded-full hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
                                     + sub-tarea
                                   </button>
                                 )}
@@ -610,7 +610,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                       const sel = wizardData.selectedRoles.includes(role);
                       return (
                         <button key={role} onClick={() => toggleWizardRole(role)} className={`text-left p-2.5 border-[1.5px] rounded-lg transition-all ${sel ? "border-indigo-600 bg-indigo-50/50" : "border-neutral-200 bg-white hover:border-indigo-300"}`}>
-                          <div className={`text-[12.5px] font-bold font-mono leading-none mb-1 ${sel ? "text-indigo-700" : "text-neutral-800"}`}>{label}</div>
+                          <div className={`text-[12.5px] font-bold leading-none mb-1 ${sel ? "text-indigo-700" : "text-neutral-800"}`}>{label}</div>
                           <div className={`text-[11px] leading-tight ${sel ? "text-indigo-600/70" : "text-neutral-400"}`}>{desc}</div>
                         </button>
                       );
@@ -649,7 +649,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
             {/* Footer */}
             <div className="px-8 py-4 bg-neutral-50/80 border-t border-neutral-200 flex items-center justify-between">
-              <span className="text-[12px] text-neutral-400 font-mono font-medium">Paso {wizardStep} de 3</span>
+              <span className="text-[12px] text-neutral-400 font-medium">Paso {wizardStep} de 3</span>
               <div className="flex items-center gap-2">
                 {wizardStep > 1 && (
                   <button onClick={wizardBack} className="px-3.5 py-1.5 text-[13px] font-medium text-neutral-500 hover:text-neutral-800 transition-colors">

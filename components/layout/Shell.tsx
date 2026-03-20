@@ -138,7 +138,7 @@ export function Shell({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="absolute bottom-full left-0 right-0 mb-2 mx-4 glass-panel border border-neutral-200/50 shadow-2xl z-[100] overflow-hidden pointer-events-auto"
+          className="absolute bottom-full left-0 right-0 mb-2 mx-4 glass-panel border border-neutral-200/50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-[100] overflow-hidden pointer-events-auto flex flex-col"
           ref={mobileMoreRef}
         >
           <div className="p-2 space-y-1">
@@ -189,9 +189,7 @@ export function Shell({
       <aside className="hidden md:flex flex-col w-[260px] glass-panel rounded-none border-r border-neutral-200/60 z-10 shrink-0">
         <div className="p-6 pb-2">
           <div className="flex items-center gap-2 mb-1">
-            <div className="relative w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-xl shadow-[0_4px_12px_rgba(79,70,229,0.3)]">
-              <Activity className="w-5 h-5" />
-            </div>
+            <Image src="/logo-icon.png" alt="SiteFlow Logo" width={32} height={32} className="object-contain drop-shadow-sm" priority />
             <h1 className="text-xl font-bold tracking-tight text-neutral-900 font-heading">{t.shell.appName}</h1>
           </div>
           <p className="text-xs text-neutral-500 pl-10">{t.shell.appSubtitle}</p>
@@ -259,9 +257,7 @@ export function Shell({
         {/* Top Header / Timer Bar */}
         <header className="glass-panel rounded-none border-b border-neutral-200/60 px-4 py-3 flex items-center justify-between z-40 shrink-0 sticky top-0">
           <div className="flex items-center md:hidden gap-2">
-             <div className="relative w-7 h-7 flex items-center justify-center bg-indigo-600 text-white rounded-lg shadow-sm">
-                <Activity className="w-4 h-4" />
-            </div>
+             <Image src="/logo-icon.png" alt="SiteFlow Logo" width={28} height={28} className="object-contain drop-shadow-sm" priority />
             <span className="font-heading font-bold text-lg text-neutral-900 tracking-tight">{t.shell.appName}</span>
           </div>
           
@@ -421,7 +417,7 @@ export function Shell({
       </main>
 
       {/* Mobile Bottom Nav (Glassmorphism & Simplified) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-safe pt-2 pointer-events-none">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe pt-2 pointer-events-none">
         <div className="pointer-events-auto">{renderMobileMoreMenu()}</div>
         <nav className="glass-panel border border-white/60 mx-auto rounded-3xl mb-4 px-2 py-2 pointer-events-auto flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
           {primaryNavItems.map((item) => {
