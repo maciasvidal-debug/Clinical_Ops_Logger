@@ -255,7 +255,7 @@ export function LogFormView({
     <div className="max-w-2xl mx-auto space-y-6 pb-12">
       <header>
         <h2 className="text-2xl font-bold tracking-tight text-neutral-900">{t.logForm.title}</h2>
-        <p className="text-neutral-500">{t.logForm.subtitle} {profile?.role?.replace('_', ' ')}.</p>
+        <p className="text-neutral-500 font-medium">{t.logForm.subtitle} {profile?.role?.replace('_', ' ')}.</p>
       </header>
 
       {/* AI Smart Logging */}
@@ -298,7 +298,7 @@ export function LogFormView({
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl border border-neutral-200 shadow-sm space-y-6">
         
         {/* Date & Duration */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-5 glass-panel bg-white/40 border-neutral-200/50">
           <div className="space-y-2">
             <label className="text-sm font-medium text-neutral-700">{t.logForm.date}</label>
             <input 
