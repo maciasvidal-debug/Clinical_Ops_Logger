@@ -29,7 +29,7 @@ interface CategoryWizardState {
   name: string;
   description: string;
   selectedRoles: UserRole[];
-  tasks: string[];
+  tasks: { name: string; role_context: "site_led" | "cro_led" | "shared" | null }[];
 }
 
 const ALL_ROLES: { role: UserRole; label: string; desc: string }[] = [
@@ -66,21 +66,22 @@ export function SettingsView({ profile }: SettingsViewProps) {
   }, [isPrivileged, refreshActivitiesConfig]);
 
   const [editingId, setEditingId]     = useState<string | null>(null);
-  const [editValue, setEditValue]     = useState("");
-  const [isDeleting, setIsDeleting]   = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const [editRoleContext, setEditRoleContext] = useState<"site_led" | "cro_led" | "shared" | null>(null);
+  const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
 
   const [wizardOpen, setWizardOpen]   = useState(false);
   const [wizardStep, setWizardStep]   = useState<WizardStep>(1);
   const [wizardData, setWizardData]   = useState<CategoryWizardState>({
-    name: "", description: "", selectedRoles: [], tasks: [""],
+    name: "", description: "", selectedRoles: [], tasks: [{ name: "", role_context: null }],
   });
 
   const [isExporting, setIsExporting]         = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const openWizard = () => {
-    setWizardData({ name: "", description: "", selectedRoles: [], tasks: [""] });
+    setWizardData({ name: "", description: "", selectedRoles: [], tasks: [{ name: "", role_context: null }] });
     setWizardStep(1);
     setWizardOpen(true);
   };
@@ -105,7 +106,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
   };
 
   const addWizardTask = () =>
-    setWizardData((prev) => ({ ...prev, tasks: [...prev.tasks, ""] }));
+    setWizardData((prev) => ({ ...prev, tasks: [...prev.tasks, { name: "", role_context: null }] }));
 
   const removeWizardTask = (idx: number) =>
     setWizardData((prev) => ({
@@ -113,10 +114,14 @@ export function SettingsView({ profile }: SettingsViewProps) {
       tasks: prev.tasks.filter((_, i) => i !== idx),
     }));
 
-  const updateWizardTask = (idx: number, val: string) =>
+  const updateWizardTask = (idx: number, val: string, role_context?: "site_led" | "cro_led" | "shared" | null) =>
     setWizardData((prev) => {
       const tasks = [...prev.tasks];
-      tasks[idx] = val;
+      if (role_context !== undefined) {
+        tasks[idx] = { ...tasks[idx], role_context };
+      } else {
+        tasks[idx] = { ...tasks[idx], name: val };
+      }
       return { ...prev, tasks };
     });
 
@@ -134,9 +139,9 @@ export function SettingsView({ profile }: SettingsViewProps) {
       wizardData.selectedRoles.map((role) => addCategoryRole(catId, role))
     );
 
-    const validTasks = wizardData.tasks.filter((t) => t.trim());
+    const validTasks = wizardData.tasks.filter((t) => t.name.trim());
     await Promise.all(
-      validTasks.map((name) => createActivityTask(catId, name.trim()))
+      validTasks.map((task) => createActivityTask(catId, task.name.trim(), task.role_context))
     );
 
     toast.success("Categoría creada exitosamente", {
@@ -146,14 +151,16 @@ export function SettingsView({ profile }: SettingsViewProps) {
     closeWizard();
   };
 
-  const startEditing = (id: string, currentValue: string) => {
+  const startEditing = (id: string, currentValue: string, roleContext?: "site_led" | "cro_led" | "shared" | null) => {
     setEditingId(id);
     setEditValue(currentValue);
+    setEditRoleContext(roleContext || null);
   };
 
   const cancelEditing = useCallback(() => {
     setEditingId(null);
     setEditValue("");
+    setEditRoleContext(null);
   }, []);
 
   const saveEditing = async (
@@ -163,7 +170,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
     if (!editValue.trim()) return cancelEditing();
     let res;
     if (type === "category") res = await updateActivityCategory(id, editValue);
-    else if (type === "task") res = await updateActivityTask(id, editValue);
+    else if (type === "task") res = await updateActivityTask(id, editValue, editRoleContext);
     else res = await updateActivitySubtask(id, editValue);
 
     if (res?.success) {
@@ -389,11 +396,28 @@ export function SettingsView({ profile }: SettingsViewProps) {
                               {editingId === task.id ? (
                                 <div className="flex items-center gap-2 mb-1">
                                   <input type="text" value={editValue} onChange={(e) => setEditValue(e.target.value)} className="px-2 py-1 text-[13px] border border-indigo-300 rounded focus:outline-none w-48 font-medium" autoFocus onKeyDown={(e) => { if (e.key === "Enter") saveEditing(task.id, "task"); if (e.key === "Escape") cancelEditing(); }} />
+                                  <select value={editRoleContext || ""} onChange={(e) => setEditRoleContext(e.target.value ? (e.target.value as any) : null)} className="px-2 py-1 text-[12px] border border-neutral-300 rounded focus:outline-none bg-white font-medium text-neutral-600">
+                                    <option value="">Sin Rol</option>
+                                    <option value="site_led">Local</option>
+                                    <option value="cro_led">CRO</option>
+                                    <option value="shared">Compartido</option>
+                                  </select>
                                   <button onClick={() => saveEditing(task.id, "task")} className="text-green-600 p-1 hover:bg-green-50 rounded"><Check className="w-3 h-3" /></button>
                                   <button onClick={cancelEditing} className="text-red-600 p-1 hover:bg-red-50 rounded"><X className="w-3 h-3" /></button>
                                 </div>
                               ) : (
-                                <div className="text-[13px] font-medium text-neutral-900 mb-1">{dt(task.name)}</div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <div className="text-[13px] font-medium text-neutral-900">{dt(task.name)}</div>
+                                  {task.role_context && (
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${
+                                      task.role_context === 'site_led' ? 'bg-emerald-100 text-emerald-700' :
+                                      task.role_context === 'cro_led' ? 'bg-amber-100 text-amber-700' :
+                                      'bg-blue-100 text-blue-700'
+                                    }`}>
+                                      {task.role_context === 'site_led' ? 'Local' : task.role_context === 'cro_led' ? 'CRO' : 'Compartido'}
+                                    </span>
+                                  )}
+                                </div>
                               )}
 
                               <div className="flex flex-wrap gap-1 mt-1.5">
@@ -410,7 +434,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                               </div>
                             </div>
                             <div className="flex items-center gap-1 opacity-0 group-hover/task:opacity-100 transition-opacity">
-                              <button onClick={() => startEditing(task.id, task.name)} className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-md">
+                              <button onClick={() => startEditing(task.id, task.name, task.role_context)} className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-md">
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button onClick={() => handleDelete(task.id, "task", task.name)} className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-md">
@@ -558,7 +582,13 @@ export function SettingsView({ profile }: SettingsViewProps) {
                   <div className="flex flex-col gap-1.5">
                     {wizardData.tasks.map((task, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <input type="text" value={task} onChange={(e) => updateWizardTask(i, e.target.value)} className="flex-1 px-3 py-2 bg-white border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" placeholder="Nombre de la tarea" autoFocus={i === wizardData.tasks.length - 1} />
+                        <input type="text" value={task.name} onChange={(e) => updateWizardTask(i, e.target.value)} className="flex-1 px-3 py-2 bg-white border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all" placeholder="Nombre de la tarea" autoFocus={i === wizardData.tasks.length - 1} />
+                        <select value={task.role_context || ""} onChange={(e) => updateWizardTask(i, task.name, e.target.value ? (e.target.value as any) : null)} className="px-3 py-2 bg-white border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 text-neutral-600 font-medium w-32">
+                          <option value="">Sin Rol</option>
+                          <option value="site_led">Local</option>
+                          <option value="cro_led">CRO</option>
+                          <option value="shared">Compartido</option>
+                        </select>
                         <button onClick={() => removeWizardTask(i)} className="w-9 h-9 flex items-center justify-center shrink-0 border border-neutral-200 rounded-md text-neutral-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-colors">
                           <Trash2 className="w-4 h-4" />
                         </button>

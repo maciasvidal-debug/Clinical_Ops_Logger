@@ -67,11 +67,11 @@ export async function deleteActivityCategory(id: string): Promise<{ success: boo
 
 // --- Tasks ---
 
-export async function createActivityTask(categoryId: string, name: string): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function createActivityTask(categoryId: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_tasks")
-      .insert([{ category_id: categoryId, name, is_active: true }])
+      .insert([{ category_id: categoryId, name, role_context, is_active: true }])
       .select()
       .single();
 
@@ -83,11 +83,11 @@ export async function createActivityTask(categoryId: string, name: string): Prom
   }
 }
 
-export async function updateActivityTask(id: string, name: string): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function updateActivityTask(id: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_tasks")
-      .update({ name })
+      .update(role_context !== undefined ? { name, role_context } : { name })
       .eq("id", id)
       .select()
       .single();

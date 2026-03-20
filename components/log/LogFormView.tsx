@@ -7,7 +7,7 @@ import {
   Project, 
   Protocol, 
   Site, 
-  ROLE_HIERARCHY 
+
 } from "@/lib/types";
 import { format } from "date-fns";
 import { 
@@ -24,6 +24,7 @@ import {
   Sparkles 
 } from "lucide-react";
 import { toast } from "sonner";
+import { useAppStore } from "@/lib/store";
 import { parseNaturalLanguageLog, getPredictedDuration } from "@/lib/actions";
 
 const getTaskIcon = (name: string) => {
@@ -57,6 +58,7 @@ export function LogFormView({
   sites, 
   initialData 
 }: LogFormViewProps) {
+  const { activityCategories } = useAppStore();
   const { t, language } = useTranslation();
   const { dt } = useDynamicTranslation();
     const [date, setDate] = useState(initialData?.date || format(new Date(), "yyyy-MM-dd"));
@@ -97,10 +99,29 @@ export function LogFormView({
   const [aiInput, setAiInput] = useState("");
   const [isParsing, setIsParsing] = useState(false);
 
-  const availableCategories = useMemo(() => {
-    if (!profile?.role) return [];
-    return ROLE_HIERARCHY[profile.role] || [];
-  }, [profile?.role]);
+  const availableCategories: import('@/lib/types').ActivityCategory[] = useMemo(() => {
+    if (!profile?.role || !activityCategories) return [];
+
+    // Map DB structure to ActivityCategory[] structure expected by the form
+    return activityCategories
+      .filter((cat: any) => {
+        if (!cat.category_roles || cat.category_roles.length === 0) return true; // Visible to all
+        return cat.category_roles.some((cr: any) => cr.role === profile.role);
+      })
+      .map((cat: any) => ({
+        id: cat.id,
+        name: cat.name,
+        tasks: (cat.activity_tasks || []).map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          roleContext: t.role_context,
+          subTasks: (t.activity_subtasks || []).map((st: any) => ({
+            id: st.id,
+            name: st.name
+          }))
+        }))
+      }));
+  }, [profile?.role, activityCategories]);
 
   const initialCategory = availableCategories.find(c => c.name === initialData?.category);
   const initialTask = initialCategory?.tasks.find(t => t.name === initialData?.activity);

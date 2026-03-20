@@ -5,7 +5,7 @@ import { DbActivityCategory, Todo } from "./types";
 
 import { getGeminiClient } from "./gemini";
 import { Type } from "@google/genai";
-import { ROLE_HIERARCHY, UserRole, Project, Protocol, LogEntry, TaskDurationStats, PriorityAlignmentStats } from "./types";
+import { UserRole, Project, Protocol, LogEntry, TaskDurationStats, PriorityAlignmentStats } from "./types";
 import { dictionaries } from "./i18n/dictionaries";
 
 export type ActionResponse<T> =
@@ -40,7 +40,26 @@ export async function parseNaturalLanguageLog(
 
     const ai = getGeminiClient();
 
-    const availableCategories = ROLE_HIERARCHY[userRole] || [];
+    const categoriesRes = await getActivitiesConfig();
+    let availableCategories: any[] = [];
+    if (categoriesRes.success && categoriesRes.data) {
+      availableCategories = categoriesRes.data.filter((cat: any) => {
+        if (!cat.category_roles || cat.category_roles.length === 0) return true;
+        return cat.category_roles.some((cr: any) => cr.role === userRole);
+      }).map((cat: any) => ({
+        id: cat.id,
+        name: cat.name,
+        tasks: (cat.activity_tasks || []).map((t: any) => ({
+          id: t.id,
+          name: t.name,
+          roleContext: t.role_context,
+          subTasks: (t.activity_subtasks || []).map((st: any) => ({
+            id: st.id,
+            name: st.name
+          }))
+        }))
+      }));
+    }
 
     const prompt = `
       You are an AI assistant for a Clinical Operations time tracking app.
