@@ -101,9 +101,61 @@ export interface Dictionary {
     downloadDataRecommendation: string;
     typePhraseToConfirm: string;
     deleteConfirmationPhrase: string;
+
     deleteSuccessDesc: string;
 
+    // Structure & Wizard
+    structureTitle: string;
+    structureSubtitle: string;
+    stepProject: string;
+    stepProtocol: string;
+    stepSite: string;
+    stepReview: string;
+    createNewProject: string;
+    selectExistingProject: string;
+    projectName: string;
+    createNewProtocol: string;
+    selectExistingProtocol: string;
+    protocolName: string;
+    siteNumber: string;
+    siteName: string;
+    siteAddress: string;
+    siteCity: string;
+    siteCountry: string;
+    siteRegion: string;
+    createMicroZone: string;
+    microZoneName: string;
+    assignToManager: string;
+    selectManager: string;
+    reviewAndConfirm: string;
+    verifyDetails: string;
+    siteInformation: string;
+    backToEdit: string;
+    confirmAndSave: string;
+    saving: string;
+    continue: string;
+
+    // Category Wizard
+    categoryWizardTitle: string;
+    categoryName: string;
+    allowedRoles: string;
+    allowedRolesDesc: string;
+    optionalTasks: string;
+    optionalTasksDesc: string;
+    taskNamePlaceholder: string;
+    taskName: string;
+    addSubTaskBtn: string;
+    subTaskNamePlaceholder: string;
+    editCategory: string;
+    deleteCategory: string;
+    editTask: string;
+    deleteTask: string;
+    editSubTask: string;
+    deleteSubTask: string;
+    noRolesAssigned: string;
+    noTasksConfigured: string;
   };
+
   legal: { termsTitle: string; privacyTitle: string; termsContent: string; privacyContent: string; };
   notifications: {
     reminderTitle: string;

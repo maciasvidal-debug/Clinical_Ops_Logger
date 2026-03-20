@@ -1,115 +1,155 @@
-import React, { useState } from "react";
-import { Project, Protocol, Region } from "@/lib/types";
-import { createProject, createProtocol, createSite, createMicroZone, assignSiteToManager } from "@/lib/actions_structure";
-import { createRegion } from "@/lib/actions_regions";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { UserProfile } from "@/lib/types";
+import {
+  createProject, createProtocol, createSite, createMicroZone, assignSiteToManager
+} from "@/lib/actions_structure";
+import { fetchProfiles } from "@/lib/actions_structure";
+import { Check, X, Building2, FolderKanban, MapPin, Loader2, ChevronRight, CheckCircle, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { Building, MapPin, Plus, CheckCircle, ChevronRight, Loader2, RefreshCw } from "lucide-react";
 import { useAppStore } from "@/lib/store";
-
-// Helper for mapping countries to regions (continents) initially
-const COUNTRY_TO_REGION: Record<string, string> = {
-  "USA": "North America",
-  "Canada": "North America",
-  "Mexico": "North America",
-  "Brazil": "South America",
-  "Argentina": "South America",
-  "Chile": "South America",
-  "Colombia": "South America",
-  "Peru": "South America",
-  "UK": "Europe",
-  "France": "Europe",
-  "Germany": "Europe",
-  "Italy": "Europe",
-  "Spain": "Europe",
-  "Japan": "Asia",
-  "China": "Asia",
-  "India": "Asia",
-  "Australia": "Oceania",
-  "New Zealand": "Oceania"
-};
-
-const ALL_COUNTRIES = Object.keys(COUNTRY_TO_REGION).sort();
+import { useTranslation } from "@/lib/i18n";
 
 interface StructureWizardProps {
   onComplete: () => void;
 }
 
+const ALL_COUNTRIES = [
+  "United States", "Canada", "Mexico", "Brazil", "Argentina", "Chile",
+  "Colombia", "Peru", "United Kingdom", "Germany", "France", "Spain",
+  "Italy", "Australia", "New Zealand", "Japan", "South Korea", "China",
+  "India", "Singapore"
+].sort();
+
+const COUNTRY_TO_REGION: Record<string, string> = {
+  "United States": "North America",
+  "Canada": "North America",
+  "Mexico": "Latin America",
+  "Brazil": "Latin America",
+  "Argentina": "Latin America",
+  "Chile": "Latin America",
+  "Colombia": "Latin America",
+  "Peru": "Latin America",
+  "United Kingdom": "Europe",
+  "Germany": "Europe",
+  "France": "Europe",
+  "Spain": "Europe",
+  "Italy": "Europe",
+  "Australia": "Oceania",
+  "New Zealand": "Oceania",
+  "Japan": "Asia",
+  "South Korea": "Asia",
+  "China": "Asia",
+  "India": "Asia",
+  "Singapore": "Asia"
+};
+
 export function StructureWizard({ onComplete }: StructureWizardProps) {
-  const { projects, protocols, regions, fetchRegions, refreshAppData, user, profile, profiles } = useAppStore();
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const { projects, protocols, refreshAppData } = useAppStore();
+  const { t } = useTranslation();
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
 
   // Step 1: Project
-  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [isNewProject, setIsNewProject] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [newProjectName, setNewProjectName] = useState("");
 
   // Step 2: Protocol
-  const [selectedProtocolId, setSelectedProtocolId] = useState<string>("");
   const [isNewProtocol, setIsNewProtocol] = useState(false);
+  const [selectedProtocolId, setSelectedProtocolId] = useState<string>("");
   const [newProtocolName, setNewProtocolName] = useState("");
 
-  // Step 3: Site
+  // Step 3: Site Details
   const [siteNumber, setSiteNumber] = useState("");
   const [siteName, setSiteName] = useState("");
   const [siteAddress, setSiteAddress] = useState("");
   const [siteCity, setSiteCity] = useState("");
   const [siteCountry, setSiteCountry] = useState("");
-  const [siteRegionId, setSiteRegionId] = useState<string>("");
 
   // Micro-zone
-
   const [isMicroZone, setIsMicroZone] = useState(false);
   const [microZoneName, setMicroZoneName] = useState("");
+
+  // Manager Assignment
   const [assignToManager, setAssignToManager] = useState(false);
   const [selectedManagerId, setSelectedManagerId] = useState("");
 
+  useEffect(() => {
+    fetchProfiles().then(res => {
+      if (res.success && res.data) {
+        setProfiles(res.data);
+      }
+    });
+  }, []);
 
-  // Auto-complete continent handler
+  const resetState = () => {
+    setStep(1);
+    setIsNewProject(false);
+    setSelectedProjectId("");
+    setNewProjectName("");
+    setIsNewProtocol(false);
+    setSelectedProtocolId("");
+    setNewProtocolName("");
+    setSiteNumber("");
+    setSiteName("");
+    setSiteAddress("");
+    setSiteCity("");
+    setSiteCountry("");
+    setIsMicroZone(false);
+    setMicroZoneName("");
+    setAssignToManager(false);
+    setSelectedManagerId("");
+  };
+
+  const openWizard = () => {
+    resetState();
+    setIsOpen(true);
+  };
+
+  const closeWizard = () => {
+    setIsOpen(false);
+  };
+
   const handleCountryChange = (country: string) => {
     setSiteCountry(country);
-    if (!isMicroZone && country) {
-      const mappedContinent = COUNTRY_TO_REGION[country];
-      if (mappedContinent) {
-        // Find existing region that matches
-        const existingRegion = regions.find(r => r.name.toLowerCase() === mappedContinent.toLowerCase());
-        if (existingRegion) {
-          setSiteRegionId(existingRegion.id);
-        } else {
-           // We'll create it on save or just leave it blank for manual
-           setSiteRegionId("auto-create-" + mappedContinent);
-        }
-      }
+    if (!isMicroZone && COUNTRY_TO_REGION[country]) {
+      // Auto mapping logic is handled visually and directly on submit
     }
   };
 
-  const handleNextStep1 = async () => {
+  // Validation
+  const handleNextStep1 = () => {
     if (isNewProject && !newProjectName.trim()) {
-      toast.error("Project name is required");
+      toast.error("El nombre del proyecto es obligatorio");
       return;
     }
     if (!isNewProject && !selectedProjectId) {
-      toast.error("Please select a project");
+      toast.error("Debes seleccionar un proyecto primero");
       return;
     }
     setStep(2);
   };
 
-  const handleNextStep2 = async () => {
+  const handleNextStep2 = () => {
     if (isNewProtocol && !newProtocolName.trim()) {
-      toast.error("Protocol name is required");
+      toast.error("El nombre del protocolo es obligatorio");
       return;
     }
     if (!isNewProtocol && !selectedProtocolId) {
-      toast.error("Please select a protocol");
+      toast.error("Debes seleccionar un protocolo primero");
       return;
     }
     setStep(3);
   };
 
-  const handleNextStep3 = async () => {
-    if (!siteName.trim() || !siteCountry.trim() || !siteNumber.trim()) {
-      toast.error("Site number, name, and country are required");
+  const handleNextStep3 = () => {
+    if (!siteNumber.trim() || !siteName.trim() || !siteCountry) {
+      toast.error("Los detalles del sitio son obligatorios");
       return;
     }
     if (isMicroZone && !microZoneName.trim()) {
@@ -119,421 +159,358 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
     setStep(4);
   };
 
-
   const handleSave = async () => {
     setLoading(true);
     try {
-      let finalProjectId = selectedProjectId;
+      let projectId = selectedProjectId;
       if (isNewProject) {
-        const p = await createProject(newProjectName.trim());
-        finalProjectId = p.id;
+        const pRes = await createProject(newProjectName.trim());
+        if (!pRes) throw new Error("Failed to create project");
+        projectId = pRes.id;
       }
 
-      let finalProtocolId = selectedProtocolId;
+      let protocolId = selectedProtocolId;
       if (isNewProtocol) {
-        const prot = await createProtocol(finalProjectId, newProtocolName.trim());
-        finalProtocolId = prot.id;
+        const ptRes = await createProtocol(projectId, newProtocolName.trim());
+        if (!ptRes) throw new Error("Failed to create protocol");
+        protocolId = ptRes.id;
       }
 
-      let finalRegionId = siteRegionId;
-      if (finalRegionId.startsWith("auto-create-")) {
-         // Auto create missing continent
-         const continentName = finalRegionId.replace("auto-create-", "");
-         const r = await createRegion(continentName);
-         finalRegionId = r.id;
+      let finalRegion = COUNTRY_TO_REGION[siteCountry] || "Global";
+      let microZoneId = null;
+
+      if (isMicroZone) {
+                finalRegion = microZoneName.trim();
       }
 
-      const newSite = await createSite({
-        id: crypto.randomUUID(),
-        site_number: siteNumber.trim(),
-        protocol_id: finalProtocolId,
+      const sRes = await createSite({
         name: siteName.trim(),
+        id: crypto.randomUUID(),
+        protocol_id: protocolId,
+                site_number: siteNumber.trim(),
         address: siteAddress.trim(),
         city: siteCity.trim(),
         country: siteCountry,
-        region_id: finalRegionId || undefined
+
       });
 
-
-      if (isMicroZone && microZoneName.trim()) {
-         await createMicroZone({
-            site_id: newSite.id,
-            name: microZoneName.trim()
-         });
-      }
+      if (!sRes) throw new Error("Failed to create site");
 
       if (assignToManager && selectedManagerId) {
-         await assignSiteToManager(selectedManagerId, newSite.id);
+        const assignRes = await assignSiteToManager(selectedManagerId, sRes.id);
+        if (!assignRes) throw new Error("Failed to assign manager");
       }
 
-      toast.success("Structure created successfully!");
-
-      if (user && profile) {
-        await refreshAppData();
-        fetchRegions();
-      }
+      toast.success("Sitio creado exitosamente");
+      await refreshAppData();
+      closeWizard();
       onComplete();
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to save structure. Please try again.");
+
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred during creation");
     } finally {
       setLoading(false);
     }
   };
 
-
-  // Helper to get protocol list filtered by project
-  const availableProtocols = protocols.filter(p => p.project_id === selectedProjectId);
+  if (!isOpen) {
+    return (
+      <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 flex flex-col items-center justify-center text-center min-h-[300px]">
+        <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
+          <Building2 className="w-8 h-8 text-indigo-600" />
+        </div>
+        <h3 className="text-lg font-bold text-neutral-900 mb-2">Crear Infraestructura</h3>
+        <p className="text-sm text-neutral-500 max-w-md mb-6">
+          Utiliza el wizard guiado para crear un nuevo Proyecto, Protocolo y configurar Sitios con soporte para Micro-zonas.
+        </p>
+        <button
+          onClick={openWizard}
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm"
+        >
+          <Plus className="w-4 h-4" />
+          Iniciar Wizard
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden w-full max-w-2xl mx-auto my-8">
-      {/* Header / Stepper */}
-      <div className="bg-indigo-50 border-b border-indigo-100 p-6">
-        <h2 className="text-xl font-bold text-indigo-900 flex items-center gap-2">
-          <Building className="text-indigo-600" />
-          Structure Wizard
-        </h2>
-        <p className="text-indigo-700/70 text-sm mt-1">Configure Projects, Protocols, and Sites.</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-neutral-900/50 backdrop-blur-[3px] p-4 animate-in fade-in duration-200" onClick={(e) => e.target === e.currentTarget && closeWizard()}>
+      <div className="bg-white rounded-[16px] w-full max-w-[560px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
 
-        <div className="flex items-center mt-6">
-          <div className={`flex items-center \${step >= 1 ? 'text-indigo-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 1 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}`}>1</div>
-            <span className="ml-2 text-sm font-medium">Project</span>
-          </div>
-          <div className={`flex-1 h-px mx-4 \${step >= 2 ? 'bg-indigo-600' : 'bg-gray-300'}`}></div>
-          <div className={`flex items-center \${step >= 2 ? 'text-indigo-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 2 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}`}>2</div>
-            <span className="ml-2 text-sm font-medium">Protocol</span>
-          </div>
-          <div className={`flex-1 h-px mx-4 \${step >= 3 ? 'bg-indigo-600' : 'bg-gray-300'}`}></div>
-          <div className={`flex items-center \${step >= 3 ? 'text-indigo-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 \${step >= 3 ? 'border-indigo-600 bg-indigo-50 font-bold' : 'border-gray-300'}`}>3</div>
-            <span className="ml-2 text-sm font-medium">Site</span>
+        {/* Steps indicator */}
+        <div className="pt-7 px-8 pb-0 shrink-0">
+          <div className="flex items-start">
+            {[1, 2, 3, 4].map((s, idx) => (
+              <React.Fragment key={s}>
+                <div className="flex flex-col items-center">
+                  <div className={`w-[28px] h-[28px] rounded-full flex items-center justify-center text-[12px] font-bold transition-all duration-300 ${step > s ? "bg-indigo-600 text-white" : step === s ? "bg-indigo-600 text-white ring-4 ring-indigo-100" : "bg-neutral-100 text-neutral-400"}`}>
+                    {step > s ? <Check className="w-[14px] h-[14px] stroke-[2.5px]" /> : s}
+                  </div>
+                  <span className="text-[10px] font-medium mt-1.5 text-neutral-400 hidden sm:block">{["Proyecto", "Protocolo", "Sitio", "Revisión"][idx]}</span>
+                </div>
+                {idx < 3 && (
+                  <div className={`flex-1 h-[2px] mx-2 mt-[13px] transition-colors duration-300 ${step > s ? "bg-indigo-600" : "bg-neutral-200"}`} />
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
-      </div>
 
-      <div className="p-6">
-        {/* STEP 1: PROJECT */}
-        {step === 1 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-            <h3 className="text-lg font-medium text-gray-900">Select or Create a Project</h3>
+        {/* Wizard body - Scrollable */}
+        <div className="p-8 pb-6 overflow-y-auto">
+          {/* STEP 1 */}
+          {step === 1 && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <h3 className="text-[17px] font-bold text-neutral-900 mb-1 tracking-tight">Proyecto</h3>
+              <p className="text-[13px] text-neutral-500 mb-5">Selecciona un proyecto existente o crea uno nuevo.</p>
 
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsNewProject(false)}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${!isNewProject ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-              >
-                Existing Project
-              </button>
-              <button
-                onClick={() => setIsNewProject(true)}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${isNewProject ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-              >
-                <Plus size={18} /> New Project
-              </button>
-            </div>
-
-            {!isNewProject ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Project</label>
-                <select
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={selectedProjectId}
-                  onChange={(e) => setSelectedProjectId(e.target.value)}
-                >
-                  <option value="">-- Select Project --</option>
-                  {projects.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-                {projects.length === 0 && <p className="text-sm text-amber-600 mt-2">No projects found. Please create one.</p>}
-              </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New Project Name</label>
-                <input
-                  type="text"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="e.g. Oncology Phase 3"
-                  value={newProjectName}
-                  onChange={(e) => setNewProjectName(e.target.value)}
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end mt-8">
-              <button
-                onClick={handleNextStep1}
-                className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-indigo-700 flex items-center gap-2"
-              >
-                Next <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 2: PROTOCOL */}
-        {step === 2 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-            <h3 className="text-lg font-medium text-gray-900">Select or Create a Protocol</h3>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsNewProtocol(false)}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${!isNewProtocol ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-                disabled={isNewProject} // Force new protocol if project is new
-              >
-                Existing Protocol
-              </button>
-              <button
-                onClick={() => setIsNewProtocol(true)}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 flex items-center justify-center gap-2 transition-all \${isNewProtocol ? 'border-indigo-600 bg-indigo-50 text-indigo-700' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
-              >
-                <Plus size={18} /> New Protocol
-              </button>
-            </div>
-
-            {!isNewProtocol ? (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Protocol for this Project</label>
-                <select
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={selectedProtocolId}
-                  onChange={(e) => setSelectedProtocolId(e.target.value)}
-                >
-                  <option value="">-- Select Protocol --</option>
-                  {availableProtocols.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
-                </select>
-                {availableProtocols.length === 0 && <p className="text-sm text-amber-600 mt-2">No protocols found for this project. Please create one.</p>}
-              </div>
-            ) : (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New Protocol Name</label>
-                <input
-                  type="text"
-                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="e.g. JIT-001"
-                  value={newProtocolName}
-                  onChange={(e) => setNewProtocolName(e.target.value)}
-                />
-              </div>
-            )}
-
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={() => setStep(1)}
-                className="text-gray-600 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-100"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleNextStep2}
-                className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-indigo-700 flex items-center gap-2"
-              >
-                Next <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 3: SITE */}
-        {step === 3 && (
-          <div className="space-y-4 animate-in fade-in slide-in-from-right-4">
-            <h3 className="text-lg font-medium text-gray-900">Site Information</h3>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Site Number *</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="e.g. 1377"
-                  value={siteNumber}
-                  onChange={(e) => setSiteNumber(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Site Name *</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  placeholder="e.g. Fundación Oncológica"
-                  value={siteName}
-                  onChange={(e) => setSiteName(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
-              <input
-                type="text"
-                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                placeholder="Street name, etc."
-                value={siteAddress}
-                onChange={(e) => setSiteAddress(e.target.value)}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                <input
-                  type="text"
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={siteCity}
-                  onChange={(e) => setSiteCity(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
-                <select
-                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  value={siteCountry}
-                  onChange={(e) => handleCountryChange(e.target.value)}
-                >
-                  <option value="">-- Select Country --</option>
-                  {ALL_COUNTRIES.map(c => (
-                    <option key={c} value={c}>{c}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mt-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h4 className="font-medium text-gray-900 flex items-center gap-2">
-                    <MapPin size={16} className="text-indigo-500" />
-                    Geographic Zoning
-                  </h4>
-                  <p className="text-xs text-gray-500">
-                    {!isMicroZone && siteCountry ? `Auto-assigned to Continent: \${COUNTRY_TO_REGION[siteCountry] || 'Unknown'}` : 'Create a specific micro-zone for tailored reporting'}
-                  </p>
-                </div>
-                <label className="flex items-center cursor-pointer">
-                  <div className="relative">
-                    <input type="checkbox" className="sr-only" checked={isMicroZone} onChange={() => setIsMicroZone(!isMicroZone)} />
-                    <div className={`block w-10 h-6 rounded-full transition-colors \${isMicroZone ? 'bg-indigo-500' : 'bg-gray-300'}`}></div>
-                    <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform \${isMicroZone ? 'transform translate-x-4' : ''}`}></div>
+              <div className="flex flex-col gap-4">
+                <label className={`p-4 border-[1.5px] rounded-xl cursor-pointer transition-all ${!isNewProject ? 'border-indigo-600 bg-indigo-50/50' : 'border-neutral-200 hover:border-indigo-300'}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <input type="radio" checked={!isNewProject} onChange={() => setIsNewProject(false)} className="w-4 h-4 text-indigo-600 focus:ring-indigo-500" />
+                    <span className="text-[14px] font-bold text-neutral-900">Proyecto Existente</span>
                   </div>
-                  <span className="ml-3 text-sm font-medium text-gray-700">Micro-zone</span>
-                </label>
-              </div>
-
-              {isMicroZone && (
-                <div className="mt-3 animate-in fade-in">
-                  <input
-                    type="text"
-                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    placeholder="e.g. Cono Sur, EMEA North"
-                    value={microZoneName}
-                    onChange={(e) => setMicroZoneName(e.target.value)}
-                  />
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-between mt-8">
-              <button
-                onClick={() => setStep(2)}
-                className="text-gray-600 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-100"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleNextStep3}
-                className="bg-indigo-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-indigo-700 flex items-center gap-2"
-              >
-                Review <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 4: REVIEW & CONFIRM */}
-        {step === 4 && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-            <div className="bg-indigo-50 rounded-lg p-6 border border-indigo-100 text-center">
-              <CheckCircle className="mx-auto h-12 w-12 text-indigo-500 mb-4" />
-              <h3 className="text-xl font-bold text-indigo-900 mb-2">Review & Confirm</h3>
-              <p className="text-indigo-700/80">Please verify the structure details below before saving.</p>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="bg-white p-4 border rounded-lg shadow-sm">
-                <span className="text-xs font-semibold text-gray-500 uppercase">Project</span>
-                <p className="font-medium text-gray-900 text-lg">{isNewProject ? newProjectName : projects.find(p => p.id === selectedProjectId)?.name}</p>
-                {isNewProject && <span className="inline-block px-2 py-0.5 mt-1 bg-green-100 text-green-800 text-xs font-medium rounded">New</span>}
-              </div>
-              <div className="bg-white p-4 border rounded-lg shadow-sm">
-                <span className="text-xs font-semibold text-gray-500 uppercase">Protocol</span>
-                <p className="font-medium text-gray-900 text-lg">{isNewProtocol ? newProtocolName : availableProtocols.find(p => p.id === selectedProtocolId)?.name}</p>
-                {isNewProtocol && <span className="inline-block px-2 py-0.5 mt-1 bg-green-100 text-green-800 text-xs font-medium rounded">New</span>}
-              </div>
-              <div className="bg-white p-4 border rounded-lg shadow-sm md:col-span-2">
-                <span className="text-xs font-semibold text-gray-500 uppercase">Site</span>
-                <p className="font-bold text-gray-900 text-xl">Site {siteNumber} - {siteName}</p>
-
-                <div className="mt-2 text-sm text-gray-600 grid grid-cols-2 gap-2">
-                  <p><strong>Address:</strong> {siteAddress || '-'}</p>
-                  <p><strong>City:</strong> {siteCity || '-'}</p>
-                  <p><strong>Country:</strong> {siteCountry}</p>
-                  <p><strong>Zone:</strong> {isMicroZone ? microZoneName + ' (Micro-zone)' : COUNTRY_TO_REGION[siteCountry] || 'Auto'}</p>
-                </div>
-              </div>
-
-              <div className="bg-white p-4 border rounded-lg shadow-sm md:col-span-2">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={assignToManager}
-                    onChange={(e) => setAssignToManager(e.target.checked)}
-                    className="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-gray-900 font-medium">Assign this site to a Manager?</span>
-                </label>
-
-                {assignToManager && (
-                  <div className="mt-4 pl-8">
+                  {!isNewProject && (
                     <select
-                      value={selectedManagerId}
-                      onChange={(e) => setSelectedManagerId(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                      value={selectedProjectId}
+                      onChange={(e) => setSelectedProjectId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
                     >
-                      <option value="">Select a Manager...</option>
-                      {profiles.filter(p => p.role === 'manager').map(m => (
-                        <option key={m.id} value={m.id}>{(m.first_name ? m.first_name + " " + (m.last_name || "") : m.email)}</option>
+                      <option value="">-- Seleccionar --</option>
+                      {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                    </select>
+                  )}
+                </label>
+
+                <label className={`p-4 border-[1.5px] rounded-xl cursor-pointer transition-all ${isNewProject ? 'border-indigo-600 bg-indigo-50/50' : 'border-neutral-200 hover:border-indigo-300'}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <input type="radio" checked={isNewProject} onChange={() => setIsNewProject(true)} className="w-4 h-4 text-indigo-600 focus:ring-indigo-500" />
+                    <span className="text-[14px] font-bold text-neutral-900">Nuevo Proyecto</span>
+                  </div>
+                  {isNewProject && (
+                    <input
+                      type="text"
+                      placeholder="Nombre del proyecto"
+                      value={newProjectName}
+                      onChange={(e) => setNewProjectName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      autoFocus
+                      onKeyDown={e => e.key === 'Enter' && handleNextStep1()}
+                    />
+                  )}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 2 */}
+          {step === 2 && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <h3 className="text-[17px] font-bold text-neutral-900 mb-1 tracking-tight">Protocolo</h3>
+              <p className="text-[13px] text-neutral-500 mb-5">Añade el protocolo clínico al proyecto.</p>
+
+              <div className="flex flex-col gap-4">
+                <label className={`p-4 border-[1.5px] rounded-xl cursor-pointer transition-all ${!isNewProtocol ? 'border-indigo-600 bg-indigo-50/50' : 'border-neutral-200 hover:border-indigo-300'}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <input type="radio" checked={!isNewProtocol} onChange={() => setIsNewProtocol(false)} className="w-4 h-4 text-indigo-600 focus:ring-indigo-500" />
+                    <span className="text-[14px] font-bold text-neutral-900">Protocolo Existente</span>
+                  </div>
+                  {!isNewProtocol && (
+                    <select
+                      value={selectedProtocolId}
+                      onChange={(e) => setSelectedProtocolId(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                    >
+                      <option value="">-- Seleccionar --</option>
+                      {protocols.filter(p => p.project_id === selectedProjectId).map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
                       ))}
                     </select>
+                  )}
+                </label>
+
+                <label className={`p-4 border-[1.5px] rounded-xl cursor-pointer transition-all ${isNewProtocol ? 'border-indigo-600 bg-indigo-50/50' : 'border-neutral-200 hover:border-indigo-300'}`}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <input type="radio" checked={isNewProtocol} onChange={() => setIsNewProtocol(true)} className="w-4 h-4 text-indigo-600 focus:ring-indigo-500" />
+                    <span className="text-[14px] font-bold text-neutral-900">Nuevo Protocolo</span>
                   </div>
-                )}
+                  {isNewProtocol && (
+                    <input
+                      type="text"
+                      placeholder="Identificador del protocolo (ej. PRT-2024)"
+                      value={newProtocolName}
+                      onChange={(e) => setNewProtocolName(e.target.value)}
+                      className="w-full px-3.5 py-2.5 bg-white border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
+                      autoFocus
+                      onKeyDown={e => e.key === 'Enter' && handleNextStep2()}
+                    />
+                  )}
+                </label>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3 */}
+          {step === 3 && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <h3 className="text-[17px] font-bold text-neutral-900 mb-1 tracking-tight">Detalles del Sitio</h3>
+              <p className="text-[13px] text-neutral-500 mb-5">Ingresa la información geográfica e identificativa del sitio.</p>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-neutral-600 mb-1.5">Número <span className="text-red-500">*</span></label>
+                    <input type="text" value={siteNumber} onChange={e => setSiteNumber(e.target.value)} placeholder="ej. 1377" className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-mono" autoFocus />
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-neutral-600 mb-1.5">Nombre <span className="text-red-500">*</span></label>
+                    <input type="text" value={siteName} onChange={e => setSiteName(e.target.value)} placeholder="Fundación Oncológica..." className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[12.5px] font-medium text-neutral-600 mb-1.5">Dirección</label>
+                  <input type="text" value={siteAddress} onChange={e => setSiteAddress(e.target.value)} placeholder="Calle, Av, Hospital..." className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-neutral-600 mb-1.5">Ciudad</label>
+                    <input type="text" value={siteCity} onChange={e => setSiteCity(e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10" />
+                  </div>
+                  <div>
+                    <label className="block text-[12.5px] font-medium text-neutral-600 mb-1.5">País <span className="text-red-500">*</span></label>
+                    <select value={siteCountry} onChange={e => handleCountryChange(e.target.value)} className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
+                      <option value="">-- Seleccionar --</option>
+                      {ALL_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl mt-2">
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h4 className="text-[13px] font-bold text-neutral-800 flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-indigo-500" /> Micro-zona</h4>
+                      <p className="text-[11px] text-neutral-500 leading-tight mt-0.5">
+                        {!isMicroZone && siteCountry ? `Mapeo auto: \${COUNTRY_TO_REGION[siteCountry] || 'Desconocido'}` : 'Sobrescribe la región general.'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsMicroZone(!isMicroZone)}
+                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full focus:outline-none \${isMicroZone ? 'bg-indigo-600' : 'bg-neutral-300'} transition-colors duration-200 ease-in-out`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out \${isMicroZone ? 'translate-x-2' : '-translate-x-2'}`} />
+                    </button>
+                  </div>
+                  {isMicroZone && (
+                    <div className="mt-3 animate-in fade-in slide-in-from-top-1">
+                      <input type="text" value={microZoneName} onChange={e => setMicroZoneName(e.target.value)} placeholder="ej. Cono Sur, EMEA North" className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 4 */}
+          {step === 4 && (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <CheckCircle className="w-6 h-6 text-green-600" />
+                </div>
+                <h3 className="text-[18px] font-bold text-neutral-900 tracking-tight">Revisión Final</h3>
+                <p className="text-[13px] text-neutral-500">Verifica la información antes de crear la infraestructura.</p>
               </div>
 
-            </div>
+              <div className="space-y-3">
+                <div className="flex gap-3">
+                  <div className="flex-1 p-3 bg-neutral-50 border border-neutral-200 rounded-xl">
+                    <span className="text-[10.5px] font-bold text-neutral-400 uppercase tracking-widest">Proyecto</span>
+                    <div className="text-[14px] font-semibold text-neutral-900 mt-0.5 flex items-center gap-1.5">
+                      {isNewProject ? newProjectName : projects.find(p => p.id === selectedProjectId)?.name}
+                      {isNewProject && <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded">NUEVO</span>}
+                    </div>
+                  </div>
+                  <div className="flex-1 p-3 bg-neutral-50 border border-neutral-200 rounded-xl">
+                    <span className="text-[10.5px] font-bold text-neutral-400 uppercase tracking-widest">Protocolo</span>
+                    <div className="text-[14px] font-semibold text-neutral-900 mt-0.5 flex items-center gap-1.5">
+                      {isNewProtocol ? newProtocolName : protocols.find(p => p.id === selectedProtocolId)?.name}
+                      {isNewProtocol && <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded">NUEVO</span>}
+                    </div>
+                  </div>
+                </div>
 
-            <div className="flex justify-between mt-8 pt-4 border-t border-gray-100">
-              <button
-                onClick={() => setStep(3)}
-                className="text-gray-600 px-6 py-2.5 rounded-lg font-medium hover:bg-gray-100"
-                disabled={loading}
-              >
-                Back to Edit
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={loading}
-                className="bg-green-600 text-white px-8 py-2.5 rounded-lg font-medium hover:bg-green-700 flex items-center gap-2 shadow-sm"
-              >
-                {loading ? <Loader2 className="animate-spin" size={20} /> : <CheckCircle size={20} />}
-                {loading ? 'Saving...' : 'Confirm & Save'}
-              </button>
+                <div className="p-4 bg-white border border-neutral-200 rounded-xl shadow-sm">
+                  <div className="flex items-start justify-between mb-3 border-b border-neutral-100 pb-2">
+                    <div>
+                      <span className="text-[10.5px] font-bold text-neutral-400 uppercase tracking-widest">Sitio</span>
+                      <div className="text-[16px] font-bold text-neutral-900 leading-tight">#{siteNumber} - {siteName}</div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-y-2 text-[12.5px]">
+                    <div><span className="text-neutral-500">Dir:</span> <span className="font-medium text-neutral-900">{siteAddress || '-'}</span></div>
+                    <div><span className="text-neutral-500">Ciudad:</span> <span className="font-medium text-neutral-900">{siteCity || '-'}</span></div>
+                    <div><span className="text-neutral-500">País:</span> <span className="font-medium text-neutral-900">{siteCountry}</span></div>
+                    <div><span className="text-neutral-500">Región:</span> <span className="font-medium text-indigo-700">{isMicroZone ? microZoneName + ' (MZ)' : COUNTRY_TO_REGION[siteCountry]}</span></div>
+                  </div>
+                </div>
+
+                <div className="p-4 border border-indigo-100 bg-indigo-50/30 rounded-xl">
+                  <label className="flex items-center gap-2.5 cursor-pointer">
+                    <input type="checkbox" checked={assignToManager} onChange={e => setAssignToManager(e.target.checked)} className="w-4 h-4 text-indigo-600 rounded border-neutral-300 focus:ring-indigo-500" />
+                    <span className="text-[13.5px] font-semibold text-neutral-900">Asignar Manager al sitio ahora</span>
+                  </label>
+                  {assignToManager && (
+                    <div className="mt-3 pl-6 animate-in fade-in slide-in-from-top-1">
+                      <select value={selectedManagerId} onChange={e => setSelectedManagerId(e.target.value)} className="w-full px-3 py-2 border border-neutral-300 bg-white rounded-lg text-[13px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10">
+                        <option value="">-- Seleccionar Manager --</option>
+                        {profiles.filter(p => p.role === 'manager').map(m => (
+                          <option key={m.id} value={m.id}>{(m.first_name ? m.first_name + " " + (m.last_name || "") : m.email)}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="px-8 py-4 bg-neutral-50/80 border-t border-neutral-200 flex items-center justify-between shrink-0">
+          <span className="text-[12px] text-neutral-400 font-mono font-medium hidden sm:block">Paso {step} de 4</span>
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            {step > 1 && (
+              <button onClick={() => setStep(s => s - 1)} disabled={loading} className="px-3.5 py-1.5 text-[13px] font-medium text-neutral-500 hover:text-neutral-800 transition-colors disabled:opacity-50">
+                ← Atrás
+              </button>
+            )}
+            <button onClick={closeWizard} disabled={loading} className="px-3.5 py-1.5 text-[13px] font-medium text-neutral-500 hover:text-neutral-800 transition-colors disabled:opacity-50 hidden sm:block">
+              Cancelar
+            </button>
+            {step < 4 ? (
+              <button
+                onClick={() => {
+                  if (step === 1) handleNextStep1();
+                  else if (step === 2) handleNextStep2();
+                  else if (step === 3) handleNextStep3();
+                }}
+                className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[13px] font-medium rounded-md shadow-sm transition-colors"
+              >
+                Siguiente →
+              </button>
+            ) : (
+              <button onClick={handleSave} disabled={loading} className="px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-[13px] font-medium rounded-md shadow-sm transition-colors flex items-center gap-1.5">
+                {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5 stroke-[3px]" />}
+                {loading ? "Guardando..." : "Confirmar y Crear"}
+              </button>
+            )}
           </div>
-        )}
+        </div>
+
       </div>
     </div>
   );
