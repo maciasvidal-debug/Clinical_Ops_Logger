@@ -182,17 +182,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
       {/* Tabs */}
       <div className="flex items-center gap-1 p-1 bg-neutral-100 rounded-xl w-fit">
-        <button
-          onClick={() => setActiveTab("activities")}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            activeTab === "activities"
-              ? "bg-white text-neutral-900 shadow-sm"
-              : "text-neutral-600 hover:text-neutral-900"
-          }`}
-        >
-          {t.settings.activitiesAndRoles}
-        </button>
-        <button
+                <button
           onClick={() => setActiveTab("general")}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === "general"
@@ -202,6 +192,18 @@ export function SettingsView({ profile }: SettingsViewProps) {
         >
           {t.settings.generalSettings}
         </button>
+        {profile.role === "super_admin" && (
+          <button
+            onClick={() => setActiveTab("structure")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "structure"
+                ? "bg-white text-neutral-900 shadow-sm"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            Structure
+          </button>
+        )}
       </div>
 
       {(activeTab === "activities" && (profile.role === "super_admin" || profile.role === "manager")) && (
@@ -216,145 +218,178 @@ export function SettingsView({ profile }: SettingsViewProps) {
             </button>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-6">
             {activityCategories.map((cat: any) => (
               <div
                 key={cat.id}
-                className="border border-neutral-200 rounded-xl p-4 hover:border-neutral-300 transition-colors"
+                className="bg-neutral-50 border border-neutral-200 rounded-2xl p-5 hover:border-neutral-300 transition-colors shadow-sm"
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-neutral-200">
                   {editingId === cat.id ? (
-                    <div className="flex items-center gap-2 flex-1">
+                    <div className="flex items-center gap-2 flex-1 max-w-md">
                       <input
                         type="text"
                         value={editValue}
                         onChange={(e) => setEditValue(e.target.value)}
-                        className="flex-1 px-3 py-1.5 text-sm border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                        className="flex-1 px-3 py-1.5 text-sm border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-semibold"
                         autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveEditing(cat.id, "category");
+                          if (e.key === 'Escape') cancelEditing();
+                        }}
                       />
-                      <button onClick={() => saveEditing(cat.id, "category")} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg">
+                      <button onClick={() => saveEditing(cat.id, "category")} className="p-1.5 text-green-600 hover:bg-green-100 rounded-lg transition-colors">
                         <Check className="w-4 h-4" />
                       </button>
-                      <button onClick={cancelEditing} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg">
+                      <button onClick={cancelEditing} className="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
-                    <>
-                      <h4 className="font-semibold text-neutral-900">{dt(cat.name)}</h4>
-                      <div className="flex items-center gap-2">
-                        <button onClick={() => startEditing(cat.id, cat.name)} className="p-1.5 text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
+                    <div className="flex items-center justify-between w-full group">
+                      <h4 className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                        {dt(cat.name)}
+                        <span className="text-xs font-normal text-neutral-500 bg-white px-2 py-0.5 rounded-full border border-neutral-200">Categoría</span>
+                      </h4>
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
+                        <button onClick={() => startEditing(cat.id, cat.name)} className="p-1.5 text-neutral-500 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="Editar Categoría">
                           <Edit2 className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleDelete(cat.id, "category", cat.name)} disabled={isDeleting === cat.id} className="p-1.5 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <button onClick={() => handleDelete(cat.id, "category", cat.name)} disabled={isDeleting === cat.id} className="p-1.5 text-neutral-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar Categoría">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </>
+                    </div>
                   )}
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {cat.category_roles?.map((cr: any) => (
-                    <span
-                      key={cr.role}
-                      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-neutral-100 text-neutral-800 group"
-                    >
-                      {cr.role}
-                      <button onClick={() => handleRemoveRole(cat.id, cr.role)} className="ml-1 text-neutral-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <X className="w-3 h-3" />
-                      </button>
-                    </span>
-                  ))}
-                  <button onClick={() => handleOpenModal("role", cat.id)} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border border-dashed border-neutral-300 text-neutral-500 hover:bg-neutral-50">
-                    <Plus className="w-3 h-3 mr-1" /> {t.settings.addRole}
-                  </button>
+                <div className="mb-5">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Roles Permitidos</span>
+                    <button onClick={() => handleOpenModal("role", cat.id)} className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white border border-dashed border-neutral-300 text-neutral-500 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-colors" title="Añadir Rol">
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {cat.category_roles?.length > 0 ? cat.category_roles.map((cr: any) => (
+                      <span
+                        key={cr.role}
+                        className="inline-flex items-center pl-2.5 pr-1 py-1 rounded-md text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100 group/role"
+                      >
+                        {cr.role}
+                        <button onClick={() => handleRemoveRole(cat.id, cr.role)} className="ml-1 p-0.5 text-indigo-400 hover:text-red-500 hover:bg-red-50 rounded opacity-0 group-hover/role:opacity-100 transition-all">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )) : (
+                      <span className="text-xs text-neutral-400 italic">Ningún rol asignado (visible para todos)</span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="pl-4 border-l-2 border-neutral-100 space-y-3">
-                  {cat.activity_tasks?.map((task: any) => (
-                    <div key={task.id} className="text-sm">
-                      {editingId === task.id ? (
-                        <div className="flex items-center gap-2 flex-1 mb-1">
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="flex-1 px-2 py-1 text-xs border border-indigo-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                            autoFocus
-                          />
-                          <button onClick={() => saveEditing(task.id, "task")} className="p-1 text-green-600 hover:bg-green-50 rounded-md">
-                            <Check className="w-3 h-3" />
-                          </button>
-                          <button onClick={cancelEditing} className="p-1 text-red-600 hover:bg-red-50 rounded-md">
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between group">
-                          <span className="font-medium text-neutral-700">
-                            {dt(task.name)}
-                          </span>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2">
-                             <button onClick={() => startEditing(task.id, task.name)} className="text-xs text-indigo-600 hover:underline">Editar</button>
-                             <button onClick={() => handleDelete(task.id, "task", task.name)} disabled={isDeleting === task.id} className="text-xs text-red-600 hover:underline">Eliminar</button>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-neutral-700">Tareas ({cat.activity_tasks?.length || 0})</span>
+                    <button onClick={() => handleOpenModal("task", cat.id)} className="text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 px-2 py-1 rounded-md flex items-center gap-1 transition-colors">
+                      <Plus className="w-3 h-3" />
+                      Añadir Tarea
+                    </button>
+                  </div>
+
+                  <div className="grid gap-3">
+                    {cat.activity_tasks?.map((task: any) => (
+                      <div key={task.id} className="bg-white border border-neutral-200 rounded-xl p-4 shadow-sm group/task">
+                        {editingId === task.id ? (
+                          <div className="flex items-center gap-2 flex-1 mb-3">
+                            <input
+                              type="text"
+                              value={editValue}
+                              onChange={(e) => setEditValue(e.target.value)}
+                              className="flex-1 px-3 py-1.5 text-sm border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') saveEditing(task.id, "task");
+                                if (e.key === 'Escape') cancelEditing();
+                              }}
+                            />
+                            <button onClick={() => saveEditing(task.id, "task")} className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg">
+                              <Check className="w-4 h-4" />
+                            </button>
+                            <button onClick={cancelEditing} className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg">
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between mb-3 pb-2 border-b border-neutral-100">
+                            <span className="font-semibold text-neutral-800 flex items-center gap-2">
+                              {dt(task.name)}
+                            </span>
+                            <div className="opacity-0 group-hover/task:opacity-100 transition-opacity flex items-center gap-1">
+                               <button onClick={() => startEditing(task.id, task.name)} className="p-1 text-neutral-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" title="Editar Tarea">
+                                 <Edit2 className="w-3.5 h-3.5" />
+                               </button>
+                               <button onClick={() => handleDelete(task.id, "task", task.name)} disabled={isDeleting === task.id} className="p-1 text-neutral-400 hover:text-red-600 hover:bg-red-50 rounded" title="Eliminar Tarea">
+                                 <Trash2 className="w-3.5 h-3.5" />
+                               </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="pl-2 border-l-2 border-indigo-100 ml-1">
+                          <div className="flex flex-wrap gap-2 items-center">
+                            {task.activity_subtasks?.map((st: any) => (
+                              <span
+                                key={st.id}
+                                className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-neutral-100 text-neutral-700 border border-neutral-200 group/subtask"
+                              >
+                                {editingId === st.id ? (
+                                  <div className="flex items-center gap-1">
+                                    <input
+                                      type="text"
+                                      value={editValue}
+                                      onChange={(e) => setEditValue(e.target.value)}
+                                      className="w-32 px-1 py-0.5 text-xs border border-indigo-300 rounded focus:outline-none"
+                                      autoFocus
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') saveEditing(st.id, "subtask");
+                                        if (e.key === 'Escape') cancelEditing();
+                                      }}
+                                    />
+                                    <button onClick={() => saveEditing(st.id, "subtask")} className="text-green-600 hover:text-green-700"><Check className="w-3 h-3" /></button>
+                                    <button onClick={cancelEditing} className="text-red-600 hover:text-red-700"><X className="w-3 h-3" /></button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    {dt(st.name)}
+                                    <div className="opacity-0 group-hover/subtask:opacity-100 transition-opacity flex items-center ml-2 border-l border-neutral-300 pl-1 gap-1">
+                                      <button onClick={() => startEditing(st.id, st.name)} className="text-neutral-400 hover:text-indigo-600"><Edit2 className="w-3 h-3" /></button>
+                                      <button onClick={() => handleDelete(st.id, "subtask", st.name)} disabled={isDeleting === st.id} className="text-neutral-400 hover:text-red-600"><Trash2 className="w-3 h-3" /></button>
+                                    </div>
+                                  </>
+                                )}
+                              </span>
+                            ))}
+                            {editingId !== task.id && (
+                              <button onClick={() => handleOpenModal("subtask", task.id)} className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium border border-dashed border-neutral-300 text-neutral-500 hover:bg-white hover:text-indigo-600 hover:border-indigo-300 transition-colors">
+                                <Plus className="w-3 h-3 mr-1" /> Sub-tarea
+                              </button>
+                            )}
                           </div>
                         </div>
-                      )}
-                      <div className="flex flex-wrap gap-2 mt-1.5">
-                        {task.activity_subtasks?.map((st: any) => (
-                          <span
-                            key={st.id}
-                            className="inline-flex items-center gap-1 px-2 py-1 rounded bg-neutral-50 border border-neutral-200 text-xs text-neutral-600 group relative"
-                          >
-                            {editingId === st.id ? (
-                                <div className="flex items-center gap-1">
-                                  <input
-                                    type="text"
-                                    value={editValue}
-                                    onChange={(e) => setEditValue(e.target.value)}
-                                    className="w-24 px-1 py-0.5 text-[10px] border border-indigo-300 rounded-sm focus:outline-none"
-                                    autoFocus
-                                  />
-                                  <button onClick={() => saveEditing(st.id, "subtask")} className="text-green-600 hover:bg-green-100 rounded-sm">
-                                    <Check className="w-3 h-3" />
-                                  </button>
-                                  <button onClick={cancelEditing} className="text-red-600 hover:bg-red-100 rounded-sm">
-                                    <X className="w-3 h-3" />
-                                  </button>
-                                </div>
-                            ) : (
-                              <>
-                                <span>{dt(st.name)}</span>
-                                <div className="hidden group-hover:flex items-center gap-1 absolute -top-4 right-0 bg-white border border-neutral-200 rounded shadow-sm px-1 z-10">
-                                  <button onClick={() => startEditing(st.id, st.name)} className="text-indigo-600 hover:text-indigo-700">
-                                    <Edit2 className="w-3 h-3" />
-                                  </button>
-                                  <button onClick={() => handleDelete(st.id, "subtask", st.name)} disabled={isDeleting === st.id} className="text-red-600 hover:text-red-700">
-                                    <Trash2 className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </span>
-                        ))}
-                        <button onClick={() => handleOpenModal("subtask", task.id)} className="inline-flex items-center px-2 py-1 rounded text-xs font-medium border border-dashed border-neutral-300 text-neutral-500 hover:bg-neutral-50">
-                          <Plus className="w-3 h-3 mr-1" /> {t.settings.addSubTask}
-                        </button>
                       </div>
-                    </div>
-                  ))}
-                  <button onClick={() => handleOpenModal("task", cat.id)} className="mt-2 text-xs font-medium text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-                    <Plus className="w-3 h-3" />
-                    {t.settings.newTask}
-                  </button>
+                    ))}
+                    {(!cat.activity_tasks || cat.activity_tasks.length === 0) && (
+                      <p className="text-xs text-neutral-400 italic py-2">No hay tareas configuradas para esta categoría.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
 
             {activityCategories.length === 0 && (
-              <div className="text-center py-8 text-neutral-500">
-                <p>{t.settings.noCategories}</p>
+              <div className="text-center py-12 bg-neutral-50 rounded-2xl border border-dashed border-neutral-200">
+                <p className="text-neutral-500 font-medium">No hay categorías de actividades configuradas.</p>
+                <p className="text-sm text-neutral-400 mt-1">Comienza creando una nueva categoría.</p>
               </div>
             )}
           </div>

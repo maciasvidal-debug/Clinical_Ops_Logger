@@ -11,6 +11,7 @@ import {
   LogQuery,
   UserProjectAssignment,
   UserProtocolAssignment,
+  UserSiteAssignment,
   Region,
   UserRegion
 } from "./types";
@@ -35,8 +36,11 @@ export function useAppStore() {
   const [sites, setSites] = useState<Site[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
+
   const [projectAssignments, setProjectAssignments] = useState<UserProjectAssignment[]>([]);
   const [protocolAssignments, setProtocolAssignments] = useState<UserProtocolAssignment[]>([]);
+  const [siteAssignments, setSiteAssignments] = useState<UserSiteAssignment[]>([]);
+
   const [todos, setTodos] = useState<any[]>([]);
   const [activityCategories, setActivityCategories] = useState<any[]>([]);
 
@@ -397,9 +401,12 @@ export function useAppStore() {
     sites,
     notifications,
     profiles,
+
     projectAssignments,
     protocolAssignments,
-    isLoaded, 
+    siteAssignments,
+    isLoaded,
+
     isOnline, 
     activeTimer,
     startTimer,
