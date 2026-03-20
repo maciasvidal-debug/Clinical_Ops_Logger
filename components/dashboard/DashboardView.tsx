@@ -192,7 +192,7 @@ export function DashboardView({
           <div className="w-full space-y-3">
             <button
               onClick={() => onNavigate("log")}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-3 active:scale-[0.98]"
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold transition-all duration-300 shadow-[0_4px_14px_rgba(79,70,229,0.3)] hover:shadow-[0_6px_20px_rgba(79,70,229,0.4)] hover:-translate-y-0.5 active:translate-y-0 active:scale-95 animate-breathe flex items-center justify-center gap-3 active:scale-[0.98]"
             >
               <Activity className="w-5 h-5" />
               {t.dashboard.logNewActivity}
@@ -225,10 +225,10 @@ export function DashboardView({
 
       {/* Deeper Insights Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="px-6 py-4 border-b border-neutral-100 bg-neutral-50/50 flex items-center gap-2">
+        <div className="glass-panel overflow-hidden flex flex-col">
+          <div className="px-6 py-4 border-b border-neutral-200/50 bg-white/40 backdrop-blur-sm rounded-t-2xl flex items-center gap-2">
             <PieChart className="w-5 h-5 text-neutral-500" />
-            <h3 className="font-semibold text-neutral-900">
+            <h3 className="font-bold font-heading text-neutral-900 tracking-tight">
               {t.reports.timeByCategory}
             </h3>
           </div>
@@ -268,7 +268,7 @@ export function DashboardView({
       {/* Pending To-Dos Widget */}
 
       {priorityInsight && (
-        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-200 rounded-2xl p-6 shadow-sm mb-6 animate-in fade-in zoom-in duration-300">
+        <div className="glass-panel p-6 bg-gradient-to-br from-indigo-50/80 to-blue-50/80 border-indigo-200/60 shadow-[0_4px_20px_rgba(99,102,241,0.05)] mb-6 animate-in fade-in zoom-in duration-300">
           <div className="flex items-center gap-2 mb-2 text-indigo-800">
             <Activity className="w-5 h-5" />
             <h2 className="text-lg font-semibold">{dt("productivityDiagnosis")}</h2>
@@ -280,7 +280,7 @@ export function DashboardView({
       )}
 
       {pendingTodos.length > 0 && (
-        <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-6 shadow-sm mb-6">
+        <div className="glass-panel p-6 bg-gradient-to-br from-amber-50/80 to-orange-50/80 border-amber-200/60 shadow-[0_4px_20px_rgba(245,158,11,0.05)] mb-6">
           <div className="flex items-center gap-2 mb-4 text-amber-800">
             <ListTodo className="w-5 h-5" />
             <h2 className="text-lg font-semibold">{dt("keepWorkingOn")}</h2>
@@ -289,7 +289,7 @@ export function DashboardView({
             {pendingTodos.map((todo: Todo) => (
               <div
                 key={todo.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-white/80 rounded-xl border border-amber-100/50 shadow-sm hover:bg-white transition-colors"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 glass-button rounded-xl border-amber-200/50 shadow-sm hover:bg-white transition-colors"
               >
                 <div>
                   <h3 className="font-medium text-neutral-900">{todo.title}</h3>
@@ -334,11 +334,11 @@ export function DashboardView({
       )}
 
       {/* Recent Activity */}
-        <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden flex flex-col">
-          <div className="px-5 py-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/50">
+        <div className="glass-panel overflow-hidden flex flex-col">
+          <div className="px-5 py-4 border-b border-neutral-200/50 flex items-center justify-between bg-white/40 backdrop-blur-sm rounded-t-2xl">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-neutral-500" />
-              <h3 className="font-semibold text-neutral-900">{t.dashboard.recentEntries}</h3>
+              <h3 className="font-bold font-heading text-neutral-900 tracking-tight">{t.dashboard.recentEntries}</h3>
             </div>
             <button
               onClick={() => onNavigate("history")}
@@ -359,7 +359,7 @@ export function DashboardView({
                   return (
                     <div
                       key={log.id}
-                      className="p-5 hover:bg-neutral-50 transition-colors flex items-start gap-4"
+                      className="p-5 hover:bg-white/60 transition-colors flex items-start gap-4"
                     >
                       <div className="mt-0.5 p-1.5 bg-neutral-100 text-neutral-500 rounded-full">
                         <CheckCircle2 className="w-4 h-4" />
