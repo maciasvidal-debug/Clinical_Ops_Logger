@@ -361,7 +361,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[12.5px] font-medium text-neutral-600 mb-1.5">Número <span className="text-red-500">*</span></label>
-                    <input type="text" value={siteNumber} onChange={e => setSiteNumber(e.target.value)} placeholder="ej. 1377" className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 font-mono" autoFocus />
+                    <input type="text" value={siteNumber} onChange={e => setSiteNumber(e.target.value)} placeholder="ej. 1377" className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-[13.5px] focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10" autoFocus />
                   </div>
                   <div>
                     <label className="block text-[12.5px] font-medium text-neutral-600 mb-1.5">Nombre <span className="text-red-500">*</span></label>
@@ -481,7 +481,7 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
 
         {/* Footer */}
         <div className="px-8 py-4 bg-neutral-50/80 border-t border-neutral-200 flex items-center justify-between shrink-0">
-          <span className="text-[12px] text-neutral-400 font-mono font-medium hidden sm:block">Paso {step} de 4</span>
+          <span className="text-[12px] text-neutral-400 font-medium hidden sm:block">Paso {step} de 4</span>
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             {step > 1 && (
               <button onClick={() => setStep(s => s - 1)} disabled={loading} className="px-3.5 py-1.5 text-[13px] font-medium text-neutral-500 hover:text-neutral-800 transition-colors disabled:opacity-50">
