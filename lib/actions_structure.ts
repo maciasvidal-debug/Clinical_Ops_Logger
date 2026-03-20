@@ -73,3 +73,18 @@ export async function assignSiteToManager(userId: string, siteId: string): Promi
   }
   return true;
 }
+
+export async function fetchProfiles(): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from("user_profiles")
+      .select("*")
+      .order("first_name");
+
+    if (error) throw error;
+    return { success: true, data };
+  } catch (error: any) {
+    console.error("Error fetching profiles:", error);
+    return { success: false, error: error.message };
+  }
+}
