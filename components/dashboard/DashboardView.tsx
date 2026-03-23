@@ -117,11 +117,7 @@ export function DashboardView({
         dist.set(log.category, (dist.get(log.category) || 0) + log.duration_minutes);
       }
     }
-    const entries: [string, number][] = [];
-    for (const entry of dist) {
-      entries.push(entry);
-    }
-    return entries
+    return Array.from(dist.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3);
   }, [currentWeekLogs]);
