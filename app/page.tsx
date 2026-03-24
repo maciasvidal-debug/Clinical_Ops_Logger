@@ -61,6 +61,20 @@ export default function App() {
     todos
   } = useAppStore();
 
+  const todayLogs = React.useMemo(() => {
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    return logs.filter(
+      (l) =>
+        l.user_id === user?.id &&
+        l.date === todayStr,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logs, user?.id, new Date().toDateString()]);
+
+  const pendingTodos = React.useMemo(() => {
+    return todos?.filter((t: any) => t.status === "pending" && t.user_id === profile?.id);
+  }, [todos, profile?.id]);
+
   // Push Notifications Reminder
   useEffect(() => {
     if (!profile || profile.status !== "active") return;
@@ -72,11 +86,6 @@ export default function App() {
 
     const checkReminders = () => {
       if (Notification.permission === "granted") {
-        const todayLogs = logs.filter(
-          (l) =>
-            l.user_id === user?.id &&
-            l.date === format(new Date(), "yyyy-MM-dd"),
-        );
         if (todayLogs.length === 0 && new Date().getHours() >= 16) {
           new Notification(t.notifications.reminderTitle, {
             body: t.notifications.reminderBody,
@@ -85,8 +94,7 @@ export default function App() {
         }
       }
 
-      const pendingTodos = todos?.filter((t: any) => t.status === "pending" && t.user_id === profile.id);
-      if (pendingTodos.length > 0 && Notification.permission === "granted") {
+      if (pendingTodos && pendingTodos.length > 0 && Notification.permission === "granted") {
         new Notification(t.shell.notifications || "Notifications", {
           body: `${pendingTodos.length} ${t.notifications.pendingTasksBody}`,
           icon: "/favicon.ico",
@@ -130,8 +138,8 @@ export default function App() {
     t.notifications.reminderBody,
     t.notifications.reminderTitle,
     t.shell.notifications,
-    todos,
-    user?.id,
+    todayLogs,
+    pendingTodos,
   ]);
 
   const handleRepeatLog = (log: LogEntry) => {

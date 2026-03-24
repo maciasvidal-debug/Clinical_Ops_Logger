@@ -46,24 +46,26 @@ export function DashboardView({
   const { t, language } = useTranslation();
   const { dt } = useDynamicTranslation();
   const { todos, updateTodo } = useAppStore();
-  const pendingTodos = todos.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
-  const today = new Date();
 
-  const todayLogs = logs.filter((log) =>
-    isSameDay(parseISO(log.date), today),
-  );
-  const todayMinutes = todayLogs.reduce(
-    (acc, log) => acc + log.duration_minutes,
-    0,
-  );
+  const pendingTodos = React.useMemo(() => {
+    return todos.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
+  }, [todos, profile?.id]);
 
-  const thisWeekLogs = logs.filter(
-    (log) => new Date(log.date) >= subDays(today, 7),
-  );
-  const thisWeekMinutes = thisWeekLogs.reduce(
-    (acc, log) => acc + log.duration_minutes,
-    0,
-  );
+  const { todayLogs, todayMinutes, thisWeekLogs, thisWeekMinutes } = React.useMemo(() => {
+    const today = new Date();
+    const tLogs = logs.filter((log) => isSameDay(parseISO(log.date), today));
+    const tMinutes = tLogs.reduce((acc, log) => acc + log.duration_minutes, 0);
+    const wLogs = logs.filter((log) => new Date(log.date) >= subDays(today, 7));
+    const wMinutes = wLogs.reduce((acc, log) => acc + log.duration_minutes, 0);
+
+    return {
+      todayLogs: tLogs,
+      todayMinutes: tMinutes,
+      thisWeekLogs: wLogs,
+      thisWeekMinutes: wMinutes,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [logs, new Date().toDateString()]);
 
 
   const [priorityInsight, setPriorityInsight] = React.useState<string | null>(null);
