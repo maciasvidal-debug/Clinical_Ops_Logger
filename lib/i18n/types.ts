@@ -49,7 +49,7 @@ export interface Dictionary {
     loading: string; save: string; cancel: string; delete: string; edit: string; close: string; success: string; error: string; yes: string; no: string; confirm: string; refresh: string; email: string; or: string; created: string; published: string; start_date: string; deleteConfirm: string;
   };
   navigation: { dashboard: string; log: string; history: string; reports: string; team: string;
-    settings: string; signOut: string; newEntry: string; };
+    settings: string; signOut: string; newEntry: string; more: string; };
   auth: { signIn: string; signUp: string; createAccount: string; haveAccount: string; noAccount: string; firstName: string; lastName: string; roleTitle: string; termsPrefix: string; termsLink: string; termsAnd: string; privacyLink: string; signOut: string; sendOtp: string; verifyOtp: string; otpCode: string; useOtp: string; usePassword: string; checkEmailForOtp: string; otpPlaceholder: string; email: string; password: string; accessDenied: string; pendingApproval: string; contactAdmin: string;
     accountRejected: string; selectRole: string;
     acceptTermsError: string;
