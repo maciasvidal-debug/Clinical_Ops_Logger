@@ -111,16 +111,7 @@ export default function App() {
               query.status === "OPEN" &&
               new Date(query.question_date) < threeDaysAgo
             ) {
-              const hasRecentNotification = notifications.some(
-                (n) =>
-                  n.type === "reminder" &&
-                  n.message.includes("3 days"),
-              );
-
-              if (!hasRecentNotification) {
-                // In a real app, we'd call an addNotification function that saves to DB
-                console.log("Should notify manager about old query");
-              }
+              // TODO: Implement manager notification for old queries
             }
           });
         });
