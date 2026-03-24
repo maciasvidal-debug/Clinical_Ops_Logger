@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { 
+  Todo,
+  DbActivityCategory,
   LogEntry, 
   UserProfile, 
   AppNotification, 
@@ -41,8 +43,8 @@ export function useAppStore() {
   const [protocolAssignments, setProtocolAssignments] = useState<UserProtocolAssignment[]>([]);
   const [siteAssignments, setSiteAssignments] = useState<UserSiteAssignment[]>([]);
 
-  const [todos, setTodos] = useState<any[]>([]);
-  const [activityCategories, setActivityCategories] = useState<any[]>([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [activityCategories, setActivityCategories] = useState<DbActivityCategory[]>([]);
 
   const refreshActivitiesConfig = useCallback(async () => {
     const res = await getActivitiesConfig();
