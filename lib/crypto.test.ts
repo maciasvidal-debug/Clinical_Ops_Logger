@@ -128,4 +128,41 @@ describe('crypto utilities', () => {
 
     assert.strictEqual(encrypted, data);
   });
+
+  it('should fall back to original string if decryption fails', async () => {
+    // Mock crypto.subtle.decrypt to throw an error
+    const mockCrypto = {
+      ...originalCrypto,
+      subtle: {
+        ...originalCrypto.subtle,
+        decrypt: async () => { throw new Error('Decryption failed mock error'); }
+      }
+    };
+
+    Object.defineProperty(globalThis, 'crypto', {
+        value: mockCrypto,
+        writable: true,
+        configurable: true
+    });
+
+    const validBase64 = "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=";
+
+    // Redirect console.warn to avoid test output noise
+    const originalConsoleWarn = console.warn;
+    console.warn = () => {};
+
+    const decrypted = await decryptData(validBase64);
+
+    // Restore console.warn
+    console.warn = originalConsoleWarn;
+
+    // Restore crypto
+    Object.defineProperty(globalThis, 'crypto', {
+      value: originalCrypto,
+      writable: true,
+      configurable: true
+    });
+
+    assert.strictEqual(decrypted, validBase64);
+  });
 });
