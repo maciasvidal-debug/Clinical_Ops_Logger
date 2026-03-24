@@ -15,8 +15,13 @@ interface LogEntry {
  * Test: Time Formatting
  */
 export function testFormatHours(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
+  if (typeof minutes !== 'number' || isNaN(minutes) || !isFinite(minutes) || minutes < 0) {
+    return '0h 0m';
+  }
+
+  const roundedMinutes = Math.round(minutes);
+  const h = Math.floor(roundedMinutes / 60);
+  const m = roundedMinutes % 60;
   return `${h}h ${m}m`;
 }
 

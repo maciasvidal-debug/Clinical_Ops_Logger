@@ -49,6 +49,30 @@ describe('tests: testFormatHours', () => {
   it('should format hours and minutes correctly', () => {
     assert.strictEqual(testFormatHours(125), '2h 5m');
   });
+
+  it('should format only minutes correctly', () => {
+    assert.strictEqual(testFormatHours(45), '0h 45m');
+  });
+
+  it('should handle negative numbers gracefully', () => {
+    assert.strictEqual(testFormatHours(-30), '0h 0m');
+  });
+
+  it('should handle decimal minutes gracefully', () => {
+    assert.strictEqual(testFormatHours(65.5), '1h 6m');
+  });
+
+  it('should handle NaN gracefully', () => {
+    assert.strictEqual(testFormatHours(NaN), '0h 0m');
+  });
+
+  it('should handle Infinity gracefully', () => {
+    assert.strictEqual(testFormatHours(Infinity), '0h 0m');
+  });
+
+  it('should handle large amounts of minutes correctly', () => {
+    assert.strictEqual(testFormatHours(1500), '25h 0m');
+  });
 });
 
 describe('tests: mockParseNaturalLanguage', () => {
