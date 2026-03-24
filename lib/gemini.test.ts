@@ -16,13 +16,13 @@ describe('gemini: getGeminiClient', () => {
 
   afterEach(() => {
     // Restore global state after each test
-    process.env.NODE_ENV = originalEnv;
+    Object.defineProperty(process.env, 'NODE_ENV', { value: originalEnv, writable: true, configurable: true, enumerable: true });
     process.env.NEXT_PUBLIC_GEMINI_API_KEY = originalApiKey;
     globalThis._googleGenAI = originalGoogleGenAI;
   });
 
   it('should create a new client in production and not set globalThis', () => {
-    process.env.NODE_ENV = 'production';
+    Object.defineProperty(process.env, 'NODE_ENV', { value: 'production', writable: true, configurable: true, enumerable: true });
 
     const client = getGeminiClient();
 
@@ -31,7 +31,7 @@ describe('gemini: getGeminiClient', () => {
   });
 
   it('should create a new client in development and set globalThis', () => {
-    process.env.NODE_ENV = 'development';
+    Object.defineProperty(process.env, 'NODE_ENV', { value: 'development', writable: true, configurable: true, enumerable: true });
 
     assert.strictEqual(globalThis._googleGenAI, undefined);
 
@@ -42,7 +42,7 @@ describe('gemini: getGeminiClient', () => {
   });
 
   it('should reuse the existing client in development if it is already set', () => {
-    process.env.NODE_ENV = 'development';
+    Object.defineProperty(process.env, 'NODE_ENV', { value: 'development', writable: true, configurable: true, enumerable: true });
 
     // First call to initialize
     const client1 = getGeminiClient();

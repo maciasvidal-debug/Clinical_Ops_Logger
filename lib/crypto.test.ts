@@ -128,4 +128,42 @@ describe('crypto utilities', () => {
 
     assert.strictEqual(encrypted, data);
   });
+
+  it('should return original data if window is undefined for decryptData (SSR)', async () => {
+    (globalThis as any).window = undefined;
+    const data = "encrypted-test-data";
+    const decrypted = await decryptData(data);
+    assert.strictEqual(decrypted, data);
+  });
+
+  it('should fall back to original string if decryption fails directly', async () => {
+    // Mock crypto.subtle.decrypt to throw an error
+    const mockCrypto = {
+      ...originalCrypto,
+      subtle: {
+        ...originalCrypto.subtle,
+        decrypt: async () => { throw new Error('Decryption failed mock error'); }
+      }
+    };
+
+    Object.defineProperty(globalThis, 'crypto', {
+        value: mockCrypto,
+        writable: true,
+        configurable: true
+    });
+
+    // Create a valid-looking base64 string to bypass early checks
+    const data = btoa("valid-base64-string-with-enough-length-to-bypass-iv-check1234567890123");
+
+    // Redirect console.warn to avoid test output noise
+    const originalConsoleWarn = console.warn;
+    console.warn = () => {};
+
+    const decrypted = await decryptData(data);
+
+    // Restore console.warn
+    console.warn = originalConsoleWarn;
+
+    assert.strictEqual(decrypted, data);
+  });
 });
