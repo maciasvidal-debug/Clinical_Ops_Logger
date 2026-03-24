@@ -406,9 +406,6 @@ export function SettingsView({ profile }: SettingsViewProps) {
                     <div className="px-5 py-4 bg-neutral-50 border-t border-neutral-200">
                       <div className="flex items-center justify-between mb-3">
                         <span className="text-[13px] font-semibold text-neutral-600">Tareas</span>
-                        <button onClick={() => setCreatingTaskInCat(cat.id)} className="text-[12px] font-medium text-indigo-600 hover:bg-indigo-50 px-2 py-1 rounded flex items-center gap-1 transition-colors">
-                          <Plus className="w-3 h-3" /> Añadir Tarea
-                        </button>
                       </div>
 
                       <div className="space-y-2">
@@ -488,7 +485,41 @@ export function SettingsView({ profile }: SettingsViewProps) {
                             </div>
                           </div>
                         ))}
-                        <button onClick={() => toast.info("Nueva tarea")} className="w-full py-2 flex items-center justify-center gap-1.5 border-[1.5px] border-dashed border-neutral-300 rounded-lg text-[13px] font-medium text-neutral-500 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-colors mt-1">
+                        {creatingTaskInCat === cat.id && (
+                          <div className="flex items-start justify-between p-2.5 bg-indigo-50/50 border border-indigo-200 rounded-lg shadow-sm mb-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <input type="text" value={newTaskName} onChange={(e) => setNewTaskName(e.target.value)} className="px-2 py-1 text-[13px] border border-indigo-300 rounded focus:outline-none w-48 font-medium" autoFocus placeholder="Nombre de la tarea" onKeyDown={(e) => { if (e.key === "Enter") saveNewTask(cat.id); if (e.key === "Escape") setCreatingTaskInCat(null); }} />
+                                <select value={newTaskRoleCtx || ""} onChange={(e) => setNewTaskRoleCtx(e.target.value ? (e.target.value as any) : null)} className="px-2 py-1 text-[12px] border border-neutral-300 rounded focus:outline-none bg-white font-medium text-neutral-600">
+                                  <option value="">Sin Rol</option>
+                                  <option value="site_led">Sitio</option>
+                                  <option value="cro_led">CRO</option>
+                                  <option value="shared">Compartido</option>
+                                </select>
+                                <div className="relative group/popover">
+                                  <button type="button" className="px-2 py-1 flex items-center gap-1 text-[12px] border border-neutral-300 rounded focus:outline-none bg-white font-medium text-neutral-600 hover:bg-neutral-50">
+                                    <Users className="w-3.5 h-3.5" />
+                                    {newTaskStaffRoles.length === 0 ? "Staff Roles" : `${newTaskStaffRoles.length} roles`}
+                                  </button>
+                                  <div className="absolute top-full mt-1 left-0 w-48 bg-white/95 backdrop-blur-md border border-neutral-200 rounded-lg shadow-lg opacity-0 invisible group-hover/popover:opacity-100 group-hover/popover:visible transition-all z-10 p-2 grid grid-cols-1 gap-0.5">
+                                    {ALL_ROLES.map(({ role, label }) => (
+                                        <label key={role} className="flex items-center gap-2 p-1.5 hover:bg-neutral-50 rounded cursor-pointer">
+                                          <input type="checkbox" checked={newTaskStaffRoles.includes(role)} onChange={(e) => {
+                                            if (e.target.checked) setNewTaskStaffRoles([...newTaskStaffRoles, role]);
+                                            else setNewTaskStaffRoles(newTaskStaffRoles.filter(r => r !== role));
+                                          }} className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500" />
+                                          <span className="text-[12px] text-neutral-700">{label}</span>
+                                        </label>
+                                    ))}
+                                  </div>
+                                </div>
+                                <button onClick={() => saveNewTask(cat.id)} className="text-green-600 p-1 hover:bg-green-50 rounded ml-1"><Check className="w-4 h-4" /></button>
+                                <button onClick={() => setCreatingTaskInCat(null)} className="text-red-600 p-1 hover:bg-red-50 rounded"><X className="w-4 h-4" /></button>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        <button onClick={() => { setCreatingTaskInCat(cat.id); setNewTaskName(''); setNewTaskRoleCtx(null); setNewTaskStaffRoles([]); }} className="w-full py-2 flex items-center justify-center gap-1.5 border-[1.5px] border-dashed border-neutral-300 rounded-lg text-[13px] font-medium text-neutral-500 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-colors mt-1">
                           <Plus className="w-3.5 h-3.5" /> Añadir tarea
                         </button>
                       </div>
