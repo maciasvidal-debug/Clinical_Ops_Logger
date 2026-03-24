@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "@/lib/i18n";
 import { useDynamicTranslation } from "@/lib/i18n/utils";
-import { UserProfile, UserRole } from "@/lib/types";
+import { UserProfile, UserRole, DbActivityCategory, DbActivityTask, DbActivitySubtask } from "@/lib/types";
 import { useAppStore } from "@/lib/store";
 import {
   Settings,
@@ -40,6 +40,18 @@ import { StructureWizard } from "./StructureWizard";
 
 type SettingsTab = "activities" | "general" | "structure";
 
+export type RoleContext = "site_led" | "cro_led" | "shared" | null;
+
+interface ActivityTaskWithRelations extends Omit<DbActivityTask, 'activity_subtasks'> {
+  task_roles?: { role: UserRole }[];
+  activity_subtasks?: DbActivitySubtask[];
+}
+
+interface ActivityCategoryWithRelations extends Omit<DbActivityCategory, 'activity_tasks' | 'category_roles'> {
+  category_roles?: { role: UserRole }[];
+  activity_tasks?: ActivityTaskWithRelations[];
+}
+
 type WizardStep = 1 | 2 | 3;
 
 interface CategoryWizardState {
@@ -48,7 +60,7 @@ interface CategoryWizardState {
   selectedRoles: UserRole[];
   tasks: {
     name: string;
-    role_context: "site_led" | "cro_led" | "shared" | null;
+    role_context: RoleContext;
     staff_roles: string[];
   }[];
 }
@@ -97,7 +109,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [editRoleContext, setEditRoleContext] = useState<
-    "site_led" | "cro_led" | "shared" | null
+    RoleContext
   >(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [expandedCats, setExpandedCats] = useState<Set<string>>(new Set());
@@ -106,7 +118,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
   );
   const [newTaskName, setNewTaskName] = useState("");
   const [newTaskRoleCtx, setNewTaskRoleCtx] = useState<
-    "site_led" | "cro_led" | "shared" | null
+    RoleContext
   >(null);
   const [newTaskStaffRoles, setNewTaskStaffRoles] = useState<string[]>([]);
 
@@ -170,7 +182,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
     idx: number,
     updates: Partial<{
       name: string;
-      role_context: "site_led" | "cro_led" | "shared" | null;
+      role_context: RoleContext;
       staff_roles: string[];
     }>,
   ) =>
@@ -216,7 +228,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
   const startEditing = (
     id: string,
     currentValue: string,
-    roleContext?: "site_led" | "cro_led" | "shared" | null,
+    roleContext?: RoleContext,
     staffRoles: string[] = [],
   ) => {
     setEditingId(id);
@@ -430,7 +442,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                 </p>
               </div>
             ) : (
-              activityCategories.map((cat: any) => (
+              activityCategories.map((cat: ActivityCategoryWithRelations) => (
                 <div
                   key={cat.id}
                   className="border border-neutral-200 rounded-xl overflow-hidden hover:border-indigo-300 transition-colors group/cat"
@@ -516,8 +528,8 @@ export function SettingsView({ profile }: SettingsViewProps) {
                     <span className="text-[11px] font-bold text-neutral-400 uppercase tracking-widest mr-1">
                       Roles:
                     </span>
-                    {cat.category_roles?.length > 0 ? (
-                      cat.category_roles.map((cr: any) => (
+                    {(cat.category_roles?.length ?? 0) > 0 ? (
+                      cat.category_roles?.map((cr: { role: UserRole }) => (
                         <span
                           key={cr.role}
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${getRoleBadgeClasses(cr.role)}`}
@@ -549,7 +561,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                       </div>
 
                       <div className="space-y-2">
-                        {cat.activity_tasks?.map((task: any) => (
+                        {cat.activity_tasks?.map((task: ActivityTaskWithRelations) => (
                           <div
                             key={task.id}
                             className="flex items-start justify-between p-2.5 bg-white border border-neutral-200 rounded-lg hover:border-neutral-300 hover:shadow-sm transition-all group/task"
@@ -577,7 +589,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                                       onChange={(e) =>
                                         setEditRoleContext(
                                           e.target.value
-                                            ? (e.target.value as any)
+                                            ? (e.target.value as NonNullable<RoleContext>)
                                             : null,
                                         )
                                       }
@@ -683,7 +695,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                               )}
 
                               <div className="flex flex-wrap gap-1 mt-1.5">
-                                {task.activity_subtasks?.map((st: any) => (
+                                {task.activity_subtasks?.map((st: DbActivitySubtask) => (
                                   <span
                                     key={st.id}
                                     className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] bg-neutral-100 border border-neutral-200 text-neutral-600 group/sub"
@@ -711,7 +723,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                                     task.name,
                                     task.role_context,
                                     task.task_roles?.map(
-                                      (tr: any) => tr.role,
+                                      (tr: { role: UserRole }) => tr.role,
                                     ) || [],
                                   )
                                 }
@@ -756,7 +768,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                                       onChange={(e) =>
                                         setNewTaskRoleCtx(
                                           e.target.value
-                                            ? (e.target.value as any)
+                                            ? (e.target.value as NonNullable<RoleContext>)
                                             : null,
                                         )
                                       }
@@ -1072,7 +1084,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                           onChange={(e) =>
                             updateWizardTask(i, {
                               role_context: e.target.value
-                                ? (e.target.value as any)
+                                ? (e.target.value as NonNullable<RoleContext>)
                                 : null,
                             })
                           }
