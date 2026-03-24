@@ -2,34 +2,113 @@
 // Uses AES-GCM (Advanced Encryption Standard - Galois/Counter Mode)
 
 const ENCRYPTION_KEY_NAME = "app_encryption_key";
+const DB_NAME = "AppCryptoDB";
+const STORE_NAME = "keys";
+
+let cachedKey: CryptoKey | null = null;
+
+// Helper to open IndexedDB
+function getDb(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+  });
+}
+
+// Helper to get key from IndexedDB
+async function getKeyFromDb(): Promise<CryptoKey | null> {
+  try {
+    const db = await getDb();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readonly");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(ENCRYPTION_KEY_NAME);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result as CryptoKey || null);
+    });
+  } catch (err) {
+    console.warn("Failed to get key from IndexedDB:", err);
+    return null;
+  }
+}
+
+// Helper to save key to IndexedDB
+async function saveKeyToDb(key: CryptoKey): Promise<void> {
+  try {
+    const db = await getDb();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, "readwrite");
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.put(key, ENCRYPTION_KEY_NAME);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve();
+    });
+  } catch (err) {
+    console.warn("Failed to save key to IndexedDB:", err);
+  }
+}
 
 async function getOrCreateKey(): Promise<CryptoKey> {
-  // Try to load existing key material from unencrypted storage
-  // (In a real high-security app, this would come from a server or PBKDF2 from a user password)
-  // For this local-first app, we generate and store it.
-  const storedKey = localStorage.getItem(ENCRYPTION_KEY_NAME);
+  if (cachedKey) return cachedKey;
 
-  if (storedKey) {
-    const rawKey = new Uint8Array(JSON.parse(storedKey));
-    return await crypto.subtle.importKey(
-      "raw",
-      rawKey,
-      { name: "AES-GCM" },
-      true,
-      ["encrypt", "decrypt"]
-    );
+  // Check if we have a key in IndexedDB first
+  if (typeof indexedDB !== "undefined") {
+    const dbKey = await getKeyFromDb();
+    if (dbKey) {
+      cachedKey = dbKey;
+      return dbKey;
+    }
   }
 
-  // Generate a new key if none exists
+  // Legacy fallback: check localStorage for migration
+  // We keep this to avoid breaking existing users' stored data, but we migrate it out.
+  if (typeof localStorage !== "undefined") {
+    const storedKey = localStorage.getItem(ENCRYPTION_KEY_NAME);
+    if (storedKey) {
+      try {
+        const rawKey = new Uint8Array(JSON.parse(storedKey));
+        const importedKey = await crypto.subtle.importKey(
+          "raw",
+          rawKey,
+          { name: "AES-GCM" },
+          false, // Set to false to prevent future extraction!
+          ["encrypt", "decrypt"]
+        );
+
+        cachedKey = importedKey;
+        if (typeof indexedDB !== "undefined") {
+           await saveKeyToDb(importedKey);
+        }
+        // Remove from vulnerable localStorage
+        localStorage.removeItem(ENCRYPTION_KEY_NAME);
+
+        return importedKey;
+      } catch (err) {
+        console.warn("Failed to migrate legacy encryption key", err);
+      }
+    }
+  }
+
+  // Generate a new key if none exists (now with extractable: false for security)
   const newKey = await crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
-    true,
+    false, // Security Fix: Key is no longer exportable/extractable by JS
     ["encrypt", "decrypt"]
   );
 
-  // Store the raw key material (for persistence across reloads)
-  const exportedKey = await crypto.subtle.exportKey("raw", newKey);
-  localStorage.setItem(ENCRYPTION_KEY_NAME, JSON.stringify(Array.from(new Uint8Array(exportedKey))));
+  cachedKey = newKey;
+
+  // Store securely in IndexedDB instead of vulnerable localStorage
+  if (typeof indexedDB !== "undefined") {
+    await saveKeyToDb(newKey);
+  }
 
   return newKey;
 }
@@ -101,4 +180,9 @@ export async function decryptData(encryptedString: string): Promise<string> {
     console.warn("Decryption failed, assuming legacy unencrypted data:", error);
     return encryptedString; // Fallback to raw string (legacy compatibility)
   }
+}
+
+// For testing purposes only
+export function _resetKeyCache() {
+  cachedKey = null;
 }
