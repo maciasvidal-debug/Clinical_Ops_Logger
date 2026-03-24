@@ -131,52 +131,6 @@ export function Shell({
     toast.success(t.toasts.logoutSuccessTitle, { description: t.toasts.logoutSuccessDesc });
   };
 
-  const renderMobileMoreMenu = () => (
-    <AnimatePresence>
-      {showMobileMore && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          className="absolute bottom-full left-0 right-0 mb-2 mx-4 glass-panel border border-neutral-200/50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-[100] overflow-hidden pointer-events-auto flex flex-col"
-          ref={mobileMoreRef}
-        >
-          <div className="p-2 space-y-1">
-            {secondaryNavItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    onViewChange(item.id);
-                    setShowMobileMore(false);
-                  }}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors active:scale-95",
-                    currentView === item.id
-                      ? "bg-indigo-50/80 text-indigo-700"
-                      : "text-neutral-700 hover:bg-neutral-50/80"
-                  )}
-                >
-                  <Icon className={cn("w-5 h-5", currentView === item.id ? "text-indigo-600" : "text-neutral-500")} />
-                  {item.label}
-                </button>
-              );
-            })}
-            <div className="h-px bg-neutral-200/50 my-2 mx-2" />
-            <button
-              onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-coral-600 hover:bg-coral-50/50 active:scale-95 transition-all"
-            >
-              <LogOut className="w-5 h-5" />
-              {t.navigation.signOut}
-            </button>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
   return (
     <div className="flex h-screen bg-neutral-50/50 text-neutral-900 overflow-hidden font-sans">
       {/* Background ambient subtle gradients */}
@@ -189,7 +143,9 @@ export function Shell({
       <aside className="hidden md:flex flex-col w-[260px] glass-panel rounded-none border-r border-neutral-200/60 z-10 shrink-0">
         <div className="p-6 pb-2">
           <div className="flex items-center gap-2 mb-1">
-            <Image src="/logo-icon.png" alt="SiteFlow Logo" width={32} height={32} className="object-contain drop-shadow-sm" priority />
+            <div className="relative w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-lg shadow-sm">
+              <Activity className="w-5 h-5" />
+            </div>
             <h1 className="text-xl font-bold tracking-tight text-neutral-900 font-heading">{t.shell.appName}</h1>
           </div>
           <p className="text-xs text-neutral-500 pl-10">{t.shell.appSubtitle}</p>
@@ -257,7 +213,9 @@ export function Shell({
         {/* Top Header / Timer Bar */}
         <header className="glass-panel rounded-none border-b border-neutral-200/60 px-4 py-3 flex items-center justify-between z-40 shrink-0 sticky top-0">
           <div className="flex items-center md:hidden gap-2">
-             <Image src="/logo-icon.png" alt="SiteFlow Logo" width={28} height={28} className="object-contain drop-shadow-sm" priority />
+            <div className="relative w-7 h-7 flex items-center justify-center bg-indigo-600 text-white rounded-lg shadow-sm">
+              <Activity className="w-4 h-4" />
+            </div>
             <span className="font-heading font-bold text-lg text-neutral-900 tracking-tight">{t.shell.appName}</span>
           </div>
           
@@ -418,7 +376,51 @@ export function Shell({
 
       {/* Mobile Bottom Nav (Glassmorphism & Simplified) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-safe pt-2 pointer-events-none">
-        <div className="pointer-events-auto">{renderMobileMoreMenu()}</div>
+        <div className="pointer-events-auto">
+          <AnimatePresence>
+            {showMobileMore && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="absolute bottom-full left-0 right-0 mb-2 mx-4 glass-panel border border-neutral-200/50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)] z-[100] overflow-hidden pointer-events-auto flex flex-col"
+                ref={mobileMoreRef}
+              >
+                <div className="p-2 space-y-1">
+                  {secondaryNavItems.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          onViewChange(item.id);
+                          setShowMobileMore(false);
+                        }}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors active:scale-95",
+                          currentView === item.id
+                            ? "bg-indigo-50/80 text-indigo-700"
+                            : "text-neutral-700 hover:bg-neutral-50/80"
+                        )}
+                      >
+                        <Icon className={cn("w-5 h-5", currentView === item.id ? "text-indigo-600" : "text-neutral-500")} />
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                  <div className="h-px bg-neutral-200/50 my-2 mx-2" />
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-coral-600 hover:bg-coral-50/50 active:scale-95 transition-all"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    {t.navigation.signOut}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <nav className="glass-panel border border-white/60 mx-auto rounded-3xl mb-4 px-2 py-2 pointer-events-auto flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.08)]">
           {primaryNavItems.map((item) => {
             const Icon = item.icon;
@@ -463,8 +465,8 @@ export function Shell({
               <div className="relative z-10 p-1 mb-0.5">
                 {showMobileMore ? <ChevronUp className="w-5 h-5" /> : <MoreHorizontal className="w-5 h-5" />}
               </div>
-              <span className="relative z-10 text-[10px] font-medium whitespace-nowrap">
-                More
+              <span className={cn("relative z-10 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis w-full text-center px-1 transition-all duration-300", showMobileMore ? "font-bold" : "font-medium")}>
+                {t.navigation.more}
               </span>
             </button>
           )}
