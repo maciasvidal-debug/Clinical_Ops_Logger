@@ -2,16 +2,29 @@ import { supabase } from "./supabase";
 import { UserRole, DbActivityCategory, DbActivityTask, DbActivitySubtask } from "./types";
 
 
-function parseSupabaseError(error: any, defaultMsg: string): string {
+function parseSupabaseError(error: unknown, defaultMsg: string): string {
   if (!error) return defaultMsg;
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  // Create a safe reference we can access properties on
+  const errObj = typeof error === 'object' ? (error as Record<string, unknown>) : {};
+
+  const code = typeof errObj.code === 'string' ? errObj.code : undefined;
+  const message = typeof errObj.message === 'string' ? errObj.message : undefined;
+
   // 42501 is Postgres Insufficient Privilege
-  if (error.code === '42501' || error.message?.includes('violates row-level security')) {
+  if (code === '42501' || (message && message.includes('violates row-level security'))) {
     return 'Unauthorized: You do not have permission to perform this action.';
   }
-  if (error.message === 'Failed to fetch' || error.message?.includes('Network')) {
+
+  if (message === 'Failed to fetch' || (message && message.includes('Network'))) {
     return 'Network error: Please check your connection.';
   }
-  return error instanceof Error ? error.message : (error.message || defaultMsg);
+
+  return error instanceof Error ? error.message : (message || defaultMsg);
 }
 
 // --- Categories ---
