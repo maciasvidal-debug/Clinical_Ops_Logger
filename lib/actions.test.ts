@@ -150,8 +150,8 @@ describe("actions: parseNaturalLanguageLog execution", () => {
 
     // Check if models.generateContent was called correctly
     assert.strictEqual(mockGenerateContent.mock.calls.length, 1);
-    const callArgs = mockGenerateContent.mock.calls[0].arguments;
-    assert.ok(callArgs[0].contents.includes(input));
+    const callArgs: any[] | undefined = mockGenerateContent.mock.calls[0]?.arguments;
+    assert.ok(callArgs && callArgs.length > 0 && callArgs[0].contents.includes(input));
 
     // Cleanup
     mockFrom.mock.restore();
