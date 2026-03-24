@@ -99,4 +99,46 @@ describe('tests: mockParseNaturalLanguage', () => {
     assert.strictEqual(result.duration_minutes, 0);
     assert.strictEqual(result.success, false);
   });
+
+  it('should handle uppercase and mixed case inputs', () => {
+    const result = mockParseNaturalLanguage('2 HOURS AND 15 MINS');
+    assert.strictEqual(result.duration_minutes, 135);
+    assert.strictEqual(result.success, true);
+  });
+
+  it('should parse times without spaces between number and unit', () => {
+    const result = mockParseNaturalLanguage('2hours and 15mins');
+    assert.strictEqual(result.duration_minutes, 135);
+    assert.strictEqual(result.success, true);
+  });
+
+  it('should extract time from a larger sentence', () => {
+    const result = mockParseNaturalLanguage('I worked for 2 hours and 30 mins on this task.');
+    assert.strictEqual(result.duration_minutes, 150);
+    assert.strictEqual(result.success, true);
+  });
+
+  it('should safely handle decimal hours and correctly parse them', () => {
+    const result = mockParseNaturalLanguage('1.5 hours');
+    assert.strictEqual(result.duration_minutes, 90);
+    assert.strictEqual(result.success, true);
+  });
+
+  it('should safely handle negative values or ignore them', () => {
+    const result = mockParseNaturalLanguage('-1 hour');
+    assert.strictEqual(result.duration_minutes, 0);
+    assert.strictEqual(result.success, false);
+  });
+
+  it('should handle zero values correctly', () => {
+    const result = mockParseNaturalLanguage('0 hours');
+    assert.strictEqual(result.duration_minutes, 0);
+    assert.strictEqual(result.success, false);
+  });
+
+  it('should handle empty or whitespace-only inputs', () => {
+    const result = mockParseNaturalLanguage('   ');
+    assert.strictEqual(result.duration_minutes, 0);
+    assert.strictEqual(result.success, false);
+  });
 });

@@ -41,15 +41,23 @@ export function mockParseNaturalLanguage(input: string) {
   const lowerInput = input.toLowerCase();
   let duration = 0;
   
-  // Simple regex for "X hours" or "X mins"
-  const hourMatch = lowerInput.match(/(\d+)\s*hour/);
-  const minMatch = lowerInput.match(/(\d+)\s*min/);
+  // Improved regex to handle decimals and negative numbers: match an optional minus, optional digits, dot, and digits
+  const hourMatch = lowerInput.match(/(-?\d*\.?\d+)\s*hour/);
+  const minMatch = lowerInput.match(/(-?\d*\.?\d+)\s*min/);
   
-  if (hourMatch) duration += parseInt(hourMatch[1]) * 60;
-  if (minMatch) duration += parseInt(minMatch[1]);
+  if (hourMatch) {
+    const hours = parseFloat(hourMatch[1]);
+    if (hours > 0) duration += hours * 60;
+  }
+
+  if (minMatch) {
+    const mins = parseFloat(minMatch[1]);
+    if (mins > 0) duration += mins;
+  }
   
   return {
-    duration_minutes: duration,
+    // Round to handle floating point precision issues if they occur
+    duration_minutes: Math.round(duration),
     success: duration > 0
   };
 }
