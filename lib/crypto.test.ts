@@ -165,4 +165,56 @@ describe('crypto utilities', () => {
 
     assert.strictEqual(decrypted, validBase64);
   });
+  it('should fall back to original string if btoa throws an error during encryptData', async () => {
+    // Mock btoa to throw an error
+    const originalBtoa = globalThis.btoa;
+    globalThis.btoa = () => { throw new Error('btoa failed mock error'); };
+
+    const data = "test-data";
+    // Redirect console.error to avoid test output noise
+    const originalConsoleError = console.error;
+    console.error = () => {};
+
+    const encrypted = await encryptData(data);
+
+    // Restore
+    console.error = originalConsoleError;
+    globalThis.btoa = originalBtoa;
+
+    assert.strictEqual(encrypted, data);
+  });
+
+  it('should fall back to original string if crypto.getRandomValues throws an error during encryptData', async () => {
+    // Mock crypto.getRandomValues to throw an error
+    const mockCrypto = {
+      ...originalCrypto,
+      subtle: {
+        ...originalCrypto.subtle,
+      },
+      getRandomValues: () => { throw new Error('getRandomValues failed mock error'); }
+    };
+
+    Object.defineProperty(globalThis, 'crypto', {
+        value: mockCrypto,
+        writable: true,
+        configurable: true
+    });
+
+    const data = "test-data-random-fail";
+    // Redirect console.error to avoid test output noise
+    const originalConsoleError = console.error;
+    console.error = () => {};
+
+    const encrypted = await encryptData(data);
+
+    // Restore
+    console.error = originalConsoleError;
+    Object.defineProperty(globalThis, 'crypto', {
+      value: originalCrypto,
+      writable: true,
+      configurable: true
+    });
+
+    assert.strictEqual(encrypted, data);
+  });
 });
