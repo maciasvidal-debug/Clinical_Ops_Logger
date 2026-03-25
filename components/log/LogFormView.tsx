@@ -1,14 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
 import { useDynamicTranslation } from "@/lib/i18n/utils";
-import { 
-  LogEntry, 
-  UserProfile, 
-  Project, 
-  Protocol, 
-  Site, 
-
-} from "@/lib/types";
+import { LogEntry, UserProfile, Project, Protocol, Site, DbActivityCategory, DbActivityTask, DbActivitySubtask, UserRole } from "@/lib/types";
 import { format } from "date-fns";
 import { 
   CheckCircle2, 
@@ -104,26 +97,26 @@ export function LogFormView({
 
     // Map DB structure to ActivityCategory[] structure expected by the form
     return activityCategories
-      .filter((cat: any) => {
+      .filter((cat: DbActivityCategory) => {
         if (!cat.category_roles || cat.category_roles.length === 0) return true; // Visible to all
-        return cat.category_roles.some((cr: any) => cr.role === profile.role);
+        return cat.category_roles.some((cr: { role: UserRole }) => cr.role === profile.role);
       })
-      .map((cat: any) => ({
+      .map((cat: DbActivityCategory) => ({
         id: cat.id,
         name: cat.name,
-        tasks: (cat.activity_tasks || []).filter((t: any) => {
+        tasks: (cat.activity_tasks || []).filter((t: DbActivityTask) => {
           if (!t.task_roles || t.task_roles.length === 0) return true;
-          return t.task_roles.some((tr: any) => tr.role === profile.role);
-        }).map((t: any) => ({
+          return t.task_roles.some((tr: { role: UserRole }) => tr.role === profile.role);
+        }).map((t: DbActivityTask) => ({
           id: t.id,
           name: t.name,
           roleContext: t.role_context,
-          subTasks: (t.activity_subtasks || []).map((st: any) => ({
+          subTasks: (t.activity_subtasks || []).map((st: DbActivitySubtask) => ({
             id: st.id,
             name: st.name
           }))
         }))
-      })).filter((cat: any) => cat.tasks.length > 0);
+      })).filter((cat: import('@/lib/types').ActivityCategory) => cat.tasks.length > 0);
   }, [profile?.role, activityCategories]);
 
   const initialCategory = availableCategories.find(c => c.name === initialData?.category);

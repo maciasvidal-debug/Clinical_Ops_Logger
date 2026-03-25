@@ -33,6 +33,7 @@ export interface DbActivityTask {
   created_at: string;
   updated_at: string;
   activity_subtasks?: DbActivitySubtask[];
+  task_roles?: { role: UserRole }[];
 }
 
 export interface DbActivityCategory {
