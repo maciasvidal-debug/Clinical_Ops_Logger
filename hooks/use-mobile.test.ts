@@ -35,8 +35,8 @@ describe('useIsMobile', () => {
 
   it('should return false initially (undefined coerced to false)', () => {
     // Mock useState and useEffect to prevent them from actually running React logic
-    mock.method(React, 'useState', () => [undefined, mock.fn()]);
-    mock.method(React, 'useEffect', () => {});
+    mock.method(React, 'useState', mock.fn(() => [undefined, mock.fn()]));
+    mock.method(React, 'useEffect', mock.fn(() => {}));
 
     const result = useIsMobile();
     assert.strictEqual(result, false);
@@ -46,10 +46,10 @@ describe('useIsMobile', () => {
     const setState = mock.fn();
     let effectCallback: (() => void | (() => void)) | undefined;
 
-    mock.method(React, 'useState', () => [undefined, setState]);
-    mock.method(React, 'useEffect', (cb: any) => {
+    mock.method(React, 'useState', mock.fn(() => [undefined, setState]));
+    mock.method(React, 'useEffect', mock.fn((cb: any) => {
       effectCallback = cb;
-    });
+    }));
 
     useIsMobile();
 
@@ -72,10 +72,10 @@ describe('useIsMobile', () => {
     const setState = mock.fn();
     let effectCallback: (() => void | (() => void)) | undefined;
 
-    mock.method(React, 'useState', () => [undefined, setState]);
-    mock.method(React, 'useEffect', (cb: any) => {
+    mock.method(React, 'useState', mock.fn(() => [undefined, setState]));
+    mock.method(React, 'useEffect', mock.fn((cb: any) => {
       effectCallback = cb;
-    });
+    }));
 
     useIsMobile();
     effectCallback!();
@@ -94,9 +94,9 @@ describe('useIsMobile', () => {
   it('should clean up event listener on unmount', () => {
     let effectCallback: (() => void | (() => void)) | undefined;
 
-    mock.method(React, 'useEffect', (cb: any) => {
+    mock.method(React, 'useEffect', mock.fn((cb: any) => {
       effectCallback = cb;
-    });
+    }));
 
     useIsMobile();
     const cleanup = effectCallback!();
