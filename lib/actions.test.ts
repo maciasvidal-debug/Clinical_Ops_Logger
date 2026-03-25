@@ -106,7 +106,7 @@ describe("actions: parseNaturalLanguageLog execution", () => {
       };
     });
 
-    const mockSelect = mock.fn(() => ({ order: mockOrder }));
+    const mockSelect = mock.fn(() => ({ eq: mock.fn(() => ({ order: mockOrder })) }));
     const mockFrom = mock.method(supabase, "from", () => ({ select: mockSelect }));
 
     // 2. Mock Gemini client via globalThis._googleGenAI
@@ -164,7 +164,7 @@ describe("actions: parseNaturalLanguageLog execution", () => {
 
     // Mock supabase
     const mockOrder = mock.fn(async () => ({ data: [], error: null }));
-    const mockSelect = mock.fn(() => ({ order: mockOrder }));
+    const mockSelect = mock.fn(() => ({ eq: mock.fn(() => ({ order: mockOrder })) }));
     const mockFrom = mock.method(supabase, "from", () => ({ select: mockSelect }));
 
     // Mock Gemini client to return no text
@@ -196,7 +196,7 @@ describe("actions: parseNaturalLanguageLog execution", () => {
 
     // Mock supabase
     const mockOrder = mock.fn(async () => ({ data: [], error: null }));
-    const mockSelect = mock.fn(() => ({ order: mockOrder }));
+    const mockSelect = mock.fn(() => ({ eq: mock.fn(() => ({ order: mockOrder })) }));
     const mockFrom = mock.method(supabase, "from", () => ({ select: mockSelect }));
 
     // Mock Gemini client to return invalid JSON
@@ -226,7 +226,7 @@ describe("actions: parseNaturalLanguageLog execution", () => {
 
     // Mock supabase
     const mockOrder = mock.fn(async () => ({ data: [], error: null }));
-    const mockSelect = mock.fn(() => ({ order: mockOrder }));
+    const mockSelect = mock.fn(() => ({ eq: mock.fn(() => ({ order: mockOrder })) }));
     const mockFrom = mock.method(supabase, "from", () => ({ select: mockSelect }));
 
     // Mock Gemini client to throw error
