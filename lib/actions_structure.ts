@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { Project, Protocol, Site } from "./types";
+import { Project, Protocol, Site, UserProfile } from "./types";
 
 export async function createProject(name: string, description?: string): Promise<Project> {
   const { data, error } = await supabase
@@ -74,7 +74,7 @@ export async function assignSiteToManager(userId: string, siteId: string): Promi
   return true;
 }
 
-export async function fetchProfiles(): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function fetchProfiles(): Promise<{ success: boolean; data?: UserProfile[]; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("user_profiles")
