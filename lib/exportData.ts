@@ -1,10 +1,18 @@
 import { supabase } from "./supabase";
 import { UserProfile } from "./types";
 import { toast } from "sonner";
+import { Dictionary } from "./i18n/types";
 
-export async function exportUserData(profile: UserProfile, t: any) {
+interface ExportDataPayload {
+  profile: UserProfile;
+  exported_at: string;
+  app: string;
+  logs?: unknown[];
+}
+
+export async function exportUserData(profile: UserProfile, t: Dictionary) {
   try {
-    const dataToExport: any = {
+    const dataToExport: ExportDataPayload = {
       profile: profile,
       exported_at: new Date().toISOString(),
       app: "SiteFlow",
