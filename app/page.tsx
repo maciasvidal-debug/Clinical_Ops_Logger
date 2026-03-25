@@ -100,22 +100,6 @@ export default function App() {
           icon: "/favicon.ico",
         });
       }
-
-      if (profile.role === "manager") {
-        const threeDaysAgo = new Date();
-        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-
-        logs.forEach((log) => {
-          log.log_queries?.forEach((query) => {
-            if (
-              query.status === "OPEN" &&
-              new Date(query.question_date) < threeDaysAgo
-            ) {
-              // TODO: Implement manager notification for old queries
-            }
-          });
-        });
-      }
     };
 
     checkReminders();
