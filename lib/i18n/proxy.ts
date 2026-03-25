@@ -1,14 +1,14 @@
 import { Dictionary } from './types';
 import { dictionaries } from './dictionaries';
 
-function createI18nProxy(target: any, path: string = ''): any {
+function createI18nProxy<T>(target: T, path: string = ''): T {
   if (typeof target !== 'object' || target === null) {
     return target;
   }
 
-  return new Proxy(target, {
+  return new Proxy(target as object, {
     get(obj, prop) {
-      const value = obj[prop];
+      const value = (obj as Record<string | symbol, unknown>)[prop];
       const newPath = path ? `${path}.${String(prop)}` : String(prop);
 
       // If the value is undefined, it means the translation key is missing
@@ -20,10 +20,10 @@ function createI18nProxy(target: any, path: string = ''): any {
 
         // Fallback to English dictionary to prevent the app from breaking or showing empty text
         const keys = newPath.split('.');
-        let enValue: any = dictionaries.en;
+        let enValue: unknown = dictionaries.en;
         for (const k of keys) {
-          if (enValue && typeof enValue === 'object') {
-            enValue = enValue[k];
+          if (typeof enValue === 'object' && enValue !== null) {
+            enValue = (enValue as Record<string, unknown>)[k];
           } else {
             enValue = undefined;
             break;
@@ -49,10 +49,10 @@ function createI18nProxy(target: any, path: string = ''): any {
 
       return value;
     }
-  });
+  }) as T;
 }
 
 export function getTranslationProxy(language: 'en' | 'es' | 'pt'): Dictionary {
   const dictionary = dictionaries[language] || dictionaries.en;
-  return createI18nProxy(dictionary) as Dictionary;
+  return createI18nProxy(dictionary);
 }
