@@ -206,8 +206,8 @@ export function StructureWizard({ onComplete }: StructureWizardProps) {
       closeWizard();
       onComplete();
 
-    } catch (error: any) {
-      toast.error(error.message || "An error occurred during creation");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "An error occurred during creation");
     } finally {
       setLoading(false);
     }
