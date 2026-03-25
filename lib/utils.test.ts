@@ -33,18 +33,18 @@ describe('utils: logError', () => {
   });
 
   it('should log an Error object correctly', async () => {
-    let insertedData: any = null;
-    const insertMock = mock.fn(async (data: any) => {
+    let insertedData: any[] = [];
+    const insertMock = mock.fn(async (data: Record<string, unknown>[]) => {
       insertedData = data;
       return { error: null };
     });
 
-    // Typecast to any to bypass the complex typing of the Supabase JS client for mocking
+    // Typecast through unknown to bypass the complex typing of the Supabase JS client for mocking
     mock.method(supabase, 'from', (table: string) => {
       assert.strictEqual(table, 'system_errors');
       return {
         insert: insertMock,
-      } as any;
+      } as unknown as ReturnType<typeof supabase.from>;
     });
 
     const error = new Error('Test error message');
@@ -67,8 +67,8 @@ describe('utils: logError', () => {
   });
 
   it('should log a string error correctly', async () => {
-    let insertedData: any = null;
-    const insertMock = mock.fn(async (data: any) => {
+    let insertedData: any[] = [];
+    const insertMock = mock.fn(async (data: Record<string, unknown>[]) => {
       insertedData = data;
       return { error: null };
     });
@@ -77,7 +77,7 @@ describe('utils: logError', () => {
       assert.strictEqual(table, 'system_errors');
       return {
         insert: insertMock,
-      } as any;
+      } as unknown as ReturnType<typeof supabase.from>;
     });
 
     await logError('Just a string error', 'string_context', 'user123');
@@ -97,7 +97,7 @@ describe('utils: logError', () => {
       return { error: new Error('Database error') };
     });
 
-    mock.method(supabase, 'from', () => ({ insert: insertMock } as any));
+    mock.method(supabase, 'from', () => ({ insert: insertMock } as unknown as ReturnType<typeof supabase.from>));
 
     // This should not throw an exception
     await logError(new Error('Test'), 'silent_fail_context');
