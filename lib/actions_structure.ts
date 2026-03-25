@@ -83,8 +83,8 @@ export async function fetchProfiles(): Promise<{ success: boolean; data?: any; e
 
     if (error) throw error;
     return { success: true, data };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error fetching profiles:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: error instanceof Error ? error.message : "An unknown error occurred" };
   }
 }
