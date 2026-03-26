@@ -346,8 +346,10 @@ export function DashboardView({
           <div className="p-0 flex-1 overflow-y-auto max-h-[300px]">
             <div className="divide-y divide-neutral-100">
               {logs.length === 0 ? (
-                <div className="p-8 text-center text-neutral-500">
-                  {t.dashboard.noRecentEntries}
+                <div className="p-8 text-center text-neutral-500 flex flex-col items-center">
+                  <Clock className="w-8 h-8 text-neutral-300 mb-3" />
+                  <p>{t.dashboard.noRecentEntries}</p>
+                  <p className="text-xs text-neutral-400 mt-1">{t.dashboard.logNewActivity}</p>
                 </div>
               ) : (
                 logs.slice(0, 5).map((log) => {

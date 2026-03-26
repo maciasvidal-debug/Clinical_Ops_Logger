@@ -340,7 +340,7 @@ export function Shell({
                                   </p>
                                 </div>
                                 {!notif.is_read && (
-                                  <div className="w-2 h-2 bg-indigo-500 rounded-full shrink-0 mt-1.5 shadow-[0_0_6px_rgba(99,102,241,0.6)]" />
+                                  <div className="w-3 h-3 bg-indigo-500 rounded-full shrink-0 mt-1 shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse" />
                                 )}
                               </div>
                             </div>
@@ -397,7 +397,7 @@ export function Shell({
                           setShowMobileMore(false);
                         }}
                         className={cn(
-                          "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors active:scale-95",
+                          "w-full flex items-center gap-3 px-5 py-4 rounded-xl text-base font-medium transition-colors active:scale-95 mb-1",
                           currentView === item.id
                             ? "bg-indigo-50/80 text-indigo-700"
                             : "text-neutral-700 hover:bg-neutral-50/80"
@@ -433,7 +433,7 @@ export function Shell({
                   setShowMobileMore(false);
                 }}
                 className={cn(
-                  "relative flex flex-col items-center justify-center flex-1 min-w-0 px-1 py-1 rounded-2xl transition-all duration-300 active:scale-90",
+                  "relative flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-3 rounded-2xl transition-all duration-300 active:scale-90",
                   isActive ? "text-indigo-700" : "text-neutral-500 hover:text-neutral-900"
                 )}
               >
@@ -458,7 +458,7 @@ export function Shell({
              <button
               onClick={() => setShowMobileMore(!showMobileMore)}
               className={cn(
-                "relative flex flex-col items-center justify-center flex-1 min-w-0 px-1 py-1 rounded-2xl transition-all duration-300 active:scale-90",
+                "relative flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-3 rounded-2xl transition-all duration-300 active:scale-90",
                 showMobileMore ? "text-indigo-700 bg-indigo-50/50" : "text-neutral-500"
               )}
             >
