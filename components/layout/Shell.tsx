@@ -142,13 +142,16 @@ export function Shell({
       {/* Desktop Sidebar */}
       <aside className="hidden md:flex flex-col w-[260px] glass-panel rounded-none border-r border-neutral-200/60 z-10 shrink-0">
         <div className="p-6 pb-2">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="relative w-8 h-8 flex items-center justify-center bg-indigo-600 text-white rounded-lg shadow-sm">
-              <Activity className="w-5 h-5" />
-            </div>
-            <h1 className="text-xl font-bold tracking-tight text-neutral-900 font-heading">{t.shell.appName}</h1>
+          <div className="flex items-center gap-2 mb-1 w-[140px] h-[32px] relative">
+            <Image
+              src="/logo-full.png"
+              alt={t.shell.appName}
+              fill
+              priority
+              className="object-contain object-left"
+            />
           </div>
-          <p className="text-xs text-neutral-500 pl-10">{t.shell.appSubtitle}</p>
+
         </div>
         
         <div className="px-5 my-6">
@@ -212,11 +215,14 @@ export function Shell({
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
         {/* Top Header / Timer Bar */}
         <header className="glass-panel rounded-none border-b border-neutral-200/60 px-4 py-3 flex items-center justify-between z-40 shrink-0 sticky top-0">
-          <div className="flex items-center md:hidden gap-2">
-            <div className="relative w-7 h-7 flex items-center justify-center bg-indigo-600 text-white rounded-lg shadow-sm">
-              <Activity className="w-4 h-4" />
-            </div>
-            <span className="font-heading font-bold text-lg text-neutral-900 tracking-tight">{t.shell.appName}</span>
+          <div className="flex items-center md:hidden gap-2 w-[120px] h-[28px] relative">
+            <Image
+              src="/logo-full.png"
+              alt={t.shell.appName}
+              fill
+              priority
+              className="object-contain object-left"
+            />
           </div>
           
           <div className="flex items-center gap-3 ml-auto">
@@ -433,21 +439,14 @@ export function Shell({
                   setShowMobileMore(false);
                 }}
                 className={cn(
-                  "relative flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-3 rounded-2xl transition-all duration-300 active:scale-90",
-                  isActive ? "text-indigo-700" : "text-neutral-500 hover:text-neutral-900"
+                  "relative flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-3 rounded-2xl transition-colors",
+                  isActive ? "text-indigo-700 bg-indigo-50/80" : "text-neutral-500 hover:bg-neutral-50/80 hover:text-neutral-900"
                 )}
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="mobileNavIndicator"
-                    className="absolute inset-0 bg-indigo-50/80 rounded-2xl z-0"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
                 <div className="relative z-10 p-1 mb-0.5">
-                  <Icon className={cn("w-5 h-5 transition-transform duration-300", isActive && "scale-110")} />
+                  <Icon className="w-5 h-5" />
                 </div>
-                <span className={cn("relative z-10 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis w-full text-center px-1 transition-all duration-300", isActive ? "font-bold" : "font-medium")}>
+                <span className={cn("relative z-10 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis w-full text-center px-1", isActive ? "font-medium" : "font-medium")}>
                   {item.label}
                 </span>
               </button>
@@ -458,14 +457,14 @@ export function Shell({
              <button
               onClick={() => setShowMobileMore(!showMobileMore)}
               className={cn(
-                "relative flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-3 rounded-2xl transition-all duration-300 active:scale-90",
-                showMobileMore ? "text-indigo-700 bg-indigo-50/50" : "text-neutral-500"
+                "relative flex flex-col items-center justify-center flex-1 min-w-0 px-2 py-3 rounded-2xl transition-colors",
+                showMobileMore ? "text-indigo-700 bg-indigo-50/80" : "text-neutral-500 hover:bg-neutral-50/80 hover:text-neutral-900"
               )}
             >
               <div className="relative z-10 p-1 mb-0.5">
                 {showMobileMore ? <ChevronUp className="w-5 h-5" /> : <MoreHorizontal className="w-5 h-5" />}
               </div>
-              <span className={cn("relative z-10 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis w-full text-center px-1 transition-all duration-300", showMobileMore ? "font-bold" : "font-medium")}>
+              <span className="relative z-10 text-[10px] whitespace-nowrap overflow-hidden text-ellipsis w-full text-center px-1 font-medium">
                 {t.navigation.more}
               </span>
             </button>
