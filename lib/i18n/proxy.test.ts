@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert';
-import { getTranslationProxy } from './proxy.ts';
-import { dictionaries } from './dictionaries.ts';
+import { getTranslationProxy } from './proxy';
+import { dictionaries } from './dictionaries';
 
 test('I18n Proxy - English (base language)', () => {
   const enDict = getTranslationProxy('en');
