@@ -218,3 +218,58 @@ export async function removeCategoryRole(categoryId: string, role: UserRole): Pr
     return { success: false, error: parseSupabaseError(error, "Failed to remove role") };
   }
 }
+
+export async function updateCategoryRoles(
+  categoryId: string,
+  roles: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Start by fetching current roles
+    const { data: currentRoles, error: fetchError } = await supabase
+      .from("category_roles")
+      .select("role")
+      .eq("category_id", categoryId);
+
+    if (fetchError) throw fetchError;
+
+    const currentRoleSet = new Set(currentRoles?.map((r) => r.role) || []);
+    const newRoleSet = new Set(roles);
+
+    const rolesToAdd = roles.filter((r) => !currentRoleSet.has(r));
+    const rolesToRemove = Array.from(currentRoleSet).filter(
+      (r) => !newRoleSet.has(r)
+    );
+
+    // Remove old roles
+    if (rolesToRemove.length > 0) {
+      const { error: removeError } = await supabase
+        .from("category_roles")
+        .delete()
+        .eq("category_id", categoryId)
+        .in("role", rolesToRemove);
+
+      if (removeError) throw removeError;
+    }
+
+    // Add new roles
+    if (rolesToAdd.length > 0) {
+      const inserts = rolesToAdd.map((role) => ({
+        category_id: categoryId,
+        role,
+      }));
+      const { error: insertError } = await supabase
+        .from("category_roles")
+        .insert(inserts);
+
+      if (insertError) throw insertError;
+    }
+
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Error updating category roles:", error);
+    return {
+      success: false,
+      error: parseSupabaseError(error, "Failed to update category roles"),
+    };
+  }
+}
