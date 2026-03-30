@@ -23,6 +23,7 @@ import {
 import {
   createActivityCategory,
   updateActivityCategory,
+  updateCategoryRoles,
   deleteActivityCategory,
   createActivityTask,
   updateActivityTask,
@@ -111,6 +112,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
   const [newTaskStaffRoles, setNewTaskStaffRoles] = useState<string[]>([]);
 
   const [editStaffRoles, setEditStaffRoles] = useState<string[]>([]);
+  const [editCategoryRoles, setEditCategoryRoles] = useState<UserRole[]>([]);
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
@@ -122,11 +124,13 @@ export function SettingsView({ profile }: SettingsViewProps) {
     currentValue: string,
     roleContext?: RoleContext,
     staffRoles: string[] = [],
+    categoryRoles: UserRole[] = [],
   ) => {
     setEditingId(id);
     setEditValue(currentValue);
     setEditRoleContext(roleContext || null);
     setEditStaffRoles(staffRoles || []);
+    setEditCategoryRoles(categoryRoles || []);
   };
 
   const saveNewTask = async (categoryId: string) => {
@@ -164,15 +168,24 @@ export function SettingsView({ profile }: SettingsViewProps) {
   ) => {
     if (!editValue.trim()) return cancelEditing();
     let res;
-    if (type === "category") res = await updateActivityCategory(id, editValue);
-    else if (type === "task")
+    if (type === "category") {
+      res = await updateActivityCategory(id, editValue);
+      if (res.success) {
+        const rolesRes = await updateCategoryRoles(id, editCategoryRoles);
+        if (!rolesRes.success) {
+          toast.error(rolesRes.error ?? "Error al actualizar roles de la categoría");
+        }
+      }
+    } else if (type === "task") {
       res = await updateActivityTask(
         id,
         editValue,
         editRoleContext,
         editStaffRoles,
       );
-    else res = await updateActivitySubtask(id, editValue);
+    } else {
+      res = await updateActivitySubtask(id, editValue);
+    }
 
     if (res?.success) {
       toast.success("Actualizado");
@@ -361,6 +374,52 @@ export function SettingsView({ profile }: SettingsViewProps) {
                               if (e.key === "Escape") cancelEditing();
                             }}
                           />
+                          <div className="relative group/popover shrink-0">
+                            <button
+                              type="button"
+                              className="px-2 py-1.5 flex items-center gap-1.5 text-[13px] border border-indigo-300 rounded-md focus:outline-none bg-white font-semibold text-indigo-700 hover:bg-indigo-50 transition-colors shadow-sm"
+                            >
+                              <Users className="w-4 h-4" />
+                              {editCategoryRoles.length === 0
+                                ? "Todos los roles"
+                                : `${editCategoryRoles.length} roles`}
+                            </button>
+                            <div className="absolute top-full mt-1 left-0 sm:right-0 sm:left-auto w-56 bg-white/95 backdrop-blur-md border border-neutral-200 rounded-xl shadow-xl opacity-0 invisible group-hover/popover:opacity-100 group-hover/popover:visible transition-all z-[100] p-2 grid grid-cols-1 gap-1">
+                              {ALL_ROLES.map(({ role, label, desc }) => (
+                                <label
+                                  key={role}
+                                  className="flex items-start gap-2 p-2 hover:bg-indigo-50/50 rounded-lg cursor-pointer transition-colors"
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={editCategoryRoles.includes(role)}
+                                    onChange={(e) => {
+                                      if (e.target.checked)
+                                        setEditCategoryRoles([
+                                          ...editCategoryRoles,
+                                          role,
+                                        ]);
+                                      else
+                                        setEditCategoryRoles(
+                                          editCategoryRoles.filter(
+                                            (r) => r !== role,
+                                          ),
+                                        );
+                                    }}
+                                    className="rounded border-neutral-300 text-indigo-600 focus:ring-indigo-500 mt-0.5"
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="text-[12.5px] font-semibold text-neutral-800 leading-tight">
+                                      {label}
+                                    </span>
+                                    <span className="text-[11px] text-neutral-500 leading-tight mt-0.5">
+                                      {desc}
+                                    </span>
+                                  </div>
+                                </label>
+                              ))}
+                            </div>
+                          </div>
                           <div className="flex items-center gap-1 self-end sm:self-auto shrink-0 mt-2 sm:mt-0">
                             <button
                               onClick={() => saveEditing(cat.id, "category")}
@@ -393,7 +452,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
                         onClick={(e) => e.stopPropagation()}
                       >
                         <button
-                          onClick={() => startEditing(cat.id, cat.name)}
+                          onClick={() => startEditing(cat.id, cat.name, undefined, [], cat.category_roles?.map((cr) => cr.role) || [])}
                           className="p-1.5 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors"
                           title="Editar"
                         >
