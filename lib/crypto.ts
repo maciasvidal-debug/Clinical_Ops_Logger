@@ -113,7 +113,7 @@ async function getOrCreateKey(): Promise<CryptoKey> {
   return newKey;
 }
 
-export async function encryptData(data: string): Promise<string> {
+export async function encryptData(data: string): Promise<string | null> {
   if (typeof window === "undefined") return data; // SSR safety
 
   try {
@@ -141,11 +141,11 @@ export async function encryptData(data: string): Promise<string> {
     return btoa(String.fromCharCode(...combined));
   } catch (error) {
     console.error("Encryption failed:", error);
-    return data; // Fallback in case of failure
+    return null; // Security Fix: Do not return unencrypted data on failure
   }
 }
 
-export async function decryptData(encryptedString: string): Promise<string> {
+export async function decryptData(encryptedString: string): Promise<string | null> {
   if (typeof window === "undefined") return encryptedString; // SSR safety
 
   try {
@@ -177,8 +177,8 @@ export async function decryptData(encryptedString: string): Promise<string> {
     const decoder = new TextDecoder();
     return decoder.decode(decryptedBuffer);
   } catch (error) {
-    console.warn("Decryption failed, assuming legacy unencrypted data:", error);
-    return encryptedString; // Fallback to raw string (legacy compatibility)
+    console.error("Decryption failed:", error);
+    return null; // Security Fix: Do not return raw string on failure
   }
 }
 

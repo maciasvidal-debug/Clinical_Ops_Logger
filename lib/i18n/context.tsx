@@ -32,7 +32,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const stored = localStorage.getItem(LANGUAGE_KEY);
         if (stored) {
           const decrypted = await decryptData(stored);
-          if (decrypted === 'en' || decrypted === 'es' || decrypted === 'pt') {
+          if (decrypted && (decrypted === 'en' || decrypted === 'es' || decrypted === 'pt')) {
             setLanguageState(decrypted as Language);
           }
         } else {
@@ -55,7 +55,9 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLanguageState(lang);
     try {
       const encrypted = await encryptData(lang);
-      localStorage.setItem(LANGUAGE_KEY, encrypted);
+      if (encrypted) {
+        localStorage.setItem(LANGUAGE_KEY, encrypted);
+      }
     } catch (error) {
       console.error('Failed to save language preference', error);
     }
