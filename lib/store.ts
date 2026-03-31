@@ -310,9 +310,9 @@ export function useAppStore() {
     }
   };
 
-  const addTodo = (todo: any) => setTodos((prev: any) => [todo, ...prev]);
-  const updateTodo = (id: string, updates: any) => setTodos((prev: any) => prev.map((t: any) => t.id === id ? { ...t, ...updates } : t));
-  const deleteTodo = (id: string) => setTodos((prev: any) => prev.filter((t: any) => t.id !== id));
+  const addTodo = (todo: Todo) => setTodos((prev: Todo[]) => [todo, ...prev]);
+  const updateTodo = (id: string, updates: Partial<Todo>) => setTodos((prev: Todo[]) => prev.map((t: Todo) => t.id === id ? { ...t, ...updates } : t));
+  const deleteTodo = (id: string) => setTodos((prev: Todo[]) => prev.filter((t: Todo) => t.id !== id));
 
   const startTimer = () => {
     const newState = { startTime: new Date().toISOString() };
