@@ -1,6 +1,6 @@
-import { describe, it, beforeEach, afterEach } from 'node:test';
+import { describe, it, beforeEach, afterEach, mock } from 'node:test';
 import * as assert from 'node:assert';
-import { encryptData, decryptData } from './crypto';
+import { encryptData, decryptData, _resetKeyCache } from './crypto';
 
 describe('crypto utilities', () => {
   let originalWindow: any;
@@ -28,6 +28,9 @@ describe('crypto utilities', () => {
   afterEach(() => {
     (globalThis as any).window = originalWindow;
     (globalThis as any).localStorage = originalLocalStorage;
+    (globalThis as any).indexedDB = undefined;
+    mock.restoreAll();
+
     // Restore crypto if it was modified
     if (originalCrypto !== globalThis.crypto) {
        Object.defineProperty(globalThis, 'crypto', {
@@ -216,5 +219,45 @@ describe('crypto utilities', () => {
     });
 
     assert.strictEqual(encrypted, data);
+  });
+
+  it('should generate a key with extractable set to false', async () => {
+    _resetKeyCache();
+
+    // Ensure no IndexedDB and no localStorage key to force generation
+    (globalThis as any).indexedDB = undefined;
+    (globalThis as any).localStorage.removeItem('app_encryption_key');
+
+    const generateKeyMock = mock.method(globalThis.crypto.subtle, 'generateKey');
+
+    await encryptData("test");
+
+    assert.strictEqual(generateKeyMock.mock.calls.length, 1);
+    const [algorithm, extractable, keyUsages] = generateKeyMock.mock.calls[0].arguments;
+
+    assert.deepStrictEqual(algorithm, { name: "AES-GCM", length: 256 });
+    assert.strictEqual(extractable, false, "Security Fix: Key must NOT be extractable");
+    assert.deepStrictEqual(keyUsages, ["encrypt", "decrypt"]);
+  });
+
+  it('should import a legacy key with extractable set to false', async () => {
+    _resetKeyCache();
+
+    // Mock legacy key in localStorage
+    const rawKey = new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+    (globalThis as any).localStorage.setItem('app_encryption_key', JSON.stringify(Array.from(rawKey)));
+    (globalThis as any).indexedDB = undefined;
+
+    const importKeyMock = mock.method(globalThis.crypto.subtle, 'importKey');
+
+    await encryptData("test");
+
+    assert.strictEqual(importKeyMock.mock.calls.length, 1);
+    const [format, keyData, algorithm, extractable, keyUsages] = importKeyMock.mock.calls[0].arguments;
+
+    assert.strictEqual(format, "raw");
+    assert.deepStrictEqual(algorithm, { name: "AES-GCM" });
+    assert.strictEqual(extractable, false, "Security Fix: Imported key must NOT be extractable");
+    assert.deepStrictEqual(keyUsages, ["encrypt", "decrypt"]);
   });
 });
