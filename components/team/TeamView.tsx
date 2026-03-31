@@ -178,7 +178,8 @@ function AssignmentManager({
       if (isSelected) {
         // Unassign project and its protocols
         const projectProtocols = protocols.filter(p => p.project_id === projectId).map(p => p.id);
-        setLocalProtocolIds(prevProtocols => prevProtocols.filter(id => !projectProtocols.includes(id)));
+        const projectProtocolsSet = new Set(projectProtocols);
+        setLocalProtocolIds(prevProtocols => prevProtocols.filter(id => !projectProtocolsSet.has(id)));
         return prev.filter(id => id !== projectId);
       } else {
         return [...prev, projectId];
