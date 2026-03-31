@@ -56,9 +56,9 @@ describe('crypto utilities', () => {
     assert.notStrictEqual(encrypted, data);
 
     // Should be a base64-like string (not JSON)
-    assert.ok(encrypted.length > data.length);
+    assert.ok(encrypted && encrypted.length > data.length);
 
-    const decrypted = await decryptData(encrypted);
+    const decrypted = await decryptData(encrypted as string);
     assert.strictEqual(decrypted, data);
   });
 
@@ -72,8 +72,8 @@ describe('crypto utilities', () => {
     assert.notStrictEqual(encrypted1, data1);
     assert.notStrictEqual(encrypted2, data2);
 
-    const decrypted1 = await decryptData(encrypted1);
-    const decrypted2 = await decryptData(encrypted2);
+    const decrypted1 = await decryptData(encrypted1 as string);
+    const decrypted2 = await decryptData(encrypted2 as string);
 
     assert.strictEqual(decrypted1, data1);
     assert.strictEqual(decrypted2, data2);

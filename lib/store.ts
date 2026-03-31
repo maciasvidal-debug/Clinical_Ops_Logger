@@ -68,6 +68,7 @@ export function useAppStore() {
     const stored = localStorage.getItem(TIMER_KEY);
     if (stored) {
       decryptData(stored).then(decrypted => {
+        if (!decrypted) return;
         try {
           const parsed = JSON.parse(decrypted);
           setActiveTimer(parsed);
