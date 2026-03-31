@@ -53,10 +53,30 @@ export function DashboardView({
 
   const { todayLogs, todayMinutes, thisWeekLogs, thisWeekMinutes } = React.useMemo(() => {
     const today = new Date();
-    const tLogs = logs.filter((log) => isSameDay(parseISO(log.date), today));
-    const tMinutes = tLogs.reduce((acc, log) => acc + log.duration_minutes, 0);
-    const wLogs = logs.filter((log) => new Date(log.date) >= subDays(today, 7));
-    const wMinutes = wLogs.reduce((acc, log) => acc + log.duration_minutes, 0);
+    const sevenDaysAgo = subDays(today, 7);
+
+    const tLogs: LogEntry[] = [];
+    const wLogs: LogEntry[] = [];
+    let tMinutes = 0;
+    let wMinutes = 0;
+
+    for (const log of logs) {
+      const logDate = new Date(log.date);
+
+      if (logDate >= sevenDaysAgo) {
+        wLogs.push(log);
+        wMinutes += log.duration_minutes;
+
+        if (
+          logDate.getDate() === today.getDate() &&
+          logDate.getMonth() === today.getMonth() &&
+          logDate.getFullYear() === today.getFullYear()
+        ) {
+          tLogs.push(log);
+          tMinutes += log.duration_minutes;
+        }
+      }
+    }
 
     return {
       todayLogs: tLogs,
