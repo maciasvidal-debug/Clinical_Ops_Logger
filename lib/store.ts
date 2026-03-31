@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "./supabase";
 import { getActivitiesConfig, getTodos, saveTodo } from "./actions";
+import { setSecureItem, getSecureItem, removeSecureItem } from "./secure_store";
 import { encryptData, decryptData } from "./crypto";
 import { logError } from "./utils";
 import { useTranslation } from "./i18n";
@@ -65,18 +66,16 @@ export function useAppStore() {
     if (isTimerInitialized.current || typeof window === "undefined") return;
     isTimerInitialized.current = true;
 
-    const stored = localStorage.getItem(TIMER_KEY);
-    if (stored) {
-      decryptData(stored).then(decrypted => {
-        if (!decrypted) return;
+    getSecureItem(TIMER_KEY).then(decrypted => {
+      if (decrypted) {
         try {
           const parsed = JSON.parse(decrypted);
           setActiveTimer(parsed);
         } catch (e) {
           logError(e, "store_parsing_timer");
         }
-      });
-    }
+      }
+    });
   }, []);
 
   // Load profile data
@@ -319,11 +318,7 @@ export function useAppStore() {
     const newState = { startTime: new Date().toISOString() };
     setActiveTimer(newState);
     // Persist securely
-    encryptData(JSON.stringify(newState)).then(encrypted => {
-      if (encrypted) {
-        localStorage.setItem(TIMER_KEY, encrypted);
-      }
-    });
+    setSecureItem(TIMER_KEY, JSON.stringify(newState));
     toast.success(t.toasts.timerStartedTitle, { description: t.toasts.timerStartedDesc });
   };
 
@@ -332,7 +327,7 @@ export function useAppStore() {
     const elapsedMs = new Date().getTime() - new Date(activeTimer.startTime).getTime();
     const elapsedMinutes = Math.max(1, Math.floor(elapsedMs / 60000));
     setActiveTimer({ startTime: null });
-    localStorage.removeItem(TIMER_KEY);
+    removeSecureItem(TIMER_KEY);
     return elapsedMinutes;
   };
 
