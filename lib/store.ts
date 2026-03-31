@@ -319,7 +319,9 @@ export function useAppStore() {
     setActiveTimer(newState);
     // Persist securely
     encryptData(JSON.stringify(newState)).then(encrypted => {
-      localStorage.setItem(TIMER_KEY, encrypted);
+      if (encrypted) {
+        localStorage.setItem(TIMER_KEY, encrypted);
+      }
     });
     toast.success(t.toasts.timerStartedTitle, { description: t.toasts.timerStartedDesc });
   };

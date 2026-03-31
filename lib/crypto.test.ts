@@ -79,16 +79,16 @@ describe('crypto utilities', () => {
     assert.strictEqual(decrypted2, data2);
   });
 
-  it('should fallback to returning encrypted string if decryption fails (legacy support)', async () => {
+  it('should return null if decryption fails', async () => {
     const invalidEncrypted = "not-a-valid-base64-or-encrypted-string";
-    // Suppress console.warn for the test
-    const originalConsoleWarn = console.warn;
-    console.warn = () => {};
+    // Suppress console.error for the test
+    const originalConsoleError = console.error;
+    console.error = () => {};
 
     const decrypted = await decryptData(invalidEncrypted);
 
-    console.warn = originalConsoleWarn;
-    assert.strictEqual(decrypted, invalidEncrypted);
+    console.error = originalConsoleError;
+    assert.strictEqual(decrypted, null);
   });
 
   it('should return string as is if it looks like legacy JSON array', async () => {
@@ -103,7 +103,7 @@ describe('crypto utilities', () => {
     assert.strictEqual(decrypted, jsonString);
   });
 
-  it('should fall back to original string if encryption fails', async () => {
+  it('should return null if encryption fails', async () => {
     // Mock crypto.subtle.encrypt to throw an error
     const mockCrypto = {
       ...originalCrypto,
@@ -129,10 +129,10 @@ describe('crypto utilities', () => {
     // Restore console.error
     console.error = originalConsoleError;
 
-    assert.strictEqual(encrypted, data);
+    assert.strictEqual(encrypted, null);
   });
 
-  it('should fall back to original string if decryption fails', async () => {
+  it('should return null if decryption fails when mocked', async () => {
     // Mock crypto.subtle.decrypt to throw an error
     const mockCrypto = {
       ...originalCrypto,
@@ -151,13 +151,13 @@ describe('crypto utilities', () => {
     const validBase64 = "YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo=";
 
     // Redirect console.warn to avoid test output noise
-    const originalConsoleWarn = console.warn;
-    console.warn = () => {};
+    const originalConsoleError = console.error;
+    console.error = () => {};
 
     const decrypted = await decryptData(validBase64);
 
     // Restore console.warn
-    console.warn = originalConsoleWarn;
+    console.error = originalConsoleError;
 
     // Restore crypto
     Object.defineProperty(globalThis, 'crypto', {
@@ -166,9 +166,9 @@ describe('crypto utilities', () => {
       configurable: true
     });
 
-    assert.strictEqual(decrypted, validBase64);
+    assert.strictEqual(decrypted, null);
   });
-  it('should fall back to original string if btoa throws an error during encryptData', async () => {
+  it('should return null if btoa throws an error during encryptData', async () => {
     // Mock btoa to throw an error
     const originalBtoa = globalThis.btoa;
     globalThis.btoa = () => { throw new Error('btoa failed mock error'); };
@@ -184,10 +184,10 @@ describe('crypto utilities', () => {
     console.error = originalConsoleError;
     globalThis.btoa = originalBtoa;
 
-    assert.strictEqual(encrypted, data);
+    assert.strictEqual(encrypted, null);
   });
 
-  it('should fall back to original string if crypto.getRandomValues throws an error during encryptData', async () => {
+  it('should return null if crypto.getRandomValues throws an error during encryptData', async () => {
     // Mock crypto.getRandomValues to throw an error
     const mockCrypto = {
       ...originalCrypto,
@@ -218,7 +218,7 @@ describe('crypto utilities', () => {
       configurable: true
     });
 
-    assert.strictEqual(encrypted, data);
+    assert.strictEqual(encrypted, null);
   });
 
   it('should generate a key with extractable set to false', async () => {
