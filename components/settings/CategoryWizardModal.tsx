@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { UserRole } from "@/lib/types";
 import { Plus, Trash2, Check } from "lucide-react";
-import { createActivityCategory, addCategoryRole, createActivityTask } from "@/lib/actions_config";
+import { createActivityCategory, addCategoryRoles, createActivityTasks } from "@/lib/actions_config";
 import { toast } from "sonner";
 
 export type RoleContext = "site_led" | "cro_led" | "shared" | null;
@@ -114,20 +114,16 @@ export function CategoryWizardModal({
     }
     const catId: string = catRes.data.id;
 
-    await Promise.all(
-      wizardData.selectedRoles.map((role) => addCategoryRole(catId, role)),
-    );
+    await addCategoryRoles(catId, wizardData.selectedRoles);
 
     const validTasks = wizardData.tasks.filter((t) => t.name.trim());
-    await Promise.all(
-      validTasks.map((task) =>
-        createActivityTask(
-          catId,
-          task.name.trim(),
-          task.role_context,
-          task.staff_roles,
-        ),
-      ),
+    await createActivityTasks(
+      catId,
+      validTasks.map((t) => ({
+        name: t.name.trim(),
+        role_context: t.role_context,
+        staff_roles: t.staff_roles,
+      })),
     );
 
     toast.success("Categoría creada exitosamente", {

@@ -103,6 +103,49 @@ export async function createActivityTask(categoryId: string, name: string, role_
   }
 }
 
+export async function createActivityTasks(
+  categoryId: string,
+  tasks: { name: string; role_context?: "site_led" | "cro_led" | "shared" | null; staff_roles?: string[] }[]
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  try {
+    if (tasks.length === 0) return { success: true, data: [] };
+
+    const taskInserts = tasks.map((t) => ({
+      category_id: categoryId,
+      name: t.name,
+      role_context: t.role_context,
+      is_active: true,
+    }));
+
+    const { data: insertedTasks, error: taskError } = await supabase
+      .from("activity_tasks")
+      .insert(taskInserts)
+      .select();
+
+    if (taskError) throw taskError;
+
+    const roleInserts: { task_id: string; role: string }[] = [];
+    tasks.forEach((task, index) => {
+      if (task.staff_roles && task.staff_roles.length > 0) {
+        const taskId = insertedTasks[index].id;
+        task.staff_roles.forEach((role) => {
+          roleInserts.push({ task_id: taskId, role });
+        });
+      }
+    });
+
+    if (roleInserts.length > 0) {
+      const { error: roleError } = await supabase.from("task_roles").insert(roleInserts);
+      if (roleError) throw roleError;
+    }
+
+    return { success: true, data: insertedTasks };
+  } catch (error: unknown) {
+    console.error("Error creating tasks in bulk:", error);
+    return { success: false, error: parseSupabaseError(error, "Failed to create tasks") };
+  }
+}
+
 export async function updateActivityTask(id: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
     const { data, error } = await supabase
@@ -201,6 +244,27 @@ export async function addCategoryRole(categoryId: string, role: UserRole): Promi
   } catch (error: unknown) {
     console.error("Error adding role to category:", error);
     return { success: false, error: parseSupabaseError(error, "Failed to add role") };
+  }
+}
+
+export async function addCategoryRoles(categoryId: string, roles: UserRole[]): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (roles.length === 0) return { success: true };
+
+    const inserts = roles.map((role) => ({
+      category_id: categoryId,
+      role,
+    }));
+
+    const { error } = await supabase
+      .from("category_roles")
+      .insert(inserts);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (error: unknown) {
+    console.error("Error adding roles to category:", error);
+    return { success: false, error: parseSupabaseError(error, "Failed to add roles") };
   }
 }
 
