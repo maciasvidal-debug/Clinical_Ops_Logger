@@ -31,7 +31,7 @@ describe("actions_config: createActivityCategory", () => {
     assert.deepStrictEqual(result, { success: true, data: mockData });
     assert.strictEqual(mockFrom.mock.calls.length, 1);
     assert.strictEqual(mockFrom.mock.calls[0].arguments[0], "activity_categories");
-    assert.deepStrictEqual(mockInsert.mock.calls[0].arguments[0], [{ name: "New Category", is_active: true }]);
+    assert.deepStrictEqual((mockInsert.mock.calls[0] as any).arguments[0], [{ name: "New Category", is_active: true }]);
 
     mockFrom.mock.restore();
   });
