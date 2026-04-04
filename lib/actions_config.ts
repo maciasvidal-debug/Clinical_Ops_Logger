@@ -30,7 +30,7 @@ function parseSupabaseError(error: unknown, defaultMsg: string): string {
 // --- Categories ---
 
 
-export async function createActivityCategory(name: string): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function createActivityCategory(name: string): Promise<{ success: boolean; data?: DbActivityCategory; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_categories")
@@ -46,7 +46,7 @@ export async function createActivityCategory(name: string): Promise<{ success: b
   }
 }
 
-export async function updateActivityCategory(id: string, name: string): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function updateActivityCategory(id: string, name: string): Promise<{ success: boolean; data?: DbActivityCategory; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_categories")
@@ -83,7 +83,7 @@ export async function deleteActivityCategory(id: string): Promise<{ success: boo
 
 // --- Tasks ---
 
-export async function createActivityTask(categoryId: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function createActivityTask(categoryId: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: DbActivityTask; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_tasks")
@@ -106,7 +106,7 @@ export async function createActivityTask(categoryId: string, name: string, role_
 export async function createActivityTasks(
   categoryId: string,
   tasks: { name: string; role_context?: "site_led" | "cro_led" | "shared" | null; staff_roles?: string[] }[]
-): Promise<{ success: boolean; data?: any; error?: string }> {
+): Promise<{ success: boolean; data?: DbActivityTask[]; error?: string }> {
   try {
     if (tasks.length === 0) return { success: true, data: [] };
 
@@ -146,7 +146,7 @@ export async function createActivityTasks(
   }
 }
 
-export async function updateActivityTask(id: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function updateActivityTask(id: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: DbActivityTask; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_tasks")
@@ -181,7 +181,7 @@ export async function deleteActivityTask(id: string): Promise<{ success: boolean
 
 // --- Subtasks ---
 
-export async function createActivitySubtask(taskId: string, name: string): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function createActivitySubtask(taskId: string, name: string): Promise<{ success: boolean; data?: DbActivitySubtask; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_subtasks")
@@ -198,7 +198,7 @@ export async function createActivitySubtask(taskId: string, name: string): Promi
   }
 }
 
-export async function updateActivitySubtask(id: string, name: string): Promise<{ success: boolean; data?: any; error?: string }> {
+export async function updateActivitySubtask(id: string, name: string): Promise<{ success: boolean; data?: DbActivitySubtask; error?: string }> {
   try {
     const { data, error } = await supabase
       .from("activity_subtasks")
