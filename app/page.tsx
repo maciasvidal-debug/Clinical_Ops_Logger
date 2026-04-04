@@ -10,7 +10,7 @@ import { TeamView } from "@/components/team/TeamView";
 import { AuthView } from "@/components/auth/AuthView";
 import { PendingApprovalView } from "@/components/auth/PendingApprovalView";
 import { useAppStore } from "@/lib/store";
-import { LogEntry } from "@/lib/types";
+import { LogEntry, Todo } from "@/lib/types";
 import { Toaster } from "sonner";
 import { format } from "date-fns";
 import { useTranslation } from "@/lib/i18n";
@@ -72,7 +72,7 @@ export default function App() {
   }, [logs, user?.id, todayStr]);
 
   const pendingTodos = React.useMemo(() => {
-    return todos?.filter((t: any) => t.status === "pending" && t.user_id === profile?.id);
+    return todos?.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
   }, [todos, profile?.id]);
 
   // Push Notifications Reminder
