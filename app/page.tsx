@@ -61,15 +61,15 @@ export default function App() {
     todos
   } = useAppStore();
 
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+
   const todayLogs = React.useMemo(() => {
-    const todayStr = format(new Date(), "yyyy-MM-dd");
     return logs.filter(
       (l) =>
         l.user_id === user?.id &&
         l.date === todayStr,
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logs, user?.id, new Date().toDateString()]);
+  }, [logs, user?.id, todayStr]);
 
   const pendingTodos = React.useMemo(() => {
     return todos?.filter((t: any) => t.status === "pending" && t.user_id === profile?.id);

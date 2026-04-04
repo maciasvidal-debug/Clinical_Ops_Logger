@@ -1,7 +1,7 @@
 "use server";
 
 import { supabase } from "./supabase";
-import { DbActivityCategory, Todo } from "./types";
+import { DbActivityCategory, Todo, ActivityCategory } from "./types";
 
 import { getGeminiClient } from "./gemini";
 import { Type } from "@google/genai";
@@ -41,19 +41,19 @@ export async function parseNaturalLanguageLog(
     const ai = getGeminiClient();
 
     const categoriesRes = await getActivitiesConfig();
-    let availableCategories: any[] = [];
+    let availableCategories: ActivityCategory[] = [];
     if (categoriesRes.success && categoriesRes.data) {
-      availableCategories = categoriesRes.data.filter((cat: any) => {
+      availableCategories = categoriesRes.data.filter((cat) => {
         if (!cat.category_roles || cat.category_roles.length === 0) return true;
-        return cat.category_roles.some((cr: any) => cr.role === userRole);
-      }).map((cat: any) => ({
+        return cat.category_roles.some((cr) => cr.role === userRole);
+      }).map((cat) => ({
         id: cat.id,
         name: cat.name,
-        tasks: (cat.activity_tasks || []).map((t: any) => ({
+        tasks: (cat.activity_tasks || []).map((t) => ({
           id: t.id,
           name: t.name,
           roleContext: t.role_context,
-          subTasks: (t.activity_subtasks || []).map((st: any) => ({
+          subTasks: (t.activity_subtasks || []).map((st) => ({
             id: st.id,
             name: st.name
           }))
