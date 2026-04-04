@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { useTranslation } from "@/lib/i18n";
+import { useTranslation, Dictionary } from "@/lib/i18n";
 import { 
   UserProfile, 
   Project, 
@@ -156,7 +156,7 @@ interface AssignmentManagerProps {
   protocolAssignments: UserProtocolAssignment[];
   onUpdateAssignments: (userId: string, projectIds: string[], protocolIds: string[]) => void;
   onUpdateUserStatus: (userId: string, status: "active" | "rejected") => void;
-  t: any;
+  t: Dictionary;
 }
 
 function AssignmentManager({
