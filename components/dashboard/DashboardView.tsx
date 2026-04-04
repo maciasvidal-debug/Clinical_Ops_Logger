@@ -51,9 +51,12 @@ export function DashboardView({
     return todos.filter((t: Todo) => t.status === "pending" && t.user_id === profile?.id);
   }, [todos, profile?.id]);
 
+  const todayString = new Date().toDateString();
+
   const { todayLogs, todayMinutes, thisWeekLogs, thisWeekMinutes } = React.useMemo(() => {
-    const today = new Date();
-    const sevenDaysAgo = subDays(today, 7);
+    const today = new Date(todayString);
+    const now = new Date();
+    const sevenDaysAgo = subDays(now, 7);
 
     const tLogs: LogEntry[] = [];
     const wLogs: LogEntry[] = [];
@@ -84,8 +87,7 @@ export function DashboardView({
       thisWeekLogs: wLogs,
       thisWeekMinutes: wMinutes,
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logs, new Date().toDateString()]);
+  }, [logs, todayString]);
 
 
   const [priorityInsight, setPriorityInsight] = React.useState<string | null>(null);
@@ -121,7 +123,7 @@ export function DashboardView({
   const isManager = profile?.role === "manager" || profile?.role === "super_admin";
 
   const currentWeekLogs = useMemo(() => {
-    const today = new Date();
+    const today = new Date(todayString);
     return logs.filter((log) => {
       const logDate = parseISO(log.date);
       return isWithinInterval(logDate, {
@@ -129,7 +131,7 @@ export function DashboardView({
         end: endOfWeek(today),
       });
     });
-  }, [logs]);
+  }, [logs, todayString]);
 
   const categoryDistribution = useMemo(() => {
     const dist = new Map<string, number>();
