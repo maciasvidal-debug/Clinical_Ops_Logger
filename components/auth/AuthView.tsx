@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { supabase } from "@/lib/supabase";
+import { useAppStore } from "@/lib/store";
+import { localSaveProfile, generateId, initializeDefaultData } from "@/lib/local_db";
+import { setSecureItem, getSecureItem } from "@/lib/secure_store";
 import { toast } from "sonner";
 import { Activity, Loader2, Mail, Lock, User, Briefcase, KeyRound } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
@@ -16,20 +18,37 @@ type LoginMode = "password" | "otp_request" | "otp_verify";
 
 export function AuthView() {
   const { t } = useTranslation();
+  const { signIn } = useAppStore();
   const [isLogin, setIsLogin] = useState(true);
-  const [loginMode, setLoginMode] = useState<LoginMode>("password");
   const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [otpCode, setOtpCode] = useState("");
+
+  // Local auth
+  const [pin, setPin] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [role, setRole] = useState<UserRole>("cra");
+
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   // Legal modal state
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [legalModalType, setLegalModalType] = useState<"terms" | "privacy">("terms");
+
+  // Check if user has an account setup locally
+  const [hasLocalAccount, setHasLocalAccount] = useState(false);
+
+  React.useEffect(() => {
+    const checkAccount = async () => {
+      const storedPin = await getSecureItem("app_pin");
+      if (storedPin) {
+        setHasLocalAccount(true);
+        setIsLogin(true);
+      } else {
+        setHasLocalAccount(false);
+        setIsLogin(false);
+      }
+    };
+    checkAccount();
+  }, []);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,52 +57,53 @@ export function AuthView() {
       toast.error(t.toasts.errorTitle, { description: t.auth.acceptTermsError });
       return;
     }
+
+    if (pin.length < 4) {
+      toast.error(t.toasts.errorTitle, { description: "PIN must be at least 4 characters" });
+      return;
+    }
+
     setLoading(true);
 
     try {
       if (isLogin) {
-        if (loginMode === "password") {
-          const { error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) throw error;
-          toast.success(t.toasts.loginSuccessTitle, { description: t.toasts.loginSuccessDesc });
-        } else if (loginMode === "otp_request") {
-          const { error } = await supabase.auth.signInWithOtp({
-            email,
-            options: { shouldCreateUser: false }
-          });
-          if (error) throw error;
-          setLoginMode("otp_verify");
-          toast.success(t.toasts.otpSentTitle, { description: t.toasts.otpSentDesc });
-        } else if (loginMode === "otp_verify") {
-          const { error } = await supabase.auth.verifyOtp({ email, token: otpCode, type: 'email' });
-          if (error) throw error;
-          toast.success(t.toasts.otpVerifiedTitle, { description: t.toasts.otpVerifiedDesc });
+        // Verify PIN
+        const storedPin = await getSecureItem("app_pin");
+        if (storedPin === pin) {
+          const profileStr = localStorage.getItem("local_profile_basic");
+          if (profileStr) {
+            await signIn(JSON.parse(profileStr));
+            toast.success(t.toasts.loginSuccessTitle, { description: t.toasts.loginSuccessDesc });
+          } else {
+            toast.error("Profile data not found. Please clear cache and setup again.");
+          }
+        } else {
+          toast.error(t.toasts.errorTitle, { description: "Invalid PIN" });
         }
       } else {
-        const { data, error } = await supabase.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            data: {
-              first_name: firstName,
-              last_name: lastName,
-              role: role,
-              terms_accepted_at: new Date().toISOString(),
-              terms_version: "2026-03-18"
-            }
-          }
-        });
-        if (error) throw error;
-        if (data.user) {
-          toast.success(t.toasts.signupSuccessTitle, { description: t.toasts.signupSuccessDesc });
-        }
+        // Create account locally
+        await setSecureItem("app_pin", pin);
+
+        const newProfile = {
+          id: generateId(),
+          email: "local@user.com",
+          first_name: firstName,
+          last_name: lastName,
+          role: "super_admin" as UserRole, // Single user is always super_admin
+          status: "active" as const,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        await localSaveProfile(newProfile);
+        localStorage.setItem("local_profile_basic", JSON.stringify(newProfile));
+        await initializeDefaultData(newProfile);
+
+        await signIn(newProfile);
+        toast.success(t.toasts.signupSuccessTitle, { description: "Local account created successfully" });
       }
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        toast.error(t.toasts.errorTitle, { description: error.message || t.toasts.errorDesc });
-      } else {
-        toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
-      }
+      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
     } finally {
       setLoading(false);
     }
@@ -133,7 +153,7 @@ export function AuthView() {
 
         <div className="p-8">
           <h2 className="text-xl font-semibold text-neutral-900 mb-6 text-center">
-            {isLogin ? (loginMode === "otp_verify" ? t.auth.verifyOtp : t.auth.signIn) : t.auth.createAccount}
+            {isLogin ? "Enter PIN" : "Create Account & PIN"}
           </h2>
 
           <form onSubmit={handleAuth} className="space-y-4">
@@ -167,81 +187,21 @@ export function AuthView() {
               </div>
             )}
 
-            {!isLogin && (
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.roleTitle.toUpperCase()}</label>
-                <div className="relative">
-                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <select
-                    value={role}
-                    onChange={(e) => setRole(e.target.value as UserRole)}
-                    className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
-                  >
-                    <option value="cra">{t.roles.cra}</option>
-                    <option value="crc">{t.roles.crc}</option>
-                    <option value="data_entry">{t.roles.data_entry}</option>
-                    <option value="recruitment_specialist">{t.roles.recruitment_specialist}</option>
-                    <option value="retention_specialist">{t.roles.retention_specialist}</option>
-                    <option value="cta">{t.roles.cta}</option>
-                    <option value="ra">{t.roles.ra}</option>
-                    <option value="manager">{t.roles.manager}</option>
-                  </select>
-                </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-neutral-500 uppercase">{"PIN".toUpperCase()}</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
+                <input
+                  type="password"
+                  required
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none tracking-widest text-lg font-mono text-center"
+                  placeholder="••••"
+                  maxLength={6}
+                />
               </div>
-            )}
-
-            {(!isLogin || loginMode !== "otp_verify") && (
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.email.toUpperCase()}</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="name@company.com"
-                  />
-                </div>
-              </div>
-            )}
-
-            {isLogin && loginMode === "otp_verify" && (
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.otpCode.toUpperCase()}</label>
-                <p className="text-sm text-neutral-600 mb-2">{t.auth.checkEmailForOtp}</p>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="text"
-                    required
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center tracking-widest font-mono text-lg"
-                    placeholder={t.auth.otpPlaceholder}
-                    maxLength={6}
-                  />
-                </div>
-              </div>
-            )}
-
-            {(!isLogin || loginMode === "password") && (
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-neutral-500 uppercase">{t.auth.password.toUpperCase()}</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-            )}
+            </div>
 
 
             {!isLogin && (
@@ -288,54 +248,28 @@ export function AuthView() {
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                isLogin
-                  ? (loginMode === "password" ? t.auth.signIn : (loginMode === "otp_request" ? t.auth.sendOtp : t.auth.verifyOtp))
-                  : t.auth.signUp
+                isLogin ? t.auth.signIn : "Create Personal Account"
               )}
             </button>
           </form>
 
-          {isLogin && (
-            <div className="mt-4 flex flex-col space-y-2">
-              <div className="relative flex items-center py-2">
-                <div className="flex-grow border-t border-neutral-200"></div>
-                <span className="flex-shrink-0 mx-4 text-neutral-400 text-xs uppercase">{t.common.or}</span>
-                <div className="flex-grow border-t border-neutral-200"></div>
-              </div>
-
-              {loginMode === "password" ? (
-                <button
-                  type="button"
-                  onClick={() => setLoginMode("otp_request")}
-                  className="w-full bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 py-2.5 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2 text-sm"
-                >
-                  <Mail className="w-4 h-4" />
-                  {t.auth.useOtp}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setLoginMode("password")}
-                  className="w-full bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-700 py-2.5 rounded-xl font-medium transition-colors shadow-sm flex items-center justify-center gap-2 text-sm"
-                >
-                  <Lock className="w-4 h-4" />
-                  {t.auth.usePassword}
-                </button>
-              )}
+          {!hasLocalAccount && (
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                }}
+                className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                {isLogin ? "Setup new personal account" : "I already have a PIN"}
+              </button>
             </div>
           )}
-
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setLoginMode("password");
-              }}
-              className="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
-            >
-              {isLogin ? t.auth.noAccount : t.auth.haveAccount}
-            </button>
-          </div>
+          {hasLocalAccount && isLogin && (
+            <div className="mt-6 text-center">
+               <p className="text-xs text-neutral-500">Welcome back! Enter your PIN to unlock.</p>
+            </div>
+          )}
         </div>
       </motion.div>
       

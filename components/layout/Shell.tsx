@@ -120,7 +120,6 @@ export function Shell({
   ];
 
   const secondaryNavItems = [
-    ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "team" as View, label: t.navigation.team, icon: Users }] : []),
     ...(profile?.role === "manager" || profile?.role === "super_admin" ? [{ id: "settings" as View, label: t.navigation.settings, icon: Settings }] : []),
   ];
 

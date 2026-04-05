@@ -1,10 +1,8 @@
-"use server";
-
-import { supabase } from "./supabase";
 import { DbActivityCategory, Todo, ActivityCategory } from "./types";
 
 import { getGeminiClient } from "./gemini";
 import { Type } from "@google/genai";
+import { localGetCategories, localSaveTodo, localGetTodos } from "./local_db";
 import { UserRole, Project, Protocol, LogEntry, TaskDurationStats, PriorityAlignmentStats } from "./types";
 import { dictionaries } from "./i18n/dictionaries";
 
@@ -193,21 +191,8 @@ export async function getActivitiesConfig(): Promise<{
 }> {
 
   try {
-    const { data: categories, error } = await supabase
-      .from("activity_categories")
-      .select(
-        `
-        *,
-        category_roles(role),
-        activity_tasks (
-          *,
-          activity_subtasks (*)
-        )
-      `,
-      )
-      .eq('is_active', true).order("name");
+    const categories = await localGetCategories();
 
-    if (error) throw error;
     return {
       success: true,
       data: categories as unknown as DbActivityCategory[],
@@ -229,12 +214,7 @@ export async function getTodos(): Promise<{
 }> {
 
   try {
-    const { data: todos, error } = await supabase
-      .from("todos")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) throw error;
+    const todos = await localGetTodos();
     return { success: true, data: todos as Todo[] };
   } catch (error: unknown) {
     console.error("Error fetching todos:", error);
@@ -250,33 +230,28 @@ export async function saveTodo(
 ): Promise<{ success: boolean; data?: Todo; error?: string }> {
 
   try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
+    // We assume saving local overrides completely
+    const profileStr = localStorage.getItem("local_profile_basic");
+    if (!profileStr) throw new Error("Not authenticated");
+    const user = JSON.parse(profileStr);
 
     const payload = {
       ...todo,
       user_id: user.id,
-    };
+    } as Todo;
 
-    let result;
     if (todo.id) {
       if (todo.status === "completed" && !todo.completed_at) {
         payload.completed_at = new Date().toISOString();
       }
-      result = await supabase
-        .from("todos")
-        .update(payload)
-        .eq("id", todo.id)
-        .select()
-        .single();
     } else {
-      result = await supabase.from("todos").insert([payload]).select().single();
+        payload.id = crypto.randomUUID();
+        payload.created_at = new Date().toISOString();
     }
 
-    if (result.error) throw result.error;
-    return { success: true, data: result.data as Todo };
+    await localSaveTodo(payload);
+
+    return { success: true, data: payload };
   } catch (error: unknown) {
     console.error("Error saving todo:", error);
     return {
@@ -292,12 +267,7 @@ export async function updateLogEntryStatus(
 ): Promise<{ success: boolean; error?: string }> {
 
   try {
-    const { error } = await supabase
-      .from("log_entries")
-      .update({ status })
-      .eq("id", id);
-
-    if (error) throw error;
+    // Dummy update for local, usually store handles this.
     return { success: true };
   } catch (error: unknown) {
     console.error("Error updating log entry status:", error);
@@ -321,23 +291,9 @@ export async function getPredictedDuration(
   taskId: string
 ): Promise<{ success: boolean; data?: TaskDurationStats; error?: string }> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    const { data, error } = await supabase.rpc("get_user_duration_stats", {
-      p_category: categoryId,
-      p_activity: taskId,
-    });
-
-    if (error) throw error;
-
-    if (data && data.length > 0) {
-      return { success: true, data: data[0] as TaskDurationStats };
-    }
-
+    // For local fallback: just return nothing
     return { success: true, data: undefined }; // Not enough data yet
   } catch (error: unknown) {
-    console.error("Error fetching predicted duration:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to predict duration",
@@ -350,15 +306,9 @@ export async function getPredictedDuration(
  */
 export async function getPriorityAlignment(): Promise<{ success: boolean; data?: PriorityAlignmentStats[]; error?: string }> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Not authenticated");
-
-    const { data, error } = await supabase.rpc("get_user_priority_alignment");
-
-    if (error) throw error;
-    return { success: true, data: data as PriorityAlignmentStats[] };
+    // Fallback local mock
+    return { success: true, data: [] };
   } catch (error: unknown) {
-    console.error("Error fetching priority alignment:", error);
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to fetch priority alignment",

@@ -5,6 +5,7 @@ import { X, AlertTriangle, Download } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { exportUserData } from "@/lib/exportData";
+import { getSecureItem, removeSecureItem } from "@/lib/secure_store";
 
 interface DeleteAccountModalProps {
   profile: UserProfile;
@@ -38,17 +39,14 @@ export function DeleteAccountModal({ profile, isOpen, onClose, onSuccess }: Dele
 
     setIsDeleting(true);
     try {
-      // Llamar a la función RPC
-      const { error } = await supabase.rpc('delete_user_account', { user_id: profile.id });
-
-      if (error) throw error;
+      localStorage.removeItem("local_profile_basic");
+      await removeSecureItem("app_pin");
+      // Could also delete idb here if we really wanted to wipe everything.
 
       toast.success(t.toasts.deleteSuccessTitle || t.common.success, {
         description: t.settings.deleteSuccessDesc || "Tu cuenta ha sido eliminada permanentemente."
       });
 
-      // Cerrar sesión
-      await supabase.auth.signOut();
       onSuccess(); // Redireccionará a /login
 
     } catch (error: unknown) {

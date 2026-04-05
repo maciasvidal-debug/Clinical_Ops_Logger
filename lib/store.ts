@@ -11,26 +11,37 @@ import {
   UserRole,
   UserStatus,
   LogQuery,
-  UserProjectAssignment,
-  UserProtocolAssignment,
-  UserSiteAssignment,
-  Region,
-  UserRegion
+  Region
 } from "./types";
 import { toast } from "sonner";
-import { supabase } from "./supabase";
-import { getActivitiesConfig, getTodos, saveTodo } from "./actions";
 import { setSecureItem, getSecureItem, removeSecureItem } from "./secure_store";
-import { encryptData, decryptData } from "./crypto";
 import { logError } from "./utils";
 import { useTranslation } from "./i18n";
-import { User } from "@supabase/supabase-js";
+
+import {
+  localGetProfile,
+  localGetLogs,
+  localSaveLog,
+  localDeleteLog,
+  localGetProjects,
+  localGetProtocols,
+  localGetSites,
+  localGetTodos,
+  localSaveTodo,
+  localDeleteTodo,
+  localGetCategories,
+  localGetNotifications,
+  localSaveNotification,
+  localDeleteNotification,
+  localClearNotifications,
+  generateId,
+} from "./local_db";
 
 const TIMER_KEY = "clinical_ops_timer";
 
 export function useAppStore() {
   const { t } = useTranslation();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<{ id: string, email: string } | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -40,19 +51,12 @@ export function useAppStore() {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
 
-  const [projectAssignments, setProjectAssignments] = useState<UserProjectAssignment[]>([]);
-  const [protocolAssignments, setProtocolAssignments] = useState<UserProtocolAssignment[]>([]);
-  const [siteAssignments, setSiteAssignments] = useState<UserSiteAssignment[]>([]);
+  const [projectAssignments, setProjectAssignments] = useState<any[]>([]);
+  const [protocolAssignments, setProtocolAssignments] = useState<any[]>([]);
+  const [siteAssignments, setSiteAssignments] = useState<any[]>([]);
 
   const [todos, setTodos] = useState<Todo[]>([]);
   const [activityCategories, setActivityCategories] = useState<DbActivityCategory[]>([]);
-
-  const refreshActivitiesConfig = useCallback(async () => {
-    const res = await getActivitiesConfig();
-    if (res.success && res.data) {
-      setActivityCategories(res.data);
-    }
-  }, []);
 
   const [isLoaded, setIsLoaded] = useState(false);
   const [isOnline, setIsOnline] = useState(() => 
@@ -61,7 +65,6 @@ export function useAppStore() {
   const [activeTimer, setActiveTimer] = useState<{ startTime: string | null }>({ startTime: null });
   const isTimerInitialized = useRef(false);
 
-  // Async load encrypted timer
   useEffect(() => {
     if (isTimerInitialized.current || typeof window === "undefined") return;
     isTimerInitialized.current = true;
@@ -78,122 +81,43 @@ export function useAppStore() {
     });
   }, []);
 
-  // Load profile data
-
   const fetchRegions = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from("regions")
-        .select("*")
-        .order("name", { ascending: true });
-      if (error) throw error;
-      if (data) setRegions(data);
-    } catch (error: unknown) {
-      logError(error, "fetch_regions");
-    }
+    // No regions implemented in local defaults currently
+    setRegions([]);
   }, []);
 
-
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error) {
-      if (error.code !== "PGRST116") {
-        logError(error, "fetch_profile", userId);
-      }
-      return null;
-    }
-    return data as UserProfile;
+  const refreshActivitiesConfig = useCallback(async () => {
+    const cats = await localGetCategories();
+    setActivityCategories(cats);
   }, []);
 
-  // Load all app data
-  const fetchAppData = useCallback(async (userId: string, role: UserRole) => {
-    // Fetch logs
-    let logsQuery = supabase.from("log_entries").select(`
-      *,
-      user_profiles (first_name, last_name),
-      log_queries (*)
-    `);
+  const fetchAppData = useCallback(async () => {
+    const lLogs = await localGetLogs();
+    setLogs(lLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
 
-    if (role !== "manager" && role !== "super_admin") {
-      logsQuery = logsQuery.eq("user_id", userId);
-    }
-
-    const { data: logsData } = await logsQuery.order("date", { ascending: false });
-    if (logsData) setLogs(logsData as LogEntry[]);
-
-    // Fetch master data
-    const { data: projectsData } = await supabase.from("projects").select("*");
-    if (projectsData) setProjects(projectsData);
-
-    const { data: protocolsData } = await supabase.from("protocols").select("*");
-    if (protocolsData) setProtocols(protocolsData);
-
-    const { data: sitesData } = await supabase.from("sites").select("*");
-    if (sitesData) setSites(sitesData);
-
-    // Fetch notifications
-    const { data: notifsData } = await supabase
-      .from("app_notifications")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    if (notifsData) setNotifications(notifsData as AppNotification[]);
-
-    // Manager specific data
-    if (role === "manager" || role === "super_admin") {
-      const { data: profilesData } = await supabase.from("user_profiles").select("*");
-      if (profilesData) setProfiles(profilesData as UserProfile[]);
-
-      const { data: projAssignData } = await supabase.from("user_project_assignments").select("*");
-      if (projAssignData) setProjectAssignments(projAssignData as UserProjectAssignment[]);
-
-      const { data: protAssignData } = await supabase.from("user_protocol_assignments").select("*");
-      if (protAssignData) setProtocolAssignments(protAssignData as UserProtocolAssignment[]);
-    }
-  }, []);
+    setProjects(await localGetProjects());
+    setProtocols(await localGetProtocols());
+    setSites(await localGetSites());
+    setTodos(await localGetTodos());
+    setNotifications(await localGetNotifications());
+    setActivityCategories(await localGetCategories());
+    setProfiles(profile ? [profile] : []); // Only one user
+  }, [profile]);
 
   useEffect(() => {
-    // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id).then(p => {
-          setProfile(p);
-          if (p && p.status === "active") {
-            fetchAppData(session.user.id, p.role);
-          }
-          setIsLoaded(true);
-        });
-      } else {
-        setIsLoaded(true);
+    const loadSession = async () => {
+      const storedProfile = await localGetProfile();
+      if (storedProfile) {
+        setProfile(storedProfile);
+        setUser({ id: storedProfile.id, email: storedProfile.email });
+        await fetchAppData();
       }
-    });
+      setIsLoaded(true);
+    };
+    loadSession();
+  }, [fetchAppData]);
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id).then(p => {
-          setProfile(p);
-          if (p && p.status === "active") {
-            fetchAppData(session.user.id, p.role);
-          }
-        });
-      } else {
-        setProfile(null);
-        setLogs([]);
-      }
-    });
 
-    return () => subscription.unsubscribe();
-  }, [fetchProfile, fetchAppData]);
-
-  // Online/Offline listeners
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -206,118 +130,79 @@ export function useAppStore() {
   }, []);
 
   const addLog = async (log: Partial<LogEntry>) => {
-    if (!user) return;
-    const { data, error } = await supabase.from("log_entries").insert([{
+    if (!profile) return;
+    const newLog: LogEntry = {
       ...log,
-      user_id: user.id,
+      id: generateId(),
+      user_id: profile.id,
+      date: log.date || new Date().toISOString().split('T')[0],
+      duration_minutes: log.duration_minutes || 0,
+      role: profile.role,
+      category: log.category || '',
+      activity: log.activity || '',
+      notes: log.notes || '',
       synced: true,
-      role: profile?.role || "cra"
-    }]).select().single();
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      user_profiles: { first_name: profile.first_name, last_name: profile.last_name }
+    };
 
-    if (error) {
-      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
-      logError(error, "add_log", user.id);
-    } else {
-      setLogs([data as LogEntry, ...logs]);
-      toast.success(t.toasts.saveSuccessTitle, { description: t.toasts.saveSuccessDesc });
-    }
+    await localSaveLog(newLog);
+    setLogs([newLog, ...logs]);
+    toast.success(t.toasts.saveSuccessTitle, { description: t.toasts.saveSuccessDesc });
   };
 
   const deleteLog = async (id: string) => {
-    const { error } = await supabase.from("log_entries").delete().eq("id", id);
-    if (error) {
-      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
-    } else {
-      setLogs(logs.filter(l => l.id !== id));
-      toast.success(t.toasts.deleteSuccessTitle, { description: t.toasts.deleteSuccessDesc });
-    }
+    await localDeleteLog(id);
+    setLogs(logs.filter(l => l.id !== id));
+    toast.success(t.toasts.deleteSuccessTitle, { description: t.toasts.deleteSuccessDesc });
   };
 
   const addQuery = async (logId: string, question: string) => {
-    if (!user || !profile) return;
-    
-    const log = logs.find(l => l.id === logId);
-    if (!log) return;
-
-    const { data, error } = await supabase.from("log_queries").insert([{
-      log_entry_id: logId,
-      manager_id: user.id,
-      manager_name: `${profile.first_name} ${profile.last_name}`,
-      question,
-      status: "OPEN"
-    }]).select().single();
-
-    if (error) {
-      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
-    } else {
-      setLogs(logs.map(l => l.id === logId ? { ...l, log_queries: [...(l.log_queries || []), data as LogQuery] } : l));
-      
-      await supabase.from("app_notifications").insert([{
-        user_id: log.user_id,
-        title: "New Query",
-        message: `${profile.first_name} opened a query on your log entry.`,
-        type: "query",
-        is_read: false,
-        link: "history"
-      }]);
-      
-      toast.success(t.toasts.queryAddedTitle, { description: t.toasts.queryAddedDesc });
-    }
+    // Queries no son muy útiles en app single-user, mockearemos
+    toast.error("Queries not supported in offline personal mode");
   };
 
   const replyToQuery = async (logId: string, queryId: string, response: string) => {
-    if (!user || !profile) return;
-
-    const { data, error } = await supabase.from("log_queries").update({
-      staff_response: response,
-      response_date: new Date().toISOString(),
-      status: "RESOLVED"
-    }).eq("id", queryId).select().single();
-
-    if (error) {
-      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
-    } else {
-      setLogs(logs.map(l => l.id === logId ? {
-        ...l,
-        log_queries: l.log_queries?.map(q => q.id === queryId ? (data as LogQuery) : q)
-      } : l));
-
-      const query = data as LogQuery;
-      await supabase.from("app_notifications").insert([{
-        user_id: query.manager_id,
-        title: "Query Resolved",
-        message: `${profile.first_name} replied to your query.`,
-        type: "query",
-        is_read: false,
-        link: "team"
-      }]);
-
-      toast.success(t.toasts.queryResolvedTitle, { description: t.toasts.queryResolvedDesc });
-    }
+     // Mock
   };
 
   const markNotificationRead = async (id: string) => {
-    const { error } = await supabase.from("app_notifications").update({ is_read: true }).eq("id", id);
-    if (!error) {
-      setNotifications(notifications.map(n => n.id === id ? { ...n, is_read: true } : n));
+    const notif = notifications.find(n => n.id === id);
+    if (notif) {
+      notif.is_read = true;
+      await localSaveNotification(notif);
+      setNotifications(notifications.map(n => n.id === id ? notif : n));
     }
   };
 
   const clearNotifications = async (userId: string) => {
-    const { error } = await supabase.from("app_notifications").delete().eq("user_id", userId);
-    if (!error) {
-      setNotifications([]);
+    await localClearNotifications();
+    setNotifications([]);
+  };
+
+  const addTodo = async (todo: Todo) => {
+    await localSaveTodo(todo);
+    setTodos([todo, ...todos]);
+  };
+
+  const updateTodo = async (id: string, updates: Partial<Todo>) => {
+    const todo = todos.find(t => t.id === id);
+    if(todo) {
+      const updated = { ...todo, ...updates, updated_at: new Date().toISOString() };
+      await localSaveTodo(updated);
+      setTodos(todos.map(t => t.id === id ? updated : t));
     }
   };
 
-  const addTodo = (todo: Todo) => setTodos((prev: Todo[]) => [todo, ...prev]);
-  const updateTodo = (id: string, updates: Partial<Todo>) => setTodos((prev: Todo[]) => prev.map((t: Todo) => t.id === id ? { ...t, ...updates } : t));
-  const deleteTodo = (id: string) => setTodos((prev: Todo[]) => prev.filter((t: Todo) => t.id !== id));
+  const deleteTodoAction = async (id: string) => {
+    await localDeleteTodo(id);
+    setTodos(todos.filter(t => t.id !== id));
+  };
 
   const startTimer = () => {
     const newState = { startTime: new Date().toISOString() };
     setActiveTimer(newState);
-    // Persist securely
     setSecureItem(TIMER_KEY, JSON.stringify(newState));
     toast.success(t.toasts.timerStartedTitle, { description: t.toasts.timerStartedDesc });
   };
@@ -332,56 +217,22 @@ export function useAppStore() {
   };
 
   const updateAssignments = async (userId: string, projectIds: string[], protocolIds: string[]) => {
-    // Perform project and protocol assignment updates in parallel to reduce network latency
-    const updateProjects = async () => {
-      await supabase.from("user_project_assignments").delete().eq("user_id", userId);
-      if (projectIds.length > 0) {
-        await supabase.from("user_project_assignments").insert(
-          projectIds.map(pid => ({ user_id: userId, project_id: pid }))
-        );
-      }
-    };
-
-    const updateProtocols = async () => {
-      await supabase.from("user_protocol_assignments").delete().eq("user_id", userId);
-      if (protocolIds.length > 0) {
-        await supabase.from("user_protocol_assignments").insert(
-          protocolIds.map(pid => ({ user_id: userId, protocol_id: pid }))
-        );
-      }
-    };
-
-    await Promise.all([updateProjects(), updateProtocols()]);
-
-    // Refresh local state
-    if (user && profile) fetchAppData(user.id, profile.role);
+    // No-op for single user
   };
 
   const updateUserStatus = async (userId: string, status: UserStatus) => {
-    const { error } = await supabase.from("user_profiles").update({ status }).eq("id", userId);
-    if (error) {
-      toast.error(t.toasts.errorTitle, { description: t.toasts.errorDesc });
-    } else {
-      setProfiles(profiles.map(p => p.id === userId ? { ...p, status } : p));
-      toast.success(t.toasts.statusUpdatedTitle, { description: t.toasts.statusUpdatedDesc });
-      
-      // Notify user
-      await supabase.from("app_notifications").insert([{
-        user_id: userId,
-        title: "Account Status Updated",
-        message: `Your account has been ${status} by a manager.`,
-        type: "system",
-        is_read: false,
-        link: "/"
-      }]);
-    }
+     // No-op for single user
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    // Sign out local doesn't delete profile from idb, just locks screen.
     setUser(null);
-    setProfile(null);
-    setLogs([]);
+  };
+
+  const signIn = async (profileData: UserProfile) => {
+    setProfile(profileData);
+    setUser({ id: profileData.id, email: profileData.email });
+    await fetchAppData();
   };
 
   return { 
@@ -394,7 +245,6 @@ export function useAppStore() {
     setProjects,
     setProtocols,
     setSites,
-
 
     regions,
     fetchRegions,
@@ -420,13 +270,14 @@ export function useAppStore() {
     updateAssignments,
     updateUserStatus,
     signOut,
-    refreshProfile: () => user && fetchProfile(user.id).then(setProfile),
-    refreshAppData: () => user && profile && fetchAppData(user.id, profile.role),
+    signIn,
+    refreshProfile: async () => {}, // mock
+    refreshAppData: fetchAppData,
     todos,
     setTodos,
     addTodo,
     updateTodo,
-    deleteTodo,
+    deleteTodo: deleteTodoAction,
     activityCategories,
     setActivityCategories,
     refreshActivitiesConfig
