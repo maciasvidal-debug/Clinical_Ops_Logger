@@ -1,31 +1,22 @@
-import { supabase } from "./supabase";
 import { UserProfile } from "./types";
 import { toast } from "sonner";
 import { Dictionary } from "./i18n/types";
-
-interface ExportDataPayload {
-  profile: UserProfile;
-  exported_at: string;
-  app: string;
-  logs?: unknown[];
-}
+import { localGetLogs, localGetTodos, localGetCategories, localGetProjects, localGetProtocols, localGetSites } from "./local_db";
 
 export async function exportUserData(profile: UserProfile, t: Dictionary) {
   try {
-    const dataToExport: ExportDataPayload = {
+    const dataToExport: any = {
       profile: profile,
       exported_at: new Date().toISOString(),
       app: "SiteFlow",
     };
 
-    // Consultar logs del usuario
-    const { data: logs, error: logsError } = await supabase
-      .from("activity_logs")
-      .select("*")
-      .eq("user_id", profile.id);
-
-    if (logsError) throw logsError;
-    dataToExport.logs = logs || [];
+    dataToExport.logs = await localGetLogs();
+    dataToExport.todos = await localGetTodos();
+    dataToExport.categories = await localGetCategories();
+    dataToExport.projects = await localGetProjects();
+    dataToExport.protocols = await localGetProtocols();
+    dataToExport.sites = await localGetSites();
 
     // Formatear JSON
     const jsonStr = JSON.stringify(dataToExport, null, 2);

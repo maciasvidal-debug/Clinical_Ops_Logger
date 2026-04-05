@@ -37,6 +37,7 @@ import {
 import { toast } from "sonner";
 import { exportUserData } from "@/lib/exportData";
 import { DeleteAccountModal } from "./DeleteAccountModal";
+import { localSaveProfile, localSaveLog, localSaveTodo, localSaveCategory, localSaveProject, localSaveProtocol, localSaveSite, localClearNotifications } from "@/lib/local_db";
 import { StructureWizard } from "./StructureWizard";
 import { CategoryWizardModal } from "./CategoryWizardModal";
 
@@ -116,6 +117,7 @@ export function SettingsView({ profile }: SettingsViewProps) {
 
   const [wizardOpen, setWizardOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const closeWizard = () => setWizardOpen(false);
 
@@ -237,6 +239,34 @@ export function SettingsView({ profile }: SettingsViewProps) {
     } finally {
       setIsExporting(false);
     }
+  };
+
+  const handleImportData = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target?.result as string);
+        if (data.profile) await localSaveProfile(data.profile);
+        if (data.logs) for (const item of data.logs) await localSaveLog(item);
+        if (data.todos) for (const item of data.todos) await localSaveTodo(item);
+        if (data.categories) for (const item of data.categories) await localSaveCategory(item);
+        if (data.projects) for (const item of data.projects) await localSaveProject(item);
+        if (data.protocols) for (const item of data.protocols) await localSaveProtocol(item);
+        if (data.sites) for (const item of data.sites) await localSaveSite(item);
+
+        toast.success("Import successful. Reloading app...");
+        setTimeout(() => window.location.reload(), 1000);
+      } catch (err) {
+        toast.error("Invalid import file format");
+      } finally {
+        setIsImporting(false);
+      }
+    };
+    reader.readAsText(file);
   };
 
   const toggleCat = (id: string) => {
@@ -834,14 +864,20 @@ export function SettingsView({ profile }: SettingsViewProps) {
                 herramientas de análisis clínico.
               </p>
             </div>
-            <button
-              onClick={handleExportData}
-              disabled={isExporting}
-              className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[13.5px] font-medium rounded-lg transition-colors shadow-sm"
-            >
-              <Download className="w-4 h-4" />
-              {isExporting ? "Exportando..." : "Exportar datos"}
-            </button>
+            <div className="flex flex-col gap-2 shrink-0">
+              <button
+                onClick={handleExportData}
+                disabled={isExporting}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-[13.5px] font-medium rounded-lg transition-colors shadow-sm"
+              >
+                <Download className="w-4 h-4" />
+                {isExporting ? "Exportando..." : "Exportar datos"}
+              </button>
+              <label className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-white border border-indigo-200 text-indigo-700 hover:bg-indigo-50 cursor-pointer disabled:opacity-50 text-[13.5px] font-medium rounded-lg transition-colors shadow-sm">
+                {isImporting ? "Importando..." : "Importar datos (Restaurar)"}
+                <input type="file" className="hidden" accept=".json" onChange={handleImportData} disabled={isImporting} />
+              </label>
+            </div>
           </div>
 
           <div className="bg-[#FFFAFA] rounded-2xl border border-red-200 p-6">

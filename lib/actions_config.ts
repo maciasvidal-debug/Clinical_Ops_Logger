@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { localGetCategories, localSaveCategory, generateId } from "./local_db";
 import { UserRole, DbActivityCategory, DbActivityTask, DbActivitySubtask } from "./types";
 
 
@@ -32,52 +32,44 @@ function parseSupabaseError(error: unknown, defaultMsg: string): string {
 
 export async function createActivityCategory(name: string): Promise<{ success: boolean; data?: DbActivityCategory; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from("activity_categories")
-      .insert([{ name, is_active: true }])
-      .select()
-      .single();
-
-    if (error) throw error;
-    return { success: true, data };
+    const cat: DbActivityCategory = {
+      id: generateId(),
+      name,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    await localSaveCategory(cat);
+    return { success: true, data: cat };
   } catch (error: unknown) {
-    console.error("Error creating category:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to create category") };
+    return { success: false, error: "Failed to create category" };
   }
 }
 
 export async function updateActivityCategory(id: string, name: string): Promise<{ success: boolean; data?: DbActivityCategory; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from("activity_categories")
-      .update({ name })
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) throw error;
-
-
-
-    return { success: true, data };
+    const cats = await localGetCategories();
+    const cat = cats.find(c => c.id === id);
+    if (!cat) throw new Error("Not found");
+    cat.name = name;
+    await localSaveCategory(cat);
+    return { success: true, data: cat };
   } catch (error: unknown) {
-    console.error("Error updating category:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to update category") };
+    return { success: false, error: "Failed to update category" };
   }
 }
 
 export async function deleteActivityCategory(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase
-      .from("activity_categories")
-      .update({ is_active: false })
-      .eq("id", id);
-
-    if (error) throw error;
+    const cats = await localGetCategories();
+    const cat = cats.find(c => c.id === id);
+    if (cat) {
+        cat.is_active = false;
+        await localSaveCategory(cat);
+    }
     return { success: true };
   } catch (error: unknown) {
-    console.error("Error deleting category:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to delete category") };
+    return { success: false, error: "Failed to delete category" };
   }
 }
 
@@ -85,21 +77,27 @@ export async function deleteActivityCategory(id: string): Promise<{ success: boo
 
 export async function createActivityTask(categoryId: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: DbActivityTask; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from("activity_tasks")
-      .insert([{ category_id: categoryId, name, role_context, is_active: true }])
-      .select()
-      .single();
+    const cats = await localGetCategories();
+    const cat = cats.find(c => c.id === categoryId);
+    if (!cat) throw new Error("Not found");
 
-    if (error) throw error;
-    if (staff_roles && staff_roles.length > 0) {
-      const taskRoles = staff_roles.map((r: string) => ({ task_id: data.id, role: r }));
-      await supabase.from("task_roles").insert(taskRoles);
-    }
-    return { success: true, data };
+    const task: DbActivityTask = {
+        id: generateId(),
+        category_id: categoryId,
+        name,
+        role_context: role_context ?? undefined,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        task_roles: staff_roles?.map(r => ({ role: r as UserRole }))
+    };
+    if (!cat.activity_tasks) cat.activity_tasks = [];
+    cat.activity_tasks.push(task);
+    await localSaveCategory(cat);
+
+    return { success: true, data: task };
   } catch (error: unknown) {
-    console.error("Error creating task:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to create task") };
+    return { success: false, error: "Failed to create task" };
   }
 }
 
@@ -108,74 +106,73 @@ export async function createActivityTasks(
   tasks: { name: string; role_context?: "site_led" | "cro_led" | "shared" | null; staff_roles?: string[] }[]
 ): Promise<{ success: boolean; data?: DbActivityTask[]; error?: string }> {
   try {
-    if (tasks.length === 0) return { success: true, data: [] };
+    const cats = await localGetCategories();
+    const cat = cats.find(c => c.id === categoryId);
+    if (!cat) throw new Error("Not found");
 
-    const taskInserts = tasks.map((t) => ({
-      category_id: categoryId,
-      name: t.name,
-      role_context: t.role_context,
-      is_active: true,
+    if (!cat.activity_tasks) cat.activity_tasks = [];
+
+    const newTasks = tasks.map(t => ({
+        id: generateId(),
+        category_id: categoryId,
+        name: t.name,
+        role_context: t.role_context ?? undefined,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        task_roles: t.staff_roles?.map(r => ({ role: r as UserRole }))
     }));
+    cat.activity_tasks.push(...newTasks);
+    await localSaveCategory(cat);
 
-    const { data: insertedTasks, error: taskError } = await supabase
-      .from("activity_tasks")
-      .insert(taskInserts)
-      .select();
-
-    if (taskError) throw taskError;
-
-    const roleInserts: { task_id: string; role: string }[] = [];
-    tasks.forEach((task, index) => {
-      if (task.staff_roles && task.staff_roles.length > 0) {
-        const taskId = insertedTasks[index].id;
-        task.staff_roles.forEach((role) => {
-          roleInserts.push({ task_id: taskId, role });
-        });
-      }
-    });
-
-    if (roleInserts.length > 0) {
-      const { error: roleError } = await supabase.from("task_roles").insert(roleInserts);
-      if (roleError) throw roleError;
-    }
-
-    return { success: true, data: insertedTasks };
+    return { success: true, data: newTasks };
   } catch (error: unknown) {
-    console.error("Error creating tasks in bulk:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to create tasks") };
+    return { success: false, error: "Failed to create tasks" };
   }
 }
 
 export async function updateActivityTask(id: string, name: string, role_context?: "site_led" | "cro_led" | "shared" | null, staff_roles?: string[]): Promise<{ success: boolean; data?: DbActivityTask; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from("activity_tasks")
-      .update(role_context !== undefined ? { name, role_context } : { name })
-      .eq("id", id)
-      .select()
-      .single();
+    const cats = await localGetCategories();
+    let foundTask: DbActivityTask | null = null;
+    let foundCat: DbActivityCategory | null = null;
 
-    if (error) throw error;
+    for (const c of cats) {
+        const t = c.activity_tasks?.find(t => t.id === id);
+        if (t) {
+            foundTask = t;
+            foundCat = c;
+            break;
+        }
+    }
+    if (!foundTask || !foundCat) throw new Error("Not found");
 
-    return { success: true, data };
+    foundTask.name = name;
+    if (role_context !== undefined) foundTask.role_context = role_context ?? undefined;
+    if (staff_roles) foundTask.task_roles = staff_roles.map(r => ({ role: r as UserRole }));
+
+    await localSaveCategory(foundCat);
+
+    return { success: true, data: foundTask };
   } catch (error: unknown) {
-    console.error("Error updating task:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to update task") };
+    return { success: false, error: "Failed to update task" };
   }
 }
 
 export async function deleteActivityTask(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase
-      .from("activity_tasks")
-      .update({ is_active: false })
-      .eq("id", id);
-
-    if (error) throw error;
+    const cats = await localGetCategories();
+    for (const c of cats) {
+        const t = c.activity_tasks?.find(t => t.id === id);
+        if (t) {
+            t.is_active = false;
+            await localSaveCategory(c);
+            break;
+        }
+    }
     return { success: true };
   } catch (error: unknown) {
-    console.error("Error deleting task:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to delete task") };
+    return { success: false, error: "Failed to delete task" };
   }
 }
 
@@ -183,104 +180,107 @@ export async function deleteActivityTask(id: string): Promise<{ success: boolean
 
 export async function createActivitySubtask(taskId: string, name: string): Promise<{ success: boolean; data?: DbActivitySubtask; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from("activity_subtasks")
-      .insert([{ task_id: taskId, name, is_active: true }])
-      .select()
-      .single();
+    const cats = await localGetCategories();
+    let foundTask: DbActivityTask | null = null;
+    let foundCat: DbActivityCategory | null = null;
 
-    if (error) throw error;
+    for (const c of cats) {
+        const t = c.activity_tasks?.find(t => t.id === taskId);
+        if (t) {
+            foundTask = t;
+            foundCat = c;
+            break;
+        }
+    }
+    if (!foundTask || !foundCat) throw new Error("Not found");
 
-    return { success: true, data };
+    const subtask: DbActivitySubtask = {
+        id: generateId(),
+        task_id: taskId,
+        name,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+    };
+
+    if (!foundTask.activity_subtasks) foundTask.activity_subtasks = [];
+    foundTask.activity_subtasks.push(subtask);
+    await localSaveCategory(foundCat);
+
+    return { success: true, data: subtask };
   } catch (error: unknown) {
-    console.error("Error creating subtask:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to create subtask") };
+    return { success: false, error: "Failed to create subtask" };
   }
 }
 
 export async function updateActivitySubtask(id: string, name: string): Promise<{ success: boolean; data?: DbActivitySubtask; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from("activity_subtasks")
-      .update({ name })
-      .eq("id", id)
-      .select()
-      .single();
+    const cats = await localGetCategories();
+    let foundSub: DbActivitySubtask | null = null;
+    let foundCat: DbActivityCategory | null = null;
 
-    if (error) throw error;
+    for (const c of cats) {
+        if (c.activity_tasks) {
+            for (const t of c.activity_tasks) {
+                const s = t.activity_subtasks?.find(s => s.id === id);
+                if (s) {
+                    foundSub = s;
+                    foundCat = c;
+                    break;
+                }
+            }
+        }
+    }
+    if (!foundSub || !foundCat) throw new Error("Not found");
 
-    return { success: true, data };
+    foundSub.name = name;
+    await localSaveCategory(foundCat);
+
+    return { success: true, data: foundSub };
   } catch (error: unknown) {
-    console.error("Error updating subtask:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to update subtask") };
+    return { success: false, error: "Failed to update subtask" };
   }
 }
 
 export async function deleteActivitySubtask(id: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { error } = await supabase
-      .from("activity_subtasks")
-      .update({ is_active: false })
-      .eq("id", id);
-
-    if (error) throw error;
+    const cats = await localGetCategories();
+    for (const c of cats) {
+        if (c.activity_tasks) {
+            for (const t of c.activity_tasks) {
+                const s = t.activity_subtasks?.find(s => s.id === id);
+                if (s) {
+                    s.is_active = false;
+                    await localSaveCategory(c);
+                    break;
+                }
+            }
+        }
+    }
     return { success: true };
   } catch (error: unknown) {
-    console.error("Error deleting subtask:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to delete subtask") };
+    return { success: false, error: "Failed to delete subtask" };
   }
 }
 
 // --- Category Roles ---
 
 export async function addCategoryRole(categoryId: string, role: UserRole): Promise<{ success: boolean; error?: string }> {
-  try {
-    const { error } = await supabase
-      .from("category_roles")
-      .insert([{ category_id: categoryId, role }]);
-
-    if (error) throw error;
-    return { success: true };
-  } catch (error: unknown) {
-    console.error("Error adding role to category:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to add role") };
-  }
+    return updateCategoryRoles(categoryId, [role]);
 }
 
 export async function addCategoryRoles(categoryId: string, roles: UserRole[]): Promise<{ success: boolean; error?: string }> {
-  try {
-    if (roles.length === 0) return { success: true };
-
-    const inserts = roles.map((role) => ({
-      category_id: categoryId,
-      role,
-    }));
-
-    const { error } = await supabase
-      .from("category_roles")
-      .insert(inserts);
-
-    if (error) throw error;
-    return { success: true };
-  } catch (error: unknown) {
-    console.error("Error adding roles to category:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to add roles") };
-  }
+    return updateCategoryRoles(categoryId, roles);
 }
 
 export async function removeCategoryRole(categoryId: string, role: UserRole): Promise<{ success: boolean; error?: string }> {
-  try {
-    const { error } = await supabase
-      .from("category_roles")
-      .delete()
-      .match({ category_id: categoryId, role });
-
-    if (error) throw error;
+    const cats = await localGetCategories();
+    const cat = cats.find(c => c.id === categoryId);
+    if (cat && cat.category_roles) {
+        cat.category_roles = cat.category_roles.filter(r => r.role !== role);
+        await localSaveCategory(cat);
+    }
     return { success: true };
-  } catch (error: unknown) {
-    console.error("Error removing role from category:", error);
-    return { success: false, error: parseSupabaseError(error, "Failed to remove role") };
-  }
 }
 
 export async function updateCategoryRoles(
@@ -288,52 +288,18 @@ export async function updateCategoryRoles(
   roles: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Start by fetching current roles
-    const { data: currentRoles, error: fetchError } = await supabase
-      .from("category_roles")
-      .select("role")
-      .eq("category_id", categoryId);
+    const cats = await localGetCategories();
+    const cat = cats.find(c => c.id === categoryId);
+    if (!cat) throw new Error("Not found");
 
-    if (fetchError) throw fetchError;
-
-    const currentRoleSet = new Set(currentRoles?.map((r) => r.role) || []);
-    const newRoleSet = new Set(roles);
-
-    const rolesToAdd = roles.filter((r) => !currentRoleSet.has(r));
-    const rolesToRemove = Array.from(currentRoleSet).filter(
-      (r) => !newRoleSet.has(r)
-    );
-
-    // Remove old roles
-    if (rolesToRemove.length > 0) {
-      const { error: removeError } = await supabase
-        .from("category_roles")
-        .delete()
-        .eq("category_id", categoryId)
-        .in("role", rolesToRemove);
-
-      if (removeError) throw removeError;
-    }
-
-    // Add new roles
-    if (rolesToAdd.length > 0) {
-      const inserts = rolesToAdd.map((role) => ({
-        category_id: categoryId,
-        role,
-      }));
-      const { error: insertError } = await supabase
-        .from("category_roles")
-        .insert(inserts);
-
-      if (insertError) throw insertError;
-    }
+    cat.category_roles = roles.map(r => ({ role: r as UserRole }));
+    await localSaveCategory(cat);
 
     return { success: true };
   } catch (error: unknown) {
-    console.error("Error updating category roles:", error);
     return {
       success: false,
-      error: parseSupabaseError(error, "Failed to update category roles"),
+      error: "Failed to update category roles",
     };
   }
 }

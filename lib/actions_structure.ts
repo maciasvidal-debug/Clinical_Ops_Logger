@@ -1,26 +1,16 @@
-import { supabase } from "./supabase";
 import { Project, Protocol, Site, UserProfile } from "./types";
+import { localSaveProject, localSaveProtocol, localSaveSite, generateId, localGetProfile } from "./local_db";
 
 export async function createProject(name: string, description?: string): Promise<Project> {
-  const { data, error } = await supabase
-    .from("projects")
-    .insert([{ name, description }])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  const proj: Project = { id: generateId(), name, created_at: new Date().toISOString() };
+  await localSaveProject(proj);
+  return proj;
 }
 
 export async function createProtocol(projectId: string, name: string): Promise<Protocol> {
-  const { data, error } = await supabase
-    .from("protocols")
-    .insert([{ project_id: projectId, name }])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  const prot: Protocol = { id: generateId(), project_id: projectId, name, created_at: new Date().toISOString() };
+  await localSaveProtocol(prot);
+  return prot;
 }
 
 export interface CreateSitePayload {
@@ -35,14 +25,12 @@ export interface CreateSitePayload {
 }
 
 export async function createSite(payload: CreateSitePayload): Promise<Site> {
-  const { data, error } = await supabase
-    .from("sites")
-    .insert([payload])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  const site: Site = {
+    ...payload,
+    created_at: new Date().toISOString()
+  };
+  await localSaveSite(site);
+  return site;
 }
 
 export interface CreateMicroZonePayload {
@@ -52,39 +40,20 @@ export interface CreateMicroZonePayload {
 }
 
 export async function createMicroZone(payload: CreateMicroZonePayload): Promise<any> {
-  const { data, error } = await supabase
-    .from("micro_zones")
-    .insert([payload])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  // Not fully supported offline currently, stub
+  return { ...payload, id: generateId() };
 }
 
 export async function assignSiteToManager(userId: string, siteId: string): Promise<boolean> {
-  const { error } = await supabase
-    .from("user_site_assignments")
-    .upsert([{ user_id: userId, site_id: siteId }]);
-
-  if (error) {
-    console.error("Error assigning site:", error);
-    return false;
-  }
+  // Not fully supported offline currently, stub
   return true;
 }
 
 export async function fetchProfiles(): Promise<{ success: boolean; data?: UserProfile[]; error?: string }> {
   try {
-    const { data, error } = await supabase
-      .from("user_profiles")
-      .select("*")
-      .order("first_name");
-
-    if (error) throw error;
-    return { success: true, data };
+    const profile = await localGetProfile();
+    return { success: true, data: profile ? [profile] : [] };
   } catch (error: unknown) {
-    console.error("Error fetching profiles:", error);
     return { success: false, error: error instanceof Error ? error.message : "An unknown error occurred" };
   }
 }

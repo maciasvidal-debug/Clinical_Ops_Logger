@@ -6,9 +6,7 @@ import { DashboardView } from "@/components/dashboard/DashboardView";
 import { LogFormView } from "@/components/log/LogFormView";
 import { HistoryView } from "@/components/history/HistoryView";
 import { ReportsView } from "@/components/reports/ReportsView";
-import { TeamView } from "@/components/team/TeamView";
 import { AuthView } from "@/components/auth/AuthView";
-import { PendingApprovalView } from "@/components/auth/PendingApprovalView";
 import { useAppStore } from "@/lib/store";
 import { LogEntry, Todo } from "@/lib/types";
 import { Toaster } from "sonner";
@@ -133,24 +131,6 @@ export default function App() {
     setCurrentView("log");
   };
 
-  const isConfigured = process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!isConfigured) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-neutral-200 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 mb-2">Configuration Required</h1>
-          <p className="text-neutral-600 mb-6">
-            Please set the <code className="bg-neutral-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-neutral-100 px-1 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> environment variables in the Settings menu to connect to your database.
-          </p>
-          <div className="text-sm text-neutral-400">
-            Once set, the application will refresh automatically.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50 text-neutral-400">
@@ -168,32 +148,6 @@ export default function App() {
         <Toaster position="top-center" richColors />
         <AuthView />
       </>
-    );
-  }
-
-  if (profile?.status === "pending") {
-    return (
-      <>
-        <Toaster position="top-center" richColors />
-        <PendingApprovalView email={user.email || ""} />
-      </>
-    );
-  }
-
-  if (profile?.status === "rejected") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-neutral-50 p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-red-100 text-center">
-          <h1 className="text-xl font-bold text-red-600 mb-2">{t.auth.accessDenied}</h1>
-          <p className="text-neutral-600 mb-6">{t.auth.accountRejected}</p>
-          <button 
-            onClick={signOut} 
-            className="text-indigo-600 font-medium"
-          >
-            {t.navigation.signOut}
-          </button>
-        </div>
-      </div>
     );
   }
 
@@ -256,21 +210,8 @@ export default function App() {
             projects={projects}
           />
         )}
-                {currentView === "settings" && profile && (
+        {currentView === "settings" && profile && (
           <SettingsView profile={profile} />
-        )}
-        {currentView === "team" && (profile?.role === "manager" || profile?.role === "super_admin") && (
-          <TeamView
-            currentUserProfile={profile}
-            profiles={profiles}
-            projects={projects}
-            protocols={protocols}
-            projectAssignments={projectAssignments}
-            protocolAssignments={protocolAssignments}
-            onUpdateAssignments={updateAssignments}
-            onUpdateUserStatus={updateUserStatus}
-            onRefresh={refreshAppData}
-          />
         )}
       </Shell>
     </>
