@@ -10,7 +10,7 @@ import type {
   Site,
   UserRole,
   UserStatus
-} from "./types.ts";
+} from "./types";
 
 const VALID_ROLES: UserRole[] = [
   "super_admin",
