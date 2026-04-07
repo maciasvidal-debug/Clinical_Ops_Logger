@@ -37,7 +37,7 @@ import {
 import { toast } from "sonner";
 import { exportUserData } from "@/lib/exportData";
 import { DeleteAccountModal } from "./DeleteAccountModal";
-import { localSaveProfile, localSaveLog, localSaveTodo, localSaveCategory, localSaveProject, localSaveProtocol, localSaveSite, localClearNotifications } from "@/lib/local_db";
+import { localSaveProfile, localSaveLogs, localSaveTodos, localSaveCategories, localSaveProjects, localSaveProtocols, localSaveSites, localClearNotifications } from "@/lib/local_db";
 import { StructureWizard } from "./StructureWizard";
 import { CategoryWizardModal } from "./CategoryWizardModal";
 
@@ -251,12 +251,12 @@ export function SettingsView({ profile }: SettingsViewProps) {
       try {
         const data = JSON.parse(event.target?.result as string);
         if (data.profile) await localSaveProfile(data.profile);
-        if (data.logs) for (const item of data.logs) await localSaveLog(item);
-        if (data.todos) for (const item of data.todos) await localSaveTodo(item);
-        if (data.categories) for (const item of data.categories) await localSaveCategory(item);
-        if (data.projects) for (const item of data.projects) await localSaveProject(item);
-        if (data.protocols) for (const item of data.protocols) await localSaveProtocol(item);
-        if (data.sites) for (const item of data.sites) await localSaveSite(item);
+        if (data.logs) await localSaveLogs(data.logs);
+        if (data.todos) await localSaveTodos(data.todos);
+        if (data.categories) await localSaveCategories(data.categories);
+        if (data.projects) await localSaveProjects(data.projects);
+        if (data.protocols) await localSaveProtocols(data.protocols);
+        if (data.sites) await localSaveSites(data.sites);
 
         toast.success("Import successful. Reloading app...");
         setTimeout(() => window.location.reload(), 1000);
