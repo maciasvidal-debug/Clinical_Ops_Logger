@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { LogEntry, Project, UserProfile } from "@/lib/types";
-import { format, parseISO, startOfWeek, endOfWeek } from "date-fns";
+import { format, parseISO, startOfWeek } from "date-fns";
 import Markdown from "react-markdown";
 import { useTranslation } from "@/lib/i18n/context";
 
