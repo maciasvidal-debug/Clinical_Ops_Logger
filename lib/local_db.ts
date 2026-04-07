@@ -54,6 +54,15 @@ export async function localSaveLog(log: LogEntry): Promise<void> {
   await db.put('logs', log);
 }
 
+export async function localSaveLogs(logs: LogEntry[]): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction('logs', 'readwrite');
+  for (const log of logs) {
+    await tx.store.put(log);
+  }
+  await tx.done;
+}
+
 export async function localDeleteLog(id: string): Promise<void> {
   const db = await getDb();
   await db.delete('logs', id);
@@ -69,6 +78,15 @@ export async function localSaveProject(project: Project): Promise<void> {
   await db.put('projects', project);
 }
 
+export async function localSaveProjects(projects: Project[]): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction('projects', 'readwrite');
+  for (const project of projects) {
+    await tx.store.put(project);
+  }
+  await tx.done;
+}
+
 export async function localGetProtocols(): Promise<Protocol[]> {
   const db = await getDb();
   return db.getAll('protocols');
@@ -77,6 +95,15 @@ export async function localGetProtocols(): Promise<Protocol[]> {
 export async function localSaveProtocol(protocol: Protocol): Promise<void> {
   const db = await getDb();
   await db.put('protocols', protocol);
+}
+
+export async function localSaveProtocols(protocols: Protocol[]): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction('protocols', 'readwrite');
+  for (const protocol of protocols) {
+    await tx.store.put(protocol);
+  }
+  await tx.done;
 }
 
 export async function localGetSites(): Promise<Site[]> {
@@ -89,6 +116,15 @@ export async function localSaveSite(site: Site): Promise<void> {
   await db.put('sites', site);
 }
 
+export async function localSaveSites(sites: Site[]): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction('sites', 'readwrite');
+  for (const site of sites) {
+    await tx.store.put(site);
+  }
+  await tx.done;
+}
+
 export async function localGetTodos(): Promise<Todo[]> {
   const db = await getDb();
   return db.getAll('todos');
@@ -97,6 +133,15 @@ export async function localGetTodos(): Promise<Todo[]> {
 export async function localSaveTodo(todo: Todo): Promise<void> {
   const db = await getDb();
   await db.put('todos', todo);
+}
+
+export async function localSaveTodos(todos: Todo[]): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction('todos', 'readwrite');
+  for (const todo of todos) {
+    await tx.store.put(todo);
+  }
+  await tx.done;
 }
 
 export async function localDeleteTodo(id: string): Promise<void> {
@@ -112,6 +157,15 @@ export async function localGetCategories(): Promise<DbActivityCategory[]> {
 export async function localSaveCategory(category: DbActivityCategory): Promise<void> {
   const db = await getDb();
   await db.put('activityCategories', category);
+}
+
+export async function localSaveCategories(categories: DbActivityCategory[]): Promise<void> {
+  const db = await getDb();
+  const tx = db.transaction('activityCategories', 'readwrite');
+  for (const category of categories) {
+    await tx.store.put(category);
+  }
+  await tx.done;
 }
 
 export async function localGetNotifications(): Promise<AppNotification[]> {
