@@ -37,7 +37,16 @@ import {
 import { toast } from "sonner";
 import { exportUserData } from "@/lib/exportData";
 import { DeleteAccountModal } from "./DeleteAccountModal";
-import { localSaveProfile, localSaveLogs, localSaveTodos, localSaveCategories, localSaveProjects, localSaveProtocols, localSaveSites, localClearNotifications } from "@/lib/local_db";
+import { localSaveProfile, localSaveLog, localSaveTodo, localSaveCategory, localSaveProject, localSaveProtocol, localSaveSite, localClearNotifications } from "@/lib/local_db";
+import {
+  validateUserProfile,
+  validateLogEntry,
+  validateTodo,
+  validateCategory,
+  validateProject,
+  validateProtocol,
+  validateSite
+} from "@/lib/validation";
 import { StructureWizard } from "./StructureWizard";
 import { CategoryWizardModal } from "./CategoryWizardModal";
 
@@ -249,21 +258,95 @@ export function SettingsView({ profile }: SettingsViewProps) {
     const reader = new FileReader();
     reader.onload = async (event) => {
       try {
-        const data = JSON.parse(event.target?.result as string);
-        if (data.profile) await localSaveProfile(data.profile);
-        if (data.logs) await localSaveLogs(data.logs);
-        if (data.todos) await localSaveTodos(data.todos);
-        if (data.categories) await localSaveCategories(data.categories);
-        if (data.projects) await localSaveProjects(data.projects);
-        if (data.protocols) await localSaveProtocols(data.protocols);
-        if (data.sites) await localSaveSites(data.sites);
+        const rawContent = event.target?.result as string;
+        if (!rawContent) throw new Error("File is empty");
 
-        toast.success("Import successful. Reloading app...");
-        setTimeout(() => window.location.reload(), 1000);
+        const data = JSON.parse(rawContent);
+        if (!data || typeof data !== "object") throw new Error("Invalid JSON structure");
+
+        let importCount = 0;
+
+        if (data.profile) {
+          const validated = validateUserProfile(data.profile);
+          if (validated) {
+            await localSaveProfile(validated);
+            importCount++;
+          }
+        }
+
+        if (Array.isArray(data.logs)) {
+          for (const item of data.logs) {
+            const validated = validateLogEntry(item);
+            if (validated) {
+              await localSaveLog(validated);
+              importCount++;
+            }
+          }
+        }
+
+        if (Array.isArray(data.todos)) {
+          for (const item of data.todos) {
+            const validated = validateTodo(item);
+            if (validated) {
+              await localSaveTodo(validated);
+              importCount++;
+            }
+          }
+        }
+
+        if (Array.isArray(data.categories)) {
+          for (const item of data.categories) {
+            const validated = validateCategory(item);
+            if (validated) {
+              await localSaveCategory(validated);
+              importCount++;
+            }
+          }
+        }
+
+        if (Array.isArray(data.projects)) {
+          for (const item of data.projects) {
+            const validated = validateProject(item);
+            if (validated) {
+              await localSaveProject(validated);
+              importCount++;
+            }
+          }
+        }
+
+        if (Array.isArray(data.protocols)) {
+          for (const item of data.protocols) {
+            const validated = validateProtocol(item);
+            if (validated) {
+              await localSaveProtocol(validated);
+              importCount++;
+            }
+          }
+        }
+
+        if (Array.isArray(data.sites)) {
+          for (const item of data.sites) {
+            const validated = validateSite(item);
+            if (validated) {
+              await localSaveSite(validated);
+              importCount++;
+            }
+          }
+        }
+
+        if (importCount > 0) {
+          toast.success(`Import successful. ${importCount} items processed. Reloading...`);
+          setTimeout(() => window.location.reload(), 1500);
+        } else {
+          toast.error("No valid data found in import file");
+        }
       } catch (err) {
-        toast.error("Invalid import file format");
+        console.error("Import error:", err);
+        toast.error(err instanceof Error ? err.message : "Invalid import file format");
       } finally {
         setIsImporting(false);
+        // Clear input
+        e.target.value = "";
       }
     };
     reader.readAsText(file);
