@@ -21,23 +21,20 @@ import {
   Wrench,
 } from "lucide-react";
 import {
-  createActivityCategory,
   updateActivityCategory,
   updateCategoryRoles,
   deleteActivityCategory,
   createActivityTask,
   updateActivityTask,
   deleteActivityTask,
-  createActivitySubtask,
   updateActivitySubtask,
   deleteActivitySubtask,
-  addCategoryRole,
   removeCategoryRole,
 } from "@/lib/actions_config";
 import { toast } from "sonner";
 import { exportUserData } from "@/lib/exportData";
 import { DeleteAccountModal } from "./DeleteAccountModal";
-import { localSaveProfile, localSaveLog, localSaveTodo, localSaveCategory, localSaveProject, localSaveProtocol, localSaveSite, localClearNotifications } from "@/lib/local_db";
+import { localSaveProfile, localSaveLog, localSaveTodo, localSaveCategory, localSaveProject, localSaveProtocol, localSaveSite } from "@/lib/local_db";
 import {
   validateUserProfile,
   validateLogEntry,
