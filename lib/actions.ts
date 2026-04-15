@@ -3,6 +3,7 @@ import { DbActivityCategory, Todo, ActivityCategory } from "./types";
 import { getGeminiClient } from "./gemini";
 import { Type } from "@google/genai";
 import { localGetCategories, localSaveTodo, localGetTodos } from "./local_db";
+import { getSecureItem } from "./secure_store";
 import { UserRole, Project, Protocol, LogEntry, TaskDurationStats, PriorityAlignmentStats } from "./types";
 import { dictionaries } from "./i18n/dictionaries";
 
@@ -231,7 +232,7 @@ export async function saveTodo(
 
   try {
     // We assume saving local overrides completely
-    const profileStr = localStorage.getItem("local_profile_basic");
+    const profileStr = await getSecureItem("local_profile_basic");
     if (!profileStr) throw new Error("Not authenticated");
     const user = JSON.parse(profileStr);
 

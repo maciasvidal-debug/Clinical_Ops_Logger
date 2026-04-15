@@ -39,7 +39,7 @@ export function DeleteAccountModal({ profile, isOpen, onClose, onSuccess }: Dele
 
     setIsDeleting(true);
     try {
-      localStorage.removeItem("local_profile_basic");
+      await removeSecureItem("local_profile_basic");
       await removeSecureItem("app_pin");
       // Could also delete idb here if we really wanted to wipe everything.
 
