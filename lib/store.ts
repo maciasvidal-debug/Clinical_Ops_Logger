@@ -92,15 +92,31 @@ export function useAppStore() {
   }, []);
 
   const fetchAppData = useCallback(async () => {
-    const lLogs = await localGetLogs();
-    setLogs(lLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    const [
+      lLogs,
+      lProjects,
+      lProtocols,
+      lSites,
+      lTodos,
+      lNotifications,
+      lCategories
+    ] = await Promise.all([
+      localGetLogs(),
+      localGetProjects(),
+      localGetProtocols(),
+      localGetSites(),
+      localGetTodos(),
+      localGetNotifications(),
+      localGetCategories()
+    ]);
 
-    setProjects(await localGetProjects());
-    setProtocols(await localGetProtocols());
-    setSites(await localGetSites());
-    setTodos(await localGetTodos());
-    setNotifications(await localGetNotifications());
-    setActivityCategories(await localGetCategories());
+    setLogs(lLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    setProjects(lProjects);
+    setProtocols(lProtocols);
+    setSites(lSites);
+    setTodos(lTodos);
+    setNotifications(lNotifications);
+    setActivityCategories(lCategories);
     setProfiles(profile ? [profile] : []); // Only one user
   }, [profile]);
 
