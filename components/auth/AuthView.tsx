@@ -70,7 +70,7 @@ export function AuthView() {
         // Verify PIN
         const storedPin = await getSecureItem("app_pin");
         if (storedPin === pin) {
-          const profileStr = localStorage.getItem("local_profile_basic");
+          const profileStr = await getSecureItem("local_profile_basic");
           if (profileStr) {
             await signIn(JSON.parse(profileStr));
             toast.success(t.toasts.loginSuccessTitle, { description: t.toasts.loginSuccessDesc });
@@ -96,7 +96,7 @@ export function AuthView() {
         };
 
         await localSaveProfile(newProfile);
-        localStorage.setItem("local_profile_basic", JSON.stringify(newProfile));
+        await setSecureItem("local_profile_basic", JSON.stringify(newProfile));
         await initializeDefaultData(newProfile);
 
         await signIn(newProfile);
