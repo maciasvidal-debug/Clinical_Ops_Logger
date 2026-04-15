@@ -35,12 +35,10 @@ $$;
 -- Using (true) for insert is a risk if public can just flood the DB without any token.
 
 DROP POLICY IF EXISTS "Anyone can insert system errors" ON public.system_errors;
-CREATE POLICY "Authenticated or Anon can insert system errors" ON public.system_errors
+DROP POLICY IF EXISTS "Authenticated or Anon can insert system errors" ON public.system_errors;
+CREATE POLICY "Authenticated users can insert system errors" ON public.system_errors
     FOR INSERT
     WITH CHECK (
-        -- Accept if user is logged in
+        -- Accept only if user is logged in
         auth.uid() IS NOT NULL
-        OR
-        -- Accept if using the anon key (from public client)
-        auth.role() = 'anon'
     );

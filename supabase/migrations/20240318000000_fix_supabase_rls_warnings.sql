@@ -3,11 +3,12 @@
 -- 1. Fix auth_rls_initplan on system_errors
 DO $$ BEGIN
     DROP POLICY IF EXISTS "Authenticated or Anon can insert system errors" ON public.system_errors;
+    DROP POLICY IF EXISTS "Authenticated users can insert system errors" ON public.system_errors;
 EXCEPTION WHEN OTHERS THEN NULL; END $$;
 
-CREATE POLICY "Authenticated or Anon can insert system errors" ON public.system_errors
+CREATE POLICY "Authenticated users can insert system errors" ON public.system_errors
 FOR INSERT TO public WITH CHECK (
-  ((select auth.uid()) IS NOT NULL) OR ((select auth.role()) = 'anon'::text)
+  ((select auth.uid()) IS NOT NULL)
 );
 
 
