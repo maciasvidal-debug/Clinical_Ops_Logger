@@ -11,6 +11,8 @@ export type UserRole =
 
 export type UserStatus = "pending" | "active" | "rejected";
 
+export type View = "dashboard" | "log" | "history" | "reports" | "team" | "settings";
+
 export interface DbActivitySubtask {
   id: string;
   task_id: string;

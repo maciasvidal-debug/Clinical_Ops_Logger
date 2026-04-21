@@ -23,18 +23,16 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "motion/react";
-import { UserProfile, AppNotification } from "@/lib/types";
+import { UserProfile, AppNotification, View } from "@/lib/types";
 import { LanguageSelector } from "./LanguageSelector";
 import { useTranslation } from "@/lib/i18n";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/lib/supabase";
 
-type View = "dashboard" | "log" | "history" | "reports" | "team" | "settings";
-
 interface ShellProps {
-  currentView: string;
-  onViewChange: (view: any) => void;
+  currentView: View;
+  onViewChange: (view: View) => void;
   children: React.ReactNode;
   isOnline: boolean;
   isSyncing: boolean;
