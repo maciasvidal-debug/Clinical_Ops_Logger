@@ -34,7 +34,21 @@ import {
 import { toast } from "sonner";
 import { exportUserData } from "@/lib/exportData";
 import { DeleteAccountModal } from "./DeleteAccountModal";
-import { localSaveProfile, localSaveLog, localSaveTodo, localSaveCategory, localSaveProject, localSaveProtocol, localSaveSite } from "@/lib/local_db";
+import {
+  localSaveProfile,
+  localSaveLog,
+  localSaveLogs,
+  localSaveTodo,
+  localSaveTodos,
+  localSaveCategory,
+  localSaveCategories,
+  localSaveProject,
+  localSaveProjects,
+  localSaveProtocol,
+  localSaveProtocols,
+  localSaveSite,
+  localSaveSites
+} from "@/lib/local_db";
 import {
   validateUserProfile,
   validateLogEntry,
@@ -272,62 +286,74 @@ export function SettingsView({ profile }: SettingsViewProps) {
         }
 
         if (Array.isArray(data.logs)) {
+          const validatedLogs = [];
           for (const item of data.logs) {
             const validated = validateLogEntry(item);
-            if (validated) {
-              await localSaveLog(validated);
-              importCount++;
-            }
+            if (validated) validatedLogs.push(validated);
+          }
+          if (validatedLogs.length > 0) {
+            await localSaveLogs(validatedLogs);
+            importCount += validatedLogs.length;
           }
         }
 
         if (Array.isArray(data.todos)) {
+          const validatedTodos = [];
           for (const item of data.todos) {
             const validated = validateTodo(item);
-            if (validated) {
-              await localSaveTodo(validated);
-              importCount++;
-            }
+            if (validated) validatedTodos.push(validated);
+          }
+          if (validatedTodos.length > 0) {
+            await localSaveTodos(validatedTodos);
+            importCount += validatedTodos.length;
           }
         }
 
         if (Array.isArray(data.categories)) {
+          const validatedCategories = [];
           for (const item of data.categories) {
             const validated = validateCategory(item);
-            if (validated) {
-              await localSaveCategory(validated);
-              importCount++;
-            }
+            if (validated) validatedCategories.push(validated);
+          }
+          if (validatedCategories.length > 0) {
+            await localSaveCategories(validatedCategories);
+            importCount += validatedCategories.length;
           }
         }
 
         if (Array.isArray(data.projects)) {
+          const validatedProjects = [];
           for (const item of data.projects) {
             const validated = validateProject(item);
-            if (validated) {
-              await localSaveProject(validated);
-              importCount++;
-            }
+            if (validated) validatedProjects.push(validated);
+          }
+          if (validatedProjects.length > 0) {
+            await localSaveProjects(validatedProjects);
+            importCount += validatedProjects.length;
           }
         }
 
         if (Array.isArray(data.protocols)) {
+          const validatedProtocols = [];
           for (const item of data.protocols) {
             const validated = validateProtocol(item);
-            if (validated) {
-              await localSaveProtocol(validated);
-              importCount++;
-            }
+            if (validated) validatedProtocols.push(validated);
+          }
+          if (validatedProtocols.length > 0) {
+            await localSaveProtocols(validatedProtocols);
+            importCount += validatedProtocols.length;
           }
         }
 
         if (Array.isArray(data.sites)) {
+          const validatedSites = [];
           for (const item of data.sites) {
             const validated = validateSite(item);
-            if (validated) {
-              await localSaveSite(validated);
-              importCount++;
-            }
+            if (validated) validatedSites.push(validated);
+          }
+          if (validatedSites.length > 0) {
+            await localSaveSites(validatedSites);
+            importCount += validatedSites.length;
           }
         }
 
