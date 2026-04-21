@@ -8,7 +8,7 @@ import { HistoryView } from "@/components/history/HistoryView";
 import { ReportsView } from "@/components/reports/ReportsView";
 import { AuthView } from "@/components/auth/AuthView";
 import { useAppStore } from "@/lib/store";
-import { LogEntry, Todo } from "@/lib/types";
+import { LogEntry, Todo, View } from "@/lib/types";
 import { Toaster } from "sonner";
 import { format } from "date-fns";
 import { useTranslation } from "@/lib/i18n";
@@ -21,8 +21,6 @@ import { SettingsView } from "@/components/settings/SettingsView";
 
 
 
-
-export type View = "dashboard" | "log" | "history" | "reports" | "team" | "settings";
 
 export default function App() {
   const { t } = useTranslation();
