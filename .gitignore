@@ -5,5 +5,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Build and execution artifacts
+out/
+*.pid
 dev_server.pid
 tsconfig.tsbuildinfo
