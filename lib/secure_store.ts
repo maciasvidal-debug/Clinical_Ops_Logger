@@ -54,32 +54,63 @@ export async function getSecureItem(key: string): Promise<string | null> {
         request.onerror = () => reject(request.error);
         request.onsuccess = () => resolve(request.result as string || null);
       });
+
+      // Security Fix: Detect if IndexedDB value is unencrypted JSON and encrypt it
+      if (encryptedValue && (encryptedValue.startsWith("{") || encryptedValue.startsWith("["))) {
+        const valToEncrypt = encryptedValue;
+        const encrypted = await encryptData(valToEncrypt);
+        if (encrypted) {
+          const transaction = db.transaction(STORE_NAME, "readwrite");
+          const store = transaction.objectStore(STORE_NAME);
+          store.put(encrypted, key);
+        }
+      }
     }
 
     // Migration from legacy localStorage
     if (!encryptedValue && typeof localStorage !== "undefined") {
       const legacyValue = localStorage.getItem(key);
       if (legacyValue) {
-        // We found a legacy value. Migrate it to IndexedDB and remove from localStorage
-        encryptedValue = legacyValue;
+        // We found a legacy value.
+        // Security Fix: Detect if legacy value is unencrypted JSON and encrypt it before migration
+        let valueToStore = legacyValue;
+        if (legacyValue.startsWith("{") || legacyValue.startsWith("[")) {
+          const encrypted = await encryptData(legacyValue);
+          if (encrypted) {
+            valueToStore = encrypted;
+          }
+        }
 
-        // Save to IndexedDB (as encrypted string directly, since legacy value is already encrypted)
+        encryptedValue = valueToStore;
+
+        // Save to IndexedDB
         if (typeof indexedDB !== "undefined") {
           const db = await getSecureDb();
           await new Promise<void>((resolve, reject) => {
             const transaction = db.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
-            const request = store.put(legacyValue, key);
+            const request = store.put(valueToStore, key);
             request.onerror = () => reject(request.error);
-            request.onsuccess = () => resolve();
+            request.onsuccess = () => {
+              // Only remove from localStorage if IndexedDB save was successful
+              localStorage.removeItem(key);
+              resolve();
+            };
           });
+        } else {
+          // If IndexedDB is not available, we still want to return the value
+          // but we might not be able to "migrate" it properly while keeping security.
+          // However, for consistency with existing code, we don't remove from localStorage here
+          // because migration (to IDB) didn't happen.
         }
-
-        localStorage.removeItem(key);
       }
     }
 
     if (encryptedValue) {
+      // Security Fix: Handle case where data is still unencrypted JSON
+      if (encryptedValue.startsWith("{") || encryptedValue.startsWith("[")) {
+        return encryptedValue;
+      }
       return await decryptData(encryptedValue);
     }
 

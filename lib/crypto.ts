@@ -149,11 +149,6 @@ export async function decryptData(encryptedString: string): Promise<string | nul
   if (typeof window === "undefined") return encryptedString; // SSR safety
 
   try {
-    // Check if it's legacy unencrypted JSON (starts with { or [)
-    if (encryptedString.startsWith("{") || encryptedString.startsWith("[")) {
-      return encryptedString;
-    }
-
     const key = await getOrCreateKey();
 
     // Decode Base64 back to Uint8Array
