@@ -1,8 +1,13 @@
-import { Project, Protocol, Site, UserProfile } from "./types";
-import { localSaveProject, localSaveProtocol, localSaveSite, generateId, localGetProfile } from "./local_db";
+import type { Project, Protocol, Site, UserProfile } from "./types.ts";
+import { localSaveProject, localSaveProtocol, localSaveSite, generateId, localGetProfile } from "./local_db.ts";
 
 export async function createProject(name: string, description?: string): Promise<Project> {
-  const proj: Project = { id: generateId(), name, created_at: new Date().toISOString() };
+  const proj: Project = {
+    id: generateId(),
+    name,
+    description,
+    created_at: new Date().toISOString()
+  };
   await localSaveProject(proj);
   return proj;
 }
