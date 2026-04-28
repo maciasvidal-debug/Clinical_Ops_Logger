@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from "react";
 import { useTranslation } from "@/lib/i18n";
-import { useDynamicTranslation } from "@/lib/i18n/utils";
 import { LogEntry, UserProfile, Project, Protocol, Site, DbActivityCategory, DbActivityTask, DbActivitySubtask, UserRole } from "@/lib/types";
 import { format } from "date-fns";
 import { CheckCircle2, Clock } from "lucide-react";
