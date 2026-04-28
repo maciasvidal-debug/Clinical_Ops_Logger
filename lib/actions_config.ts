@@ -163,11 +163,13 @@ export async function deleteActivityTask(id: string): Promise<{ success: boolean
   try {
     const cats = await localGetCategories();
     for (const c of cats) {
-        const t = c.activity_tasks?.find(t => t.id === id);
+        const tasks = c.activity_tasks;
+        if (!tasks) continue;
+        const t = tasks.find(t => t.id === id);
         if (t) {
             t.is_active = false;
             await localSaveCategory(c);
-            break;
+            return { success: true };
         }
     }
     return { success: true };
@@ -219,15 +221,15 @@ export async function updateActivitySubtask(id: string, name: string): Promise<{
     let foundSub: DbActivitySubtask | null = null;
     let foundCat: DbActivityCategory | null = null;
 
-    for (const c of cats) {
-        if (c.activity_tasks) {
-            for (const t of c.activity_tasks) {
-                const s = t.activity_subtasks?.find(s => s.id === id);
-                if (s) {
-                    foundSub = s;
-                    foundCat = c;
-                    break;
-                }
+    outer: for (const c of cats) {
+        const tasks = c.activity_tasks;
+        if (!tasks) continue;
+        for (const t of tasks) {
+            const s = t.activity_subtasks?.find(s => s.id === id);
+            if (s) {
+                foundSub = s;
+                foundCat = c;
+                break outer;
             }
         }
     }
@@ -245,15 +247,15 @@ export async function updateActivitySubtask(id: string, name: string): Promise<{
 export async function deleteActivitySubtask(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const cats = await localGetCategories();
-    for (const c of cats) {
-        if (c.activity_tasks) {
-            for (const t of c.activity_tasks) {
-                const s = t.activity_subtasks?.find(s => s.id === id);
-                if (s) {
-                    s.is_active = false;
-                    await localSaveCategory(c);
-                    break;
-                }
+    outer: for (const c of cats) {
+        const tasks = c.activity_tasks;
+        if (!tasks) continue;
+        for (const t of tasks) {
+            const s = t.activity_subtasks?.find(s => s.id === id);
+            if (s) {
+                s.is_active = false;
+                await localSaveCategory(c);
+                break outer;
             }
         }
     }
