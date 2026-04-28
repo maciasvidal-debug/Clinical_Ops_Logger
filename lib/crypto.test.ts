@@ -76,13 +76,13 @@ describe('crypto', () => {
     assert.strictEqual(decryptionErrorLog.arguments[1].message, 'Mocked decryption failure');
   });
 
-  it('decryptData returns original string if it is legacy unencrypted JSON', async () => {
+  it('decryptData returns null if it is legacy unencrypted JSON (bypass removed)', async () => {
     const legacyData = '{"key": "value"}';
     const result = await decryptData(legacyData);
-    assert.strictEqual(result, legacyData);
+    assert.strictEqual(result, null);
 
     const legacyArray = '[1, 2, 3]';
     const result2 = await decryptData(legacyArray);
-    assert.strictEqual(result2, legacyArray);
+    assert.strictEqual(result2, null);
   });
 });
