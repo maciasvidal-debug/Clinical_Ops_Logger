@@ -35,7 +35,7 @@ describe('crypto', () => {
       call.arguments[0] === 'Encryption failed:'
     );
     assert.ok(encryptionErrorLog, 'Encryption failure should be logged');
-    assert.strictEqual(encryptionErrorLog.arguments[1].message, 'Mocked encryption failure');
+    assert.strictEqual(encryptionErrorLog.arguments[1], 'Mocked encryption failure');
   });
 
   it('can encrypt and decrypt data successfully', async () => {
@@ -73,7 +73,7 @@ describe('crypto', () => {
       call.arguments[0] === 'Decryption failed:'
     );
     assert.ok(decryptionErrorLog);
-    assert.strictEqual(decryptionErrorLog.arguments[1].message, 'Mocked decryption failure');
+    assert.strictEqual(decryptionErrorLog.arguments[1], 'Mocked decryption failure');
   });
 
   it('decryptData returns null if it is legacy unencrypted JSON (bypass removed)', async () => {

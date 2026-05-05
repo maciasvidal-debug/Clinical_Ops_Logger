@@ -140,7 +140,8 @@ export async function encryptData(data: string): Promise<string | null> {
     // Convert to Base64 for string storage
     return btoa(String.fromCharCode(...combined));
   } catch (error) {
-    console.error("Encryption failed:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Encryption failed:", errorMessage);
     return null; // Security Fix: Do not return unencrypted data on failure
   }
 }
@@ -172,7 +173,8 @@ export async function decryptData(encryptedString: string): Promise<string | nul
     const decoder = new TextDecoder();
     return decoder.decode(decryptedBuffer);
   } catch (error) {
-    console.error("Decryption failed:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Decryption failed:", errorMessage);
     return null; // Security Fix: Do not return raw string on failure
   }
 }
