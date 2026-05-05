@@ -3,7 +3,7 @@
  * This file contains unit tests for core application logic.
  */
 
-import { format, parseISO, isSameDay } from "date-fns";
+import { parseISO, isSameDay } from "date-fns";
 
 // Mocking some types for testing
 interface LogEntry {
