@@ -1,4 +1,4 @@
-import { encryptData, decryptData } from "./crypto";
+import { encryptData, decryptData } from "./crypto.ts";
 
 const STORE_DB_NAME = "AppSecureStoreDB";
 const STORE_NAME = "secure_data";
@@ -73,35 +73,34 @@ export async function getSecureItem(key: string): Promise<string | null> {
       if (legacyValue) {
         // We found a legacy value.
         // Security Fix: Detect if legacy value is unencrypted JSON and encrypt it before migration
-        let valueToStore = legacyValue;
         if (legacyValue.startsWith("{") || legacyValue.startsWith("[")) {
-          const encrypted = await encryptData(legacyValue);
-          if (encrypted) {
-            valueToStore = encrypted;
+          console.warn(`[SecureStore] Found legacy unencrypted JSON in localStorage for key: ${key}. Encrypting and migrating.`);
+
+          if (typeof indexedDB !== "undefined") {
+            await setSecureItem(key, legacyValue); // this will encrypt it and save to IDB
+            localStorage.removeItem(key);
           }
-        }
 
-        encryptedValue = valueToStore;
-
-        // Save to IndexedDB
-        if (typeof indexedDB !== "undefined") {
-          const db = await getSecureDb();
-          await new Promise<void>((resolve, reject) => {
-            const transaction = db.transaction(STORE_NAME, "readwrite");
-            const store = transaction.objectStore(STORE_NAME);
-            const request = store.put(valueToStore, key);
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-              // Only remove from localStorage if IndexedDB save was successful
-              localStorage.removeItem(key);
-              resolve();
-            };
-          });
+          // Return the raw value immediately because we already have it
+          return legacyValue;
         } else {
-          // If IndexedDB is not available, we still want to return the value
-          // but we might not be able to "migrate" it properly while keeping security.
-          // However, for consistency with existing code, we don't remove from localStorage here
-          // because migration (to IDB) didn't happen.
+          // Already encrypted (presumably), just move to IndexedDB
+          if (typeof indexedDB !== "undefined") {
+            const db = await getSecureDb();
+            await new Promise<void>((resolve, reject) => {
+              const transaction = db.transaction(STORE_NAME, "readwrite");
+              const store = transaction.objectStore(STORE_NAME);
+              const request = store.put(legacyValue, key);
+              request.onerror = () => reject(request.error);
+              request.onsuccess = () => {
+                localStorage.removeItem(key);
+                resolve();
+              };
+            });
+            encryptedValue = legacyValue;
+          } else {
+            encryptedValue = legacyValue;
+          }
         }
       }
     }

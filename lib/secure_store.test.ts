@@ -34,12 +34,13 @@ function mockIDB(getValue: any, key: string) {
           transaction: () => ({
             objectStore: () => ({
               get: () => {
-                const getReq: any = { onsuccess: null };
+                const getReq: any = { onsuccess: null, result: null };
                 setTimeout(() => {
                     // For AppCryptoDB, always return null to force key generation
                     // For AppSecureStoreDB, return getValue
                     const result = name === "AppCryptoDB" ? null : getValue;
-                    if (getReq.onsuccess) getReq.onsuccess({ target: { result } });
+                    getReq.result = result;
+                    if (getReq.onsuccess) getReq.onsuccess({ target: getReq });
                 }, 1);
                 return getReq;
               },
