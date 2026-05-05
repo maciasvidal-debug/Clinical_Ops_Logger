@@ -162,16 +162,23 @@ export async function updateActivityTask(id: string, name: string, role_context?
 export async function deleteActivityTask(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const cats = await localGetCategories();
+    let foundCat: DbActivityCategory | null = null;
+
     for (const c of cats) {
         const tasks = c.activity_tasks;
         if (!tasks) continue;
         const t = tasks.find(t => t.id === id);
         if (t) {
             t.is_active = false;
-            await localSaveCategory(c);
-            return { success: true };
+            foundCat = c;
+            break;
         }
     }
+
+    if (foundCat) {
+      await localSaveCategory(foundCat);
+    }
+
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: "Failed to delete task" };
@@ -247,6 +254,8 @@ export async function updateActivitySubtask(id: string, name: string): Promise<{
 export async function deleteActivitySubtask(id: string): Promise<{ success: boolean; error?: string }> {
   try {
     const cats = await localGetCategories();
+    let foundCat: DbActivityCategory | null = null;
+
     outer: for (const c of cats) {
         const tasks = c.activity_tasks;
         if (!tasks) continue;
@@ -254,11 +263,16 @@ export async function deleteActivitySubtask(id: string): Promise<{ success: bool
             const s = t.activity_subtasks?.find(s => s.id === id);
             if (s) {
                 s.is_active = false;
-                await localSaveCategory(c);
+                foundCat = c;
                 break outer;
             }
         }
     }
+
+    if (foundCat) {
+      await localSaveCategory(foundCat);
+    }
+
     return { success: true };
   } catch (error: unknown) {
     return { success: false, error: "Failed to delete subtask" };
