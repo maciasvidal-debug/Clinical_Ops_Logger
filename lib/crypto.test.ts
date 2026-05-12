@@ -1,6 +1,6 @@
 import { describe, it, mock, beforeEach, afterEach } from 'node:test';
 import * as assert from 'node:assert';
-import { encryptData, decryptData, _resetKeyCache } from './crypto.ts';
+import { encryptData, decryptData, _resetKeyCache, getOrCreateKey } from './crypto.ts';
 
 describe('crypto', () => {
   const originalWindow = globalThis.window;
@@ -84,5 +84,10 @@ describe('crypto', () => {
     const legacyArray = '[1, 2, 3]';
     const result2 = await decryptData(legacyArray);
     assert.strictEqual(result2, null);
+  });
+
+  it('generated key is not extractable', async () => {
+    const key = await getOrCreateKey();
+    assert.strictEqual(key.extractable, false, 'Generated key should not be extractable');
   });
 });
