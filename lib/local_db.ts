@@ -1,4 +1,5 @@
 import { openDB } from 'idb';
+import { generateId } from './id_utils.ts';
 import {
   Todo,
   DbActivityCategory,
@@ -30,8 +31,7 @@ async function getDb() {
   });
 }
 
-// Generadores de ID simples para local
-export const generateId = () => crypto.randomUUID();
+export { generateId };
 
 export async function localGetProfile(): Promise<UserProfile | null> {
   const db = await getDb();
