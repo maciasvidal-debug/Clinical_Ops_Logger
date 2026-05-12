@@ -55,7 +55,7 @@ async function saveKeyToDb(key: CryptoKey): Promise<void> {
   }
 }
 
-async function getOrCreateKey(): Promise<CryptoKey> {
+export async function getOrCreateKey(): Promise<CryptoKey> {
   if (cachedKey) return cachedKey;
 
   // Check if we have a key in IndexedDB first
@@ -78,7 +78,7 @@ async function getOrCreateKey(): Promise<CryptoKey> {
           "raw",
           rawKey,
           { name: "AES-GCM" },
-          false, // Set to false to prevent future extraction!
+          false, // Security Fix: Prevent future extraction of imported key
           ["encrypt", "decrypt"]
         );
 
@@ -99,7 +99,7 @@ async function getOrCreateKey(): Promise<CryptoKey> {
   // Generate a new key if none exists (now with extractable: false for security)
   const newKey = await crypto.subtle.generateKey(
     { name: "AES-GCM", length: 256 },
-    false, // Security Fix: Key is no longer exportable/extractable by JS
+    false, // Security Fix: Key is no longer exportable or extractable by JavaScript
     ["encrypt", "decrypt"]
   );
 
